@@ -1,0 +1,247 @@
+/*
+ * ------------------------------------------------------------------------
+ * SHARED ADMIN TOKENS
+ * ------------------------------------------------------------------------
+ *
+ * This block is identical in every Dahu plugin, deliberately. The plugins
+ * are independent — each has to work with none of the others installed — so
+ * they cannot share a stylesheet, and the only way for their screens to
+ * look like one family is for each to declare the same tokens under the
+ * same names. A shop running three of them sees one interface rather than
+ * three.
+ *
+ * Values follow WordPress's own admin palette rather than inventing a
+ * brand: a plugin screen that ignores the admin it lives in reads as a
+ * foreign object, however well designed it is on its own.
+ *
+ * The `--dahu-admin-` prefix is what makes a declaration on :root safe
+ * here. Two plugins declaring it write the same values, so neither can
+ * surprise the other, and nothing outside the family can collide with it.
+ *
+ * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
+ */
+
+:root {
+	/* Surfaces */
+	--dahu-admin-surface: #fff;
+	--dahu-admin-surface-sunken: #f6f7f7;
+	--dahu-admin-border: #dcdcde;
+	--dahu-admin-border-strong: #c3c4c7;
+
+	/* Text */
+	--dahu-admin-text: #1d2327;
+	--dahu-admin-text-muted: #646970;
+
+	/* Intent */
+	--dahu-admin-accent: #2271b1;
+	--dahu-admin-accent-text: #fff;
+	--dahu-admin-success: #008a20;
+	--dahu-admin-warning: #b32d2e;
+	--dahu-admin-caution: #996800;
+	--dahu-admin-neutral: #50575e;
+
+	/* Shape */
+	--dahu-admin-radius: 4px;
+	--dahu-admin-radius-lg: 6px;
+	--dahu-admin-shadow: 0 1px 2px rgba( 0, 0, 0, .06 );
+	--dahu-admin-shadow-lg: 0 6px 20px rgba( 0, 0, 0, .16 );
+
+	/* Rhythm */
+	--dahu-admin-gap: 8px;
+	--dahu-admin-gap-lg: 14px;
+
+	/* Reading widths */
+	--dahu-admin-measure: 900px;
+	--dahu-admin-measure-wide: 1100px;
+
+	/* Motion. Short, and switched off below for anybody who asked. */
+	--dahu-admin-transition: .15s ease;
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+
+	:root {
+		--dahu-admin-transition: 0s;
+	}
+}
+
+/*
+ * ------------------------------------------------------------------------
+ * DEFERRED SEPA — ADMIN SCREENS
+ * ------------------------------------------------------------------------
+ */
+
+/* --- User profile: the active-mandate chooser ------------------------- */
+
+.dahu-sepa-mandates__option {
+	display: block;
+	margin-bottom: var( --dahu-admin-gap );
+}
+
+.dahu-sepa-mandates__hint {
+	max-width: var( --dahu-admin-measure );
+	color: var( --dahu-admin-text-muted );
+}
+
+.dahu-sepa-mandates__delay {
+	margin-top: var( --dahu-admin-gap-lg );
+}
+
+.dahu-sepa-mandates__delay-input {
+	width: 70px;
+}
+
+/* --- Order screen: the charge metabox --------------------------------- */
+
+.dahu-sepa-charge__date {
+	font-weight: 600;
+	color: var( --dahu-admin-text );
+}
+
+.dahu-sepa-charge__row {
+	margin: 0 0 var( --dahu-admin-gap );
+}
+
+.dahu-sepa-charge__hint {
+	color: var( --dahu-admin-text-muted );
+}
+
+.dahu-sepa-charge__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var( --dahu-admin-gap );
+	align-items: center;
+	margin-top: var( --dahu-admin-gap-lg );
+}
+
+/* --- Panels and notices ----------------------------------------------- */
+
+.dahu-sepa-panel {
+	padding: var( --dahu-admin-gap-lg );
+	border: 1px solid var( --dahu-admin-border );
+	border-radius: var( --dahu-admin-radius );
+	background: var( --dahu-admin-surface-sunken );
+}
+
+.dahu-sepa-panel__title {
+	margin: 0 0 var( --dahu-admin-gap );
+	font-size: 13px;
+	font-weight: 600;
+	color: var( --dahu-admin-text );
+}
+
+.dahu-sepa-note {
+	margin: var( --dahu-admin-gap ) 0;
+	padding: var( --dahu-admin-gap ) var( --dahu-admin-gap-lg );
+	border-left: 4px solid var( --dahu-admin-neutral );
+	border-radius: var( --dahu-admin-radius );
+	background: var( --dahu-admin-surface-sunken );
+	max-width: var( --dahu-admin-measure );
+}
+
+.dahu-sepa-note--caution {
+	border-left-color: var( --dahu-admin-caution );
+}
+
+.dahu-sepa-note--warning {
+	border-left-color: var( --dahu-admin-warning );
+}
+
+/* --- Diagnostics ------------------------------------------------------ */
+
+.dahu-sepa-diag {
+	margin-top: var( --dahu-admin-gap-lg );
+	padding: var( --dahu-admin-gap-lg );
+	border: 1px dashed var( --dahu-admin-border-strong );
+	border-radius: var( --dahu-admin-radius );
+	background: var( --dahu-admin-surface );
+	max-width: var( --dahu-admin-measure );
+	font-size: 12px;
+}
+
+.dahu-sepa-diag__title {
+	margin: 0 0 var( --dahu-admin-gap );
+	font-weight: 600;
+}
+
+.dahu-sepa-diag__list {
+	margin: 0;
+}
+
+.dahu-sepa-diag__list dt {
+	float: left;
+	clear: left;
+	margin-right: var( --dahu-admin-gap );
+	color: var( --dahu-admin-text-muted );
+}
+
+.dahu-sepa-diag__list dd {
+	margin: 0 0 2px;
+}
+
+.dahu-sepa-diag__yes {
+	color: var( --dahu-admin-success );
+	font-weight: 600;
+}
+
+.dahu-sepa-diag__no {
+	color: var( --dahu-admin-warning );
+	font-weight: 600;
+}
+
+/* --- Charges screen --------------------------------------------------- */
+
+.dahu-sepa-charges__filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var( --dahu-admin-gap-lg );
+	align-items: flex-end;
+	margin: var( --dahu-admin-gap-lg ) 0;
+}
+
+.dahu-sepa-charges__table {
+	max-width: var( --dahu-admin-measure-wide );
+}
+
+.dahu-sepa-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 9px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	color: var( --dahu-admin-accent-text );
+	background: var( --dahu-admin-neutral );
+}
+
+.dahu-sepa-badge--succeeded {
+	background: var( --dahu-admin-success );
+}
+
+.dahu-sepa-badge--failed,
+.dahu-sepa-badge--disputed {
+	background: var( --dahu-admin-warning );
+}
+
+.dahu-sepa-badge--processing {
+	background: var( --dahu-admin-caution );
+}
+
+.dahu-sepa-partial {
+	color: var( --dahu-admin-caution );
+	font-weight: 600;
+}
+
+/* --- The one-line introduction under the page title ------------------- */
+
+/*
+ * Every Dahu screen carries one, and it is the same rule everywhere. A lede
+ * that runs the full width of a 1920px screen is not read; the reading measure
+ * is what makes it a sentence rather than a banner.
+ */
+.dahu-sepa-charges__intro {
+	max-width: var( --dahu-admin-measure );
+	margin: 0 0 var( --dahu-admin-gap-lg );
+	color: var( --dahu-admin-text-muted );
+	font-size: 14px;
+}

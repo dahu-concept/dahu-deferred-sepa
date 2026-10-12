@@ -1,0 +1,20 @@
+# Never published
+CLAUDE.md
+*.zip
+
+# Build output
+/build/
+/dist/
+
+# Working files
+*.log
+*.bak
+*.orig
+.DS_Store
+Thumbs.db
+.vscode/
+*.code-workspace
+
+# Dependencies
+/vendor/
+/node_modules/
