@@ -231,7 +231,7 @@ positif et témoin négatif.
 
 ## 2. Banc fonctionnel
 
-`_bench/t-deferred-sepa.php` — **223 tests, 15 sections**, sur un vrai
+`_bench/t-deferred-sepa.php` — **263 tests, 16 sections**, sur un vrai
 WordPress 7.1 avec une vraie WooCommerce 11.1 et une vraie base. Idempotent
 (vérifié sur trois exécutions consécutives).
 
@@ -272,6 +272,343 @@ la passerelle disparaît du checkout. C'est le bon comportement — sans ce plug
 aucun mandat ne peut être signé — mais c'est une dépendance que rien n'écrivait.
 
 ---
+
+
+## 2 bis. Un prélèvement qui n'a jamais eu lieu, écrit le 2026-10-19
+
+Venu d'un incident de production sur la version Annad : huit commandes
+« Terminées » n'avaient jamais été prélevées, sur des échéances étalées du
+4 septembre au 14 octobre, et personne ne l'a su pendant six semaines. La
+cause y était double — une planification qui ne vérifiait pas le mandat, et un
+historique qui déduisait « encaissé » de `is_paid()`, vrai pour toute commande
+terminée. Cette extension-ci ne portait ni l'une ni l'autre : le mandat est
+revérifié au moment du prélèvement avec des refus nommés, et l'historique est
+borné sur l'existence d'une tentative. Ce qu'elle partageait, c'est le silence.
+
+Le prélèvement différé est le seul chemin de paiement sans personne devant
+l'écran. La commande passe en « Terminée », la marchandise part, et l'argent
+est censé bouger des jours plus tard, dans une tâche planifiée, chez Stripe.
+Tous les autres chemins ont un client assis devant un écran qui apprend tout de
+suite que ça n'a pas marché.
+
+`includes/alerts.php` ne fait donc qu'une chose : la boutique l'apprend.
+
+### Deux façons de ne rien encaisser, et ce ne sont pas les mêmes
+
+1. **Le prélèvement a tourné et a été refusé.** Il y a une raison, écrite sur
+   la commande par `dahu_deferred_sepa_refuse()` : pas de mandat approuvé,
+   approbation retirée, IBAN changé, Stripe qui dit non. La commande porte un
+   résultat et elle est dans l'historique. Ce qui manquait : le dire à la
+   boutique. C'est fait, par courriel, une fois.
+2. **Il n'a jamais tourné.** L'échéance est passée et rien ne s'est produit —
+   file bloquée, site sans trafic pour que le cron l'attrape, action perdue. La
+   commande porte une date dépassée, aucun résultat, et **aucun écran ne le
+   disait** : elle restait dans « À venir » avec une date d'encaissement qui
+   n'arriverait jamais. `dahu_deferred_sepa_is_overdue()` la nomme, l'écran la
+   sort de « À venir » et la met dans son propre bloc en rouge, sans estimation
+   d'encaissement — une estimation sur un prélèvement jamais parti est un
+   mensonge — et un balayage quotidien l'envoie par courriel.
+
+### Une alerte par échec, et pas une par jour
+
+Une alerte qui se répète est une alerte qu'on classe dans un dossier, et une
+alerte classée est pire que rien : c'est un silence qu'on croit couvert. Chaque
+alerte porte donc une empreinte — ce qui a échoué, la date d'échéance, et la
+phrase que lit une personne — gardée sur la commande dans
+`_dahu_deferred_sepa_alerted`, plafonnée aux vingt dernières. Le même échec
+redétecté demain n'envoie rien ; une replanification change la date, donc
+l'empreinte, donc un prélèvement qui échoue de nouveau après une reprise est
+redit. C'est le comportement voulu des deux côtés : pas de répétition de la
+même nouvelle, et pas d'étouffement d'une nouvelle qui ressemble à une
+ancienne.
+
+L'empreinte est écrite **avant** que le courriel soit passé au serveur de
+messagerie. Des deux erreurs possibles, l'une envoie un courriel deux fois,
+l'autre l'envoie en boucle.
+
+### Un seul courriel pour tout un balayage
+
+Une boutique qui découvre douze commandes impayées a besoin d'une liste
+qu'elle lit, et douze courriels ne sont pas une liste qu'on lit dans l'ordre
+qui compte. La plus vieille d'abord : celle qui est impayée depuis le plus
+longtemps est celle à regarder en premier, et c'est celle qui se retrouve en
+bas de n'importe quel autre tri.
+
+### Ce qui ne sort jamais par courriel
+
+La réponse brute du prestataire. Elle reste là où elle est déjà — la note de
+commande et le journal — et le courriel porte la phrase écrite pour une
+personne, plus le numéro de commande. Un courriel passe par le serveur de
+quelqu'un d'autre, se fait transférer, et reste pour toujours dans le client de
+son destinataire. Trois assertions nommées l'exigent : aucun `{`, aucun
+`cus_`, aucun `pm_`.
+
+### Le balayage ne prélève rien
+
+Ni retenter, ni replanifier, ni toucher Stripe. Un prélèvement qui a
+peut-être été envoyé n'est pas un prélèvement à renvoyer depuis une tâche
+planifiée sans personne devant l'écran : tout le travail du balayage est de
+mettre une personne devant la question.
+
+### Et la planification ne refuse jamais
+
+Il aurait été facile de vérifier le mandat au passage en « Terminée » et de
+refuser de planifier quand il n'y en a pas. C'est la mauvaise réponse, et pas
+pour une raison théorique : une boutique qui approuve un mandat **après** avoir
+passé la commande en « Terminée » fait une journée de travail normale, et le
+délai existe précisément pour que les choses puissent changer entre la commande
+et le prélèvement. La version Annad a d'ailleurs dû remplacer son premier
+verrou le jour même, avant déploiement, pour cette raison exacte.
+
+Donc le mandat est relu au moment du prélèvement, comme toujours — et l'état
+tel qu'il est **maintenant** est dit dans la note de planification, pour que la
+boutique corrige dans les jours qu'elle a au lieu de l'apprendre le jour dit.
+
+### Délai de grâce
+
+Un jour, et ce n'est pas une heure : Action Scheduler tourne sur le trafic du
+site, donc une boutique sans visiteur la nuit est régulièrement en retard de
+quelques heures sans que rien n'aille mal. Une alerte qui sonne pour ça apprend
+à son lecteur à l'ignorer. Un filtre peut l'allonger ; il ne peut pas le mettre
+à zéro, et une assertion nommée garde ce plancher.
+
+### Preuve
+
+`_bench/prove-deferred-sepa.py` pose **13 violations délibérées** — délai de
+grâce supprimé, tentative ignorée, autre passerelle balayée, commande sans
+échéance signalée, balayage qui se répète, un courriel par commande, empreinte
+sans date, empreinte écrite après l'envoi, refus muet, balayage qui prélève,
+planification qui refuse, note muette, liste du plus récent au plus vieux — et
+exige que chacune fasse tomber l'assertion nommée qu'elle vise. Treize sur
+treize. Cinq d'entre elles ne tombaient pas au premier essai : à chaque fois
+c'était l'assertion ou la fixture qui ne mesurait pas ce qu'elle prétendait —
+une seule commande en retard dans le lot (donc « un seul courriel » était vrai
+par accident), le refus testé en appelant l'alerte directement au lieu de
+passer par `refuse()`, le délai de grâce vérifié comme une constante au lieu
+d'être vérifié contre un filtre qui tente de le supprimer.
+
+## 2 ter. Un prélèvement envoyé qui n'aboutit pas, écrit le 2026-10-20
+
+Le 2 bis couvrait le prélèvement qui n'a **jamais tourné**. Celui-ci couvre
+l'autre moitié, plus chère : le prélèvement a été envoyé, Stripe l'a accepté,
+la marchandise est partie, et ça ne tient pas.
+
+Le chantier est parti d'une question de Hugo (« les options relancer hors
+stripe/sepa, reprogrammer… vérifie que tout cela n'a pas un intérêt pour notre
+version aussi ») et d'une **limite connue** notée dans la version Annad en
+1.8.3 : une commande déjà envoyée à Stripe puis rejetée par la banque est bien
+en retard, mais n'est pas « non exécutée », donc aucune relance ne lui est
+proposée.
+
+### L'impasse, qui était le vrai défaut
+
+En lisant cette limite chez Annad, on trouve la même chez nous, en pire. Le
+chemin de prélèvement appelle `dahu_deferred_sepa_mark_done()` dès que Stripe
+**accepte l'intention** — statut `processing`, c'est-à-dire « en route », pas
+« encaissé ». Et `_dahu_deferred_sepa_done` est ce que toutes les gardes lisent
+comme « un prélèvement est confirmé » :
+
+- `dahu_deferred_sepa_charge()` sort immédiatement ;
+- la replanification est refusée ;
+- `dahu_deferred_sepa_mark_settled_offline()` refuse le marquage, et l'écran de
+  commande ne dessine même pas le formulaire.
+
+Donc une commande envoyée puis refusée **avant encaissement** n'avait plus
+aucune issue : ni prélèvement, ni replanification, ni « réglé autrement ». Rien
+n'avait quitté le compte du client, la boutique n'était pas payée, et il n'y
+avait aucun bouton.
+
+### Ce qui a été fait
+
+Le `switch` du webhook distingue maintenant trois cas sur
+`payment_intent.payment_failed`, selon le résultat **lu avant** d'être écrasé :
+
+| État précédent | Ce qui s'est passé dans le monde | Ce qu'on fait |
+| --- | --- | --- |
+| `processing` (ou `_done`) | Refusé **avant** encaissement : rien n'a quitté le compte du client | `_done` est **retiré** (la commande est réouverte), résultat `failed`, et l'alerte de **refus** ordinaire part — son « corrigez et replanifiez » est alors vrai *et* réalisable |
+| `succeeded` | Ambigu : vrai retour bancaire, ou doublon pour l'intention qui a abouti | **rien n'est touché** — défaire un encaissement sur un événement ambigu est le seul geste qui pourrait coûter de l'argent — mais une note est écrite et une alerte part |
+| ni l'un ni l'autre | Échec au moment de l'envoi | **aucun courriel** : le chemin de prélèvement a déjà écrit à la boutique. Dit au journal, parce qu'« aucun courriel ici » ressemble à un bogue quand quelqu'un vient vérifier |
+
+`_dahu_deferred_sepa_executed_ts` n'est **jamais** retiré : une tentative a bien
+eu lieu, l'historique est borné dessus, et l'effacer masquerait la tentative.
+
+`charge.dispute.created` alerte sans condition : un litige n'existe que sur de
+l'argent qui a été pris, et aucun autre chemin de l'extension ne le signale.
+
+### Ce que la revue adverse a cassé, et c'est l'essentiel
+
+La première version de ce travail a été entièrement refaite après revue. Trois
+défauts, tous réels, tous vérifiés dans le code avant correction :
+
+1. **Les deux courriels donnaient une consigne que le code refuse.** Ils
+   disaient « encaissez-le autrement et enregistrez-le sur la commande ». Or
+   `mark_settled_offline()` refuse un prélèvement confirmé et l'écran ne dessine
+   pas le formulaire. C'était exactement le reproche que le docblock de
+   l'alerte de refus adresse au courriel de refus — reproduit sur l'autre route.
+   Un conseil que le code refuse envoie quelqu'un chercher un bouton absent.
+2. **« L'argent a bougé » était faux pour un refus depuis `processing`.**
+   `stripe_confirmed()` compte `processing` comme confirmé, ce qui est juste
+   pour sa question d'origine (peut-on effacer un prélèvement en vol ?) et faux
+   pour celle-ci. Le courriel annonçait un retour bancaire sur une créance
+   parfaitement récupérable, et présentait la commande comme intouchable.
+   C'est ce défaut qui a mené à l'impasse ci-dessus, donc à la vraie
+   correction : le webhook ne consulte plus `stripe_confirmed()` du tout, il
+   branche sur le résultat précédent. Effet de bord utile : la décision ne
+   dépend plus de `_stripe_charge_id`, une métadonnée que **cette extension
+   n'écrit jamais** — elle appartient à l'extension Stripe officielle.
+3. **L'empreinte de déduplication était constante par commande.**
+   `dahu_deferred_sepa_alert_fingerprint()` mélange
+   `_dahu_deferred_sepa_scheduled_ts` pour qu'une nouvelle échéance refasse une
+   alerte — mais `mark_done()` **supprime** cette métadonnée, et à l'instant
+   d'une réversion le prélèvement est toujours fait. La date valait donc 0 pour
+   toujours, et un second rejet sur un cycle ultérieur aurait été avalé comme
+   un doublon du premier. L'horodatage de tentative est maintenant passé
+   explicitement.
+
+**Le même défaut existait, préexistant, sur le chemin de refus**, et il a été
+corrigé dans la même session parce qu'il est pire : `dahu_deferred_sepa_refuse()`
+supprime `_scheduled_ts` *avant* d'appeler `alert_failure()`. L'empreinte de
+refus valait donc `|0|`, et un prélèvement refusé, corrigé, replanifié, puis
+refusé **pour la même raison** n'était dit à personne. Un refus silencieux est
+exactement ce que ce fichier existe pour empêcher : le chien de garde couvrait
+le silence qu'il surveillait.
+
+La correction tient dans `dahu_deferred_sepa_alert_fingerprint()`, en trois
+clés et dans cet ordre :
+
+    $cycle = (int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' );
+    if ( ! $cycle ) {
+        $cycle = (int) $order->get_meta( '_dahu_deferred_sepa_final_scheduled_ts' );
+    }
+    if ( ! $cycle ) {
+        $cycle = (int) $order->get_meta( '_dahu_deferred_sepa_executed_ts' );
+    }
+
+et `dahu_deferred_sepa_refuse()` recopie l'échéance sous `_final_scheduled_ts`
+**avant** de la supprimer, comme `mark_done()` le faisait déjà. Les trois cas
+sont nécessaires :
+
+- le balayage des retards alerte sur des prélèvements qui n'ont **jamais**
+  tourné : il n'y a pas de tentative, et c'est l'échéance vivante qui distingue
+  « en retard le 14 » de « en retard de nouveau le 21 » ;
+- tous les chemins qui alertent sur un prélèvement qui a **bien** tourné ont
+  déjà supprimé l'échéance au moment d'alerter (`refuse()` comme `mark_done()`),
+  et c'est la date du cycle conservée qui les distingue ;
+- l'horodatage de tentative ne vient qu'en **dernier** recours. Première version
+  écrite : il venait en premier, et le banc l'a refusée — `refuse()` écrit
+  `_executed_ts = time()`, donc deux refus dans la **même seconde** partagent
+  l'empreinte. Improbable en production, trivial au banc, et une boucle de
+  reprise le produirait aussi.
+
+Les deux moitiés sont mesurées : section 15 pour le balayage (« une
+replanification fait réalerter ») et section 15 pour le refus (« UN SECOND REFUS
+APRÈS REPRISE EST DIT AUSSI », avec son contrôle en négatif « MAIS LE MÊME REFUS
+DANS LE MÊME CYCLE NE REPART PAS »).
+
+### Deux choses connues et laissées en place
+
+- `update_status( 'failed', … )` sur une commande Terminée déclenche le
+  courriel « Commande échouée » de WooCommerce vers l'administrateur, qui
+  contient l'adresse de facturation complète. La boutique reçoit donc deux
+  courriels pour un seul événement, et c'est celui de WooCommerce — pas le
+  nôtre — qui transporte des données personnelles. Préexistant, désactivable
+  dans les réglages WooCommerce, non modifié : supprimer un courriel standard
+  de WooCommerce en silence est une décision qui appartient à la boutique.
+- Une commande réouverte n'a plus de date d'échéance (`mark_done()` l'avait
+  supprimée). Elle n'est donc pas reprise par la surveillance des retards, qui
+  exige une date passée. Elle apparaît dans « À venir » sans date, et le
+  courriel qui vient de partir est ce qui la signale.
+
+### Ce qui n'a pas été porté, et pourquoi
+
+Annad a déplacé en 1.8.3 les actions de rattrapage vers l'écran « À venir »,
+parce que chez lui « Reprogrammer » n'était offert que dans l'Historique alors
+que l'alerte se lisait dans « À venir » : l'action n'était pas là où l'alerte
+était vue.
+
+Ce découpage-là n'existe pas chez nous. Nos trois actions — prélever, replanifier,
+régler autrement — sont **au même endroit**, sur la commande, et le bloc des
+retards de l'écran « À venir » donne un lien direct vers chaque commande
+concernée. L'action est donc à un clic de l'alerte, dans un seul endroit, et
+dupliquer la surface d'action n'achèterait rien.
+
+### Le découpage du gestionnaire de webhook
+
+`dahu_deferred_sepa_apply_event( $order, $type, $object )` a été extraite du
+gestionnaire. La coupure est posée à un endroit précis : le gestionnaire garde
+tout ce qui décide si un événement est **croyable** — signature, propriété,
+site, intention — et la fonction extraite porte ce que l'extension **fait** de
+l'événement.
+
+Deux conséquences, et la seconde est la raison du découpage. Le gestionnaire
+peut refuser un événement sans que la fonction soit atteinte, donc ces
+vérifications restent incontournables. Et les décisions deviennent mesurables
+seules, ce qui était impossible autrement : **le banc tourne sans secret de
+webhook, à dessein** — la section 4 affirme qu'« un point d'entrée non
+configuré n'accepte rien » — donc toute signature que le banc peut fabriquer
+est refusée avant le `switch`. La première version de la section 18 appelait le
+gestionnaire complet, et ses treize assertions sont tombées toutes ensemble
+pour cette seule raison.
+
+Ce n'est pas un crochet de test : `apply_event()` ne prend aucune décision
+d'authenticité, et son docblock dit de ne l'appeler qu'avec un événement déjà
+vérifié.
+
+Ce que le découpage ne change pas, et qu'il faut savoir : les gardes du
+gestionnaire — propriété de la charge, site d'origine, correspondance de
+l'intention — restent couvertes **unitairement** seulement
+(`dahu_deferred_sepa_resolve_webhook_order()`,
+`dahu_deferred_sepa_event_intent()`, `dahu_deferred_sepa_verify_webhook()`) et
+jamais de bout en bout. La cause est structurelle : le secret est une
+**constante** (`DAHU_DEFERRED_SEPA_WEBHOOK_SECRET`), non filtrable, vide au
+banc, donc aucun appel au gestionnaire ne peut franchir la signature. C'était
+déjà le cas avant le découpage — il n'a rien retiré, il a rendu l'autre moitié
+mesurable. Si on voulait un jour couvrir ces gardes en bout en bout, il
+faudrait un filtre sur le secret, ce qui est précisément le genre de crochet
+qu'on ne pose pas sur un contrôle de signature.
+
+### Les courriels de WooCommerce comptés comme les nôtres
+
+`update_status( 'failed' )` fait partir le courriel « Commande échouée » de
+WooCommerce, et un passage en « Terminée » celui du client. Le banc capte
+`pre_wp_mail`, donc compter tout ce qu'il capte revient à compter les courriels
+de WooCommerce comme les nôtres : trois assertions de la section 18 sont tombées
+là-dessus. `ds_mail_ours()` ne compte que les objets contenant « SEPA ».
+
+C'est accessoirement la mesure de ce qui est signalé plus haut : pour un seul
+rejet, la boutique reçoit bien deux courriels, le nôtre et celui de WooCommerce.
+
+### Le piège du banc qui a coûté le plus de temps
+
+Les scripts `prove-*.py` copient l'extension de côté avant d'injecter, et la
+remettent en place à la sortie. Ils ne **supprimaient pas** la copie de côté.
+
+Un script arrêté sur un banc rouge laissait donc son instantané sur le disque,
+et le script suivant le restaurait **avant de commencer** : l'extension
+revenait à l'état qu'elle avait au début du run précédent, effaçant le code
+écrit entre les deux. Le rouge qui en sort désigne autre chose que la cause, et
+la suite lancée à la main juste avant était verte — de quoi chercher longtemps.
+
+Corrigé dans les sept scripts : toute sortie normale supprime l'instantané, et
+celui d'un run interrompu est restauré **puis** supprimé.
+
+### Suite de tests
+
+Section 18 de `_bench/t-deferred-sepa.php`. Le gestionnaire de webhook est
+appelé **pour de vrai**, signature comprise, par `ds_webhook()` : la décision
+mesurée est celle du `switch`, pas celle d'une fonction d'alerte appelée à la
+main.
+
+La mesure centrale prouve que l'impasse est levée en exerçant ce que le code
+refusait : `mark_settled_offline()` rend une `WP_Error` avant le webhook, et
+n'en rend plus après.
+
+`_bench/prove-deferred-sepa.py` compte 32 injections — **32 attrapées, 0
+manquée**, mesuré le 2026-10-20 sur une suite de 321 assertions — dont 6 pour
+cette section et 2 pour l'empreinte : réouverture jamais faite, réouverture faite à tort sur un encaissement,
+réouverture sur une commande jamais envoyée, échec après règlement passé sous
+silence, contestation passée sous silence, commande réouverte sans le dire,
+empreinte adossée à une date effacée, et litige confondu avec un rejet.
 
 ## 3. Ce qui reste à faire
 

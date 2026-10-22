@@ -180,10 +180,23 @@ function dahu_deferred_sepa_render_profile_section( $user ) {
 		return;
 	}
 
+	// The family sheet first, and its own second: the plugin's own rules
+	// are written to sit on top of the shared components, so the order is
+	// a dependency and not a hope. One handle across the family -- the
+	// file is byte-identical everywhere, so whichever plugin loads it
+	// first serves all of them, and a shop with six of these installed
+	// downloads one copy.
+	wp_enqueue_style(
+		'dahu-ui',
+		DAHU_DEFERRED_SEPA_URL . 'assets/css/dahu-ui.css',
+		array(),
+		DAHU_DEFERRED_SEPA_VERSION
+	);
+
 	wp_enqueue_style(
 		'dahu-deferred-sepa-admin',
 		DAHU_DEFERRED_SEPA_URL . 'assets/css/admin.css',
-		array(),
+		array( 'dahu-ui' ),
 		DAHU_DEFERRED_SEPA_VERSION
 	);
 

@@ -49,6 +49,8 @@ laquelle la passerelle est invisible pour la quasi-totalité des acheteurs.
 | **Webhook propre** | Point d'accès distinct, secret de signature distinct, n'agit que sur les prélèvements de cette extension. |
 | **Conditions par client** | Un délai posé sur le profil d'un client prime sur le délai global. |
 | **Écran des prélèvements** | L'encaissement attendu, et un historique filtrable, triable, exportable. |
+| **Rien n'échoue en silence** | Un prélèvement refusé part en courriel vers la boutique, une fois. Un prélèvement dont la date est passée et qui n'a jamais tourné est listé en haut de l'écran et signalé par une vérification quotidienne — le prélèvement différé est le seul chemin de paiement sans client devant l'écran pour voir l'échec. |
+| **Un prélèvement qui revient** | Un prélèvement que Stripe a accepté puis refusé avant encaissement ne prend aucun argent : la commande est donc **réouverte** — la garde « déjà prélevé » de l'extension laissait jusqu'ici une telle commande sans aucune issue : ni prélèvement, ni replanification, ni « réglé autrement ». Un échec ou une contestation sur un prélèvement déjà encaissé est laissé exactement en l'état, parce que défaire un encaissement sur un événement ambigu est le seul geste qui pourrait coûter de l'argent — et il part en courriel, ce qui n'était pas le cas avant. |
 | **Diagnostics** | L'extension explique sa propre disponibilité au lieu de vous laisser deviner. |
 | **HPOS** | Les deux stockages de commandes. Aucune table propre. |
 
@@ -119,6 +121,9 @@ mauvaise unité.
 | `dahu_deferred_sepa_mandate_submitted_admin_email` | Le courriel « mandat soumis » de la boutique. |
 | `dahu_deferred_sepa_mandate_submitted_customer_email` | Le courriel « nous avons reçu votre IBAN » du client. |
 | `dahu_deferred_sepa_mandate_approved_email` | Le courriel « approuvé » du client. |
+| `dahu_deferred_sepa_overdue_grace` | Le retard toléré avant de signaler un prélèvement. Un jour par défaut ; jamais zéro. |
+| `dahu_deferred_sepa_charge_refused_email` | L'alerte « prélèvement refusé » de la boutique. |
+| `dahu_deferred_sepa_overdue_email` | L'alerte quotidienne « prélèvements jamais exécutés ». |
 
 ### Constantes
 

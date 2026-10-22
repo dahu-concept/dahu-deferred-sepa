@@ -47,6 +47,15 @@ function dahu_deferred_sepa_schedule_on_completed( $order_id, $order = null ) {
 		return;
 	}
 
+	// Settled another way, by somebody who said so. Marking an order Completed
+	// again — which happens, for a dozen ordinary reasons — must not put a
+	// charge back on an order the shop has already been paid for.
+	if ( dahu_deferred_sepa_is_settled_offline( $order ) ) {
+		$order->add_order_note( __( 'Deferred SEPA: nothing scheduled, because this order is recorded as settled another way.', 'dahu-deferred-sepa' ) );
+
+		return;
+	}
+
 	if ( $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' ) ) {
 		return;
 	}
@@ -65,14 +74,30 @@ function dahu_deferred_sepa_schedule_on_completed( $order_id, $order = null ) {
 
 	dahu_deferred_sepa_schedule_at( $order, $timestamp );
 
-	$order->add_order_note(
-		sprintf(
-			/* translators: 1: date and time of the charge, 2: delay in days. */
-			__( 'Deferred SEPA: charge scheduled for %1$s (%2$d days from now).', 'dahu-deferred-sepa' ),
-			dahu_deferred_sepa_format_date( $timestamp ),
-			$days
-		)
+	$note = sprintf(
+		/* translators: 1: date and time of the charge, 2: delay in days. */
+		__( 'Deferred SEPA: charge scheduled for %1$s (%2$d days from now).', 'dahu-deferred-sepa' ),
+		dahu_deferred_sepa_format_date( $timestamp ),
+		$days
 	);
+
+	// What the mandate looks like NOW, when there is still time to put it
+	// right. The charge is scheduled either way, deliberately: the mandate is
+	// read again when the charge comes due, and a shop that approves one
+	// after marking an order Completed is doing a normal day's work, not
+	// making a mistake. Refusing to schedule would break that day; saying
+	// nothing would leave the discovery until the date.
+	$blocking = dahu_deferred_sepa_blocking_reason( $order );
+
+	if ( '' !== $blocking ) {
+		$note .= "\n\n" . sprintf(
+			/* translators: %s: the reason, already a sentence. */
+			__( 'As things stand, that charge would be refused: %s Put it right before the date above and nothing else needs doing.', 'dahu-deferred-sepa' ),
+			$blocking
+		);
+	}
+
+	$order->add_order_note( $note );
 }
 
 /**
@@ -261,6 +286,15 @@ function dahu_deferred_sepa_refuse( WC_Order $order, $note, $logged, $final = tr
 	$order->add_order_note( $note );
 
 	if ( $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' ) ) {
+		// Kept before it is deleted, under the same key `mark_done()` uses.
+		// The alert fingerprint needs to know WHICH cycle this refusal belongs
+		// to, and the live date is about to go. Without this, every refusal on
+		// an order fingerprints alike and the second one — after the shop put
+		// the cause right and rescheduled — is swallowed as old news.
+		$order->update_meta_data(
+			'_dahu_deferred_sepa_final_scheduled_ts',
+			(int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' )
+		);
 		$order->delete_meta_data( '_dahu_deferred_sepa_scheduled_ts' );
 		$order->save();
 	}
@@ -273,6 +307,13 @@ function dahu_deferred_sepa_refuse( WC_Order $order, $note, $logged, $final = tr
 		$order->update_meta_data( '_dahu_deferred_sepa_executed_ts', time() );
 		$order->save();
 		dahu_deferred_sepa_set_result( $order, 'failed' );
+
+		// And said to the shop, once. The note above is on the order, where
+		// somebody has to already be looking; this runs with nobody
+		// watching, and an unpaid order that looks settled is the whole
+		// failure this plugin has to avoid. The sentence is the one written
+		// on the order -- never a raw carrier response. See includes/alerts.php.
+		dahu_deferred_sepa_alert_failure( $order, $logged, $note );
 	}
 
 	dahu_deferred_sepa_log( sprintf( 'Order %d: %s', $order->get_id(), $logged ), 'error' );
@@ -373,6 +414,19 @@ function dahu_deferred_sepa_charge( $order_id ) {
 	}
 
 	if ( 'yes' === $order->get_meta( '_dahu_deferred_sepa_done' ) ) {
+		return;
+	}
+
+	// Settled another way, and checked **here** rather than only on the three
+	// screens that offer a button. A scheduled action created before the mark
+	// can still fire — Action Scheduler keeps what it was given — and this is
+	// the line that makes the mark mean something when it does. Said on the
+	// order, because a charge that was due and did not happen must never be
+	// silent.
+	if ( dahu_deferred_sepa_is_settled_offline( $order ) ) {
+		$order->add_order_note( __( 'Deferred SEPA: the charge came due and was not sent, because this order is recorded as settled another way.', 'dahu-deferred-sepa' ) );
+		dahu_deferred_sepa_unschedule( $order->get_id() );
+
 		return;
 	}
 

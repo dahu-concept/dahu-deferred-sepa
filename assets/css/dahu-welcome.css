@@ -1,0 +1,142 @@
+/*
+ * THE WELCOME SCREEN -- copied, byte for byte, into every plugin.
+ *
+ * Shown once, to somebody who has just installed a plugin they have never
+ * used. It is the only screen in the family allowed to be decorative, and
+ * the licence for that is narrow: it is read once, it asks for nothing, and
+ * a first impression is the one place where restraint reads as neglect.
+ * Every other screen in this family is a tool and stays sober.
+ *
+ * It still refuses two things. No stock photography, because fourteen
+ * plugins would need fourteen images kept consistent for ever, and a
+ * screenshot goes stale the week after it is taken. And no paragraph: three
+ * points of one sentence each, then the buttons. Somebody who wants more has
+ * the README.
+ *
+ * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
+ */
+
+.dahu-welcome {
+	max-width: 880px;
+}
+
+/* ---------------------------------------------------------------------------
+ * The hero.
+ *
+ * The mark is the plugin's initials in the family accent, not an icon: an
+ * icon set is fourteen drawings to commission, keep in step and redraw, and
+ * initials are legible at any size and never wrong.
+ * ------------------------------------------------------------------------ */
+
+.dahu-welcome .dahu-welcome-hero {
+	margin: 8px 0 28px;
+	padding: 32px 34px;
+	border: 1px solid var( --dui-accent-edge );
+	border-radius: var( --dui-radius-card );
+	background:
+		radial-gradient( 120% 140% at 0% 0%, var( --dui-accent-wash ) 0%, rgba( 255, 255, 255, 0 ) 62% ),
+		linear-gradient( 135deg, #ffffff 0%, var( --dui-paper ) 100% );
+	box-sizing: border-box;
+}
+
+.dahu-welcome .dahu-welcome-hero__mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	margin-bottom: 18px;
+	border-radius: 16px;
+	background: var( --dui-accent );
+	color: var( --dui-accent-ink );
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+
+.dahu-welcome .dahu-welcome-hero__title {
+	margin: 0;
+	padding: 0;
+	font-size: 30px;
+	font-weight: 500;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+	color: var( --dui-ink );
+}
+
+.dahu-welcome .dahu-welcome-hero__line {
+	margin: 10px 0 0;
+	font-size: 15px;
+	line-height: 1.55;
+	color: var( --dui-ink-soft );
+	max-width: 60ch;
+}
+
+/* ---------------------------------------------------------------------------
+ * The three points.
+ *
+ * Three, and the number is the design. Two looks thin, four stops being read,
+ * and anything that does not fit in three sentences is documentation.
+ * ------------------------------------------------------------------------ */
+
+.dahu-welcome .dahu-welcome-points {
+	display: grid;
+	grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
+	gap: 16px;
+	margin-bottom: 26px;
+}
+
+@media screen and ( max-width: 860px ) {
+
+	.dahu-welcome .dahu-welcome-points {
+		grid-template-columns: minmax( 0, 1fr );
+	}
+}
+
+.dahu-welcome .dahu-welcome-point {
+	padding: 20px;
+	border: 1px solid var( --dui-rule );
+	border-radius: var( --dui-radius-card );
+	background: var( --dui-paper );
+	box-sizing: border-box;
+}
+
+.dahu-welcome .dahu-welcome-point__n {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	margin-bottom: 12px;
+	border-radius: 999px;
+	background: var( --dui-accent-wash );
+	color: var( --dui-accent-deep );
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.dahu-welcome .dahu-welcome-point__title {
+	margin: 0 0 6px;
+	padding: 0;
+	font-size: 14.5px;
+	font-weight: 600;
+	color: var( --dui-ink );
+}
+
+.dahu-welcome .dahu-welcome-point__text {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var( --dui-ink-soft );
+}
+
+/* ---------------------------------------------------------------------------
+ * The buttons. One does the obvious next thing; the rest are quiet.
+ * ------------------------------------------------------------------------ */
+
+.dahu-welcome .dahu-welcome-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+}

@@ -232,16 +232,3 @@
 	font-weight: 600;
 }
 
-/* --- The one-line introduction under the page title ------------------- */
-
-/*
- * Every Dahu screen carries one, and it is the same rule everywhere. A lede
- * that runs the full width of a 1920px screen is not read; the reading measure
- * is what makes it a sentence rather than a banner.
- */
-.dahu-sepa-charges__intro {
-	max-width: var( --dahu-admin-measure );
-	margin: 0 0 var( --dahu-admin-gap-lg );
-	color: var( --dahu-admin-text-muted );
-	font-size: 14px;
-}

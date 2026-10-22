@@ -1,5 +1,6 @@
 # Never published
-CLAUDE.md
+# Les notes de session restent hors de l'extension : elles n'y ont pas leur
+# place du tout, et une ligne d'exclusion n'est pas ce qui l'empeche.
 *.zip
 
 # Build output

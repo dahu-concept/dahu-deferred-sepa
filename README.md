@@ -45,6 +45,8 @@ every shopper.
 | **Own webhook** | Separate endpoint, separate signing secret, acts only on this plugin's own charges. |
 | **Per-customer terms** | A delay on a customer's profile overrides the global one. |
 | **Charges screen** | Expected cash, and a filterable, sortable, exportable history. |
+| **Nothing fails in silence** | A refused charge is emailed to the shop, once. A charge whose date passed and which never ran is listed at the top of the screen and emailed by a daily check — a deferred charge is the one payment path with no customer watching it fail. |
+| **A debit that comes back** | A charge Stripe accepted and then refused before settlement takes no money, so the order is **reopened** — this plugin's own "already charged" guard used to leave such an order with no way out: no charge, no reschedule, no "settled another way". A failure or a dispute on a charge already collected is left exactly as it is, because undoing a settlement on an ambiguous event is the one move that could cost money — and it is emailed, which it never was before. |
 | **Diagnostics** | The plugin explains its own availability instead of leaving you to guess. |
 | **HPOS** | Both order storages. No custom tables. |
 
@@ -111,6 +113,9 @@ is refused with an order note rather than charged in the wrong unit.
 | `dahu_deferred_sepa_mandate_submitted_admin_email` | The shop's "mandate submitted" email. |
 | `dahu_deferred_sepa_mandate_submitted_customer_email` | The customer's "we received your IBAN" email. |
 | `dahu_deferred_sepa_mandate_approved_email` | The customer's "approved" email. |
+| `dahu_deferred_sepa_overdue_grace` | How late a charge may be before it is reported. Default one day; it is never allowed to be zero. |
+| `dahu_deferred_sepa_charge_refused_email` | The shop's "charge refused" alert. |
+| `dahu_deferred_sepa_overdue_email` | The daily "charges never ran" alert. |
 
 ### Constants
 

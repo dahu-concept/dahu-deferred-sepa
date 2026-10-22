@@ -3,7 +3,7 @@
  * Plugin Name: Dahu Deferred SEPA
  * Plugin URI:  https://dahu-concept.fr
  * Description: Charges a Stripe SEPA Direct Debit mandate a configurable number of days after an order is completed, instead of at checkout. The charge date can be viewed and moved from the order screen.
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      Hugo Vial-Jaime
  * Author URI:  mailto:contact@dahu-concept.fr
  * License:     MIT
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'DAHU_DEFERRED_SEPA_VERSION', '1.0.0' );
+define( 'DAHU_DEFERRED_SEPA_VERSION', '1.1.0' );
 define( 'DAHU_DEFERRED_SEPA_FILE', __FILE__ );
 define( 'DAHU_DEFERRED_SEPA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DAHU_DEFERRED_SEPA_URL', plugin_dir_url( __FILE__ ) );
@@ -260,6 +260,8 @@ add_action(
 
 require_once DAHU_DEFERRED_SEPA_PATH . 'includes/stripe.php';
 require_once DAHU_DEFERRED_SEPA_PATH . 'includes/schedule.php';
+require_once DAHU_DEFERRED_SEPA_PATH . 'includes/offline.php';
+require_once DAHU_DEFERRED_SEPA_PATH . 'includes/alerts.php';
 require_once DAHU_DEFERRED_SEPA_PATH . 'includes/gateway.php';
 require_once DAHU_DEFERRED_SEPA_PATH . 'includes/mandates.php';
 require_once DAHU_DEFERRED_SEPA_PATH . 'includes/checkout.php';
@@ -343,5 +345,95 @@ register_deactivation_hook(
 		}
 
 		wp_clear_scheduled_hook( DAHU_DEFERRED_SEPA_HOOK );
+	}
+);
+
+/*
+ * The welcome screen, shown once just after activation.
+ *
+ * Registered here rather than inside the admin include, because the
+ * activation flag has to be set whatever else is loaded.
+ */
+require_once DAHU_DEFERRED_SEPA_PATH . 'includes/dahu-welcome.php';
+
+/*
+ * The flag, not a redirect: an activation hook that redirects breaks bulk
+ * activation and WP-CLI, which activate several plugins in one request. The
+ * welcome screen reads the flag on the next page load, where a redirect is
+ * safe, and clears it when several plugins were activated together.
+ */
+register_activation_hook(
+	__FILE__,
+	static function () {
+		Dahu_Welcome::mark_activated( 'dahu-deferred-sepa' );
+	}
+);
+
+add_action(
+	'init',
+	static function () {
+		Dahu_Welcome::register(
+			array(
+				'slug'       => 'dahu-deferred-sepa',
+				'name'       => __( 'Deferred SEPA', 'dahu-deferred-sepa' ),
+				'tagline'    => __( 'Takes a SEPA payment a set number of days after the order ships.', 'dahu-deferred-sepa' ),
+				'file'       => DAHU_DEFERRED_SEPA_FILE,
+				'version'    => DAHU_DEFERRED_SEPA_VERSION,
+				'textdomain' => 'dahu-deferred-sepa',
+				/*
+				 * Les mots de l'accueil viennent d'ici : le fichier partagé est
+				 * recopié dans toute la famille et ne peut donc porter aucun
+				 * domaine de traduction.
+				 */
+				'strings'    => array(
+					'next'   => __( 'Next', 'dahu-deferred-sepa' ),
+					'done'   => __( 'Done', 'dahu-deferred-sepa' ),
+					'skip'   => __( 'Skip', 'dahu-deferred-sepa' ),
+					'of'     => __( 'of', 'dahu-deferred-sepa' ),
+					'denied' => __( 'You are not allowed to view this page.', 'dahu-deferred-sepa' ),
+				),
+				'points'     => array(
+				array(
+					'title' => __( 'Charged once', 'dahu-deferred-sepa' ),
+					'text'  => __( 'One key per order, so a retry or a timeout cannot debit twice.', 'dahu-deferred-sepa' ),
+				),
+				array(
+					'title' => __( 'Nothing fails quietly', 'dahu-deferred-sepa' ),
+					'text'  => __( 'A refused or returned charge is emailed to the shop.', 'dahu-deferred-sepa' ),
+				),
+				array(
+					'title' => __( 'You keep the date', 'dahu-deferred-sepa' ),
+					'text'  => __( 'Movable until it fires, and every move is recorded.', 'dahu-deferred-sepa' ),
+				),
+				),
+
+				/*
+				 * The one-time tour.
+				 *
+				 * Every selector points at the screen's shell, which is rendered
+				 * on both tabs and whether or not a single charge exists. A step
+				 * whose target is missing is skipped without a sound, so nothing
+				 * here may sit inside the empty-list branch or the overdue block.
+				 */
+				'tour_screen' => 'woocommerce_page_dahu-deferred-sepa-charges',
+				'tour'        => array(
+					array(
+						'selector' => '.dahu-ui-head__title',
+						'title'    => __( 'Charged after shipping', 'dahu-deferred-sepa' ),
+						'text'     => __( 'Each SEPA payment is taken a set number of days after the order ships.', 'dahu-deferred-sepa' ),
+					),
+					array(
+						'selector' => '.nav-tab-wrapper a[href*="tab=upcoming"]',
+						'title'    => __( 'What is due', 'dahu-deferred-sepa' ),
+						'text'     => __( 'Charges still to come, with the date each one is sent.', 'dahu-deferred-sepa' ),
+					),
+					array(
+						'selector' => '.nav-tab-wrapper a[href*="tab=history"]',
+						'title'    => __( 'What was taken', 'dahu-deferred-sepa' ),
+						'text'     => __( 'Every charge already sent, with its outcome. Export it as CSV.', 'dahu-deferred-sepa' ),
+					),
+				),
+			)
+		);
 	}
 );

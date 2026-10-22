@@ -4,7 +4,7 @@ Tags: woocommerce, sepa, direct debit, stripe, payment terms
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -51,6 +51,13 @@ switching to an IBAN nobody approved.
 * **Optionally hides Stripe's immediate SEPA option** at checkout, while
   leaving it available under My account → Payment methods, where the customer
   signs the mandate in the first place.
+* **Nothing fails in silence.** A refused charge is emailed to the shop, once,
+  with the reason and never with a raw carrier response. A charge whose date
+  has passed and which never ran is taken out of "upcoming", listed at the top
+  of the screen with what is in the way, and reported by a daily check: a
+  deferred charge is the one payment path with no customer in front of a
+  screen to find out it did not work. Nothing is ever retried automatically,
+  because a charge that may already have been sent would be taken twice.
 * **Diagnostics.** The gateway is deliberately hard to qualify for, so it can
   show an administrator each condition it checks and the answer, rather than
   leaving "why is it not showing?" to be guessed.
@@ -177,10 +184,25 @@ answered — is a payment record and is kept.
 
 == Changelog ==
 
+= 1.1.0 =
+* A charge Stripe accepted and then refused before settlement no longer leaves
+  the order stuck. Nothing left the customer's account, so the order is
+  reopened and can be scheduled again — previously the "already charged" guard
+  refused a charge, a reschedule and the "settled another way" mark alike,
+  leaving no way out at all.
+* A failure or a dispute reported on a charge that was already collected is
+  emailed to the shop. It was written on the order and told to nobody.
+* Such an order is deliberately left untouched: undoing a settlement on an
+  event that may be a duplicate is the one move that could cost money.
+
 = 1.0.0 =
 * First release.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Reports charges that came back after being collected, and unsticks orders whose
+debit was refused before settlement.
 
 = 1.0.0 =
 First release.

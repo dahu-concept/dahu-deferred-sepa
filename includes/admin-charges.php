@@ -124,10 +124,23 @@ function dahu_deferred_sepa_render_admin_page() {
 		wp_die( esc_html__( 'You are not allowed to view this page.', 'dahu-deferred-sepa' ), '', array( 'response' => 403 ) );
 	}
 
+	// The family sheet first, and its own second: the plugin's own rules
+	// are written to sit on top of the shared components, so the order is
+	// a dependency and not a hope. One handle across the family -- the
+	// file is byte-identical everywhere, so whichever plugin loads it
+	// first serves all of them, and a shop with six of these installed
+	// downloads one copy.
+	wp_enqueue_style(
+		'dahu-ui',
+		DAHU_DEFERRED_SEPA_URL . 'assets/css/dahu-ui.css',
+		array(),
+		DAHU_DEFERRED_SEPA_VERSION
+	);
+
 	wp_enqueue_style(
 		'dahu-deferred-sepa-admin',
 		DAHU_DEFERRED_SEPA_URL . 'assets/css/admin.css',
-		array(),
+		array( 'dahu-ui' ),
 		DAHU_DEFERRED_SEPA_VERSION
 	);
 
@@ -139,13 +152,11 @@ function dahu_deferred_sepa_render_admin_page() {
 		'history'  => __( 'History', 'dahu-deferred-sepa' ),
 	);
 
-	echo '<div class="wrap">';
-	echo '<h1>' . esc_html__( 'SEPA charges', 'dahu-deferred-sepa' ) . '</h1>';
-
-	printf(
-		'<p class="dahu-sepa-charges__intro">%s</p>',
-		esc_html__( 'Dahu Deferred SEPA takes a SEPA payment a set number of days after the order, once it has shipped. This screen is what is due and what has been taken.', 'dahu-deferred-sepa' )
-	);
+	echo '<div class="wrap dahu-ui">';
+	echo '<div class="dahu-ui-head">';
+	echo '<h1 class="dahu-ui-head__title">' . esc_html__( 'SEPA charges', 'dahu-deferred-sepa' ) . '</h1>';
+	echo '<p class="dahu-ui-head__sub">' . esc_html__( 'What is due, and what has been taken.', 'dahu-deferred-sepa' ) . '</p>';
+	echo '</div>';
 
 	echo '<hr class="wp-header-end">';
 	echo '<h2 class="nav-tab-wrapper">';
@@ -182,6 +193,102 @@ function dahu_deferred_sepa_render_admin_page() {
  *
  * @return void
  */
+/**
+ * The charges that were due and never ran, at the top of the screen.
+ *
+ * Its own block, above everything, and in the one band of the screen: this is money
+ * the shop has not been paid for goods it has already sent, and it is the
+ * only thing on this screen that needs doing today.
+ *
+ * No settlement estimate, no total mixed with the pending ones, and the
+ * reason read now rather than the reason recorded then — "no approved
+ * mandate" is put right on a profile in a minute, and the alternative is a
+ * shop opening Stripe to look for a payment that was never sent.
+ *
+ * Nothing here charges, retries or reschedules. A charge that may or may not
+ * have gone is not one to send again from a button that says "fix": the
+ * order is linked, and the decision is a person's.
+ *
+ * @param WC_Order[] $late Overdue orders, keyed by id.
+ * @return void
+ */
+function dahu_deferred_sepa_render_overdue_block( array $late ) {
+
+	if ( ! $late ) {
+		return;
+	}
+
+	echo '<div class="dahu-ui-band"><div><p class="dahu-ui-band__title">';
+
+	printf(
+		/* translators: %d: number of orders. */
+		esc_html(
+			_n(
+				'%d charge was due and never ran.',
+				'%d charges were due and never ran.',
+				count( $late ),
+				'dahu-deferred-sepa'
+			)
+		),
+		count( $late )
+	);
+
+	echo '</p><p class="dahu-ui-band__text">';
+
+	esc_html_e( 'No money moved on these orders and nothing is retried automatically, because a charge that may already have been sent would be taken twice. Check each one, then reschedule it from the order.', 'dahu-deferred-sepa' );
+
+	echo '</p></div></div>';
+
+	echo '<table class="dahu-ui-table"><thead><tr>';
+	echo '<th>' . esc_html__( 'Order', 'dahu-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Amount', 'dahu-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Was due', 'dahu-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'What is in the way', 'dahu-deferred-sepa' ) . '</th>';
+	echo '</tr></thead><tbody>';
+
+	foreach ( $late as $order ) {
+
+		$reason = dahu_deferred_sepa_blocking_reason( $order );
+
+		echo '<tr>';
+		echo '<td><a href="' . esc_url( $order->get_edit_order_url() ) . '"><strong>#'
+			. esc_html( $order->get_order_number() ) . '</strong></a></td>';
+		echo '<td>' . wp_kses_post( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ) . '</td>';
+		echo '<td>' . esc_html( dahu_deferred_sepa_format_date( (int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' ) ) ) . '</td>';
+		echo '<td>' . esc_html(
+			'' !== $reason
+				? $reason
+				// Nothing visibly wrong with the order, so the charge was
+				// never run at all. Said plainly, because it points
+				// somewhere completely different: at the queue, not at the
+				// customer's mandate.
+				: __( 'Nothing is wrong with this order: the scheduled job was lost, or the queue is not running.', 'dahu-deferred-sepa' )
+		) . '</td>';
+		echo '</tr>';
+	}
+
+	echo '</tbody></table>';
+
+	$swept = dahu_deferred_sepa_last_sweep();
+
+	echo '<p>';
+
+	if ( $swept ) {
+		printf(
+			/* translators: %s: date and time. */
+			esc_html__( 'The daily check last reported overdue charges on %s. Each order is reported once, by email, and then stays on this list until it is dealt with.', 'dahu-deferred-sepa' ),
+			esc_html( dahu_deferred_sepa_format_date( $swept ) )
+		);
+	} else {
+		// Said, and not left blank. A watchdog nobody has ever heard from is
+		// either a shop that has never been late or a watchdog that is not
+		// running, and those two want different actions.
+		esc_html_e( 'The daily check has not reported anything yet. If these orders have been here since before today, the check may not be running: look at WooCommerce, Status, Scheduled Actions.', 'dahu-deferred-sepa' );
+	}
+
+	echo '</p>';
+}
+
 function dahu_deferred_sepa_render_upcoming_tab() {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only display toggle.
 	$show_pending = ! empty( $_GET['show_pending'] );
@@ -196,10 +303,32 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		)
 	);
 
+	$late = array();
+
 	foreach ( $scheduled as $order ) {
 		$when = (int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' );
 
 		if ( ! $when || 'yes' === $order->get_meta( '_dahu_deferred_sepa_done' ) ) {
+			continue;
+		}
+
+		// Settled another way: not pending, not late, not expected cash. It
+		// keeps its own record on the order and in the history, and showing
+		// it here would make the total at the top of this screen a figure the
+		// shop is waiting for twice.
+		if ( dahu_deferred_sepa_is_settled_offline( $order ) ) {
+			continue;
+		}
+
+		// A charge whose date has passed and which never ran is not
+		// "upcoming", and showing it here with a settlement estimate is the
+		// worst thing this screen can do: it tells a shop money is on its
+		// way when nothing was ever sent, and it goes on telling it every
+		// day. Those orders are taken out of the list below and put in
+		// their own block at the top. See includes/alerts.php.
+		if ( dahu_deferred_sepa_is_overdue( $order ) ) {
+			$late[ $order->get_id() ] = $order;
+
 			continue;
 		}
 
@@ -208,6 +337,8 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 			'when'  => $when,
 		);
 	}
+
+	dahu_deferred_sepa_render_overdue_block( $late );
 
 	if ( $show_pending ) {
 		$pending = wc_get_orders(
@@ -268,6 +399,7 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		$amounts[] = wc_price( $amount, array( 'currency' => $currency ) );
 	}
 
+	echo '<div class="dahu-ui-card">';
 	echo '<div class="dahu-sepa-note">';
 	printf(
 		/* translators: 1: one or more total amounts, already formatted; 2: number of orders. */
@@ -282,7 +414,7 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 	echo '<input type="hidden" name="tab" value="upcoming">';
 	echo '<p><label><input type="checkbox" name="show_pending" value="1" ' . checked( $show_pending, true, false ) . '> '
 		. esc_html__( 'Also show orders taken on this gateway that have not shipped yet', 'dahu-deferred-sepa' )
-		. '</label> <button class="button">' . esc_html__( 'Apply', 'dahu-deferred-sepa' ) . '</button></p>';
+		. '</label> <button class="dahu-ui-btn">' . esc_html__( 'Apply', 'dahu-deferred-sepa' ) . '</button></p>';
 	echo '</form>';
 
 	echo '<p class="description">';
@@ -297,13 +429,17 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 	}
 
 	echo '</p>';
+	echo '</div>';
 
 	if ( ! $rows ) {
+		echo '<div class="dahu-ui-card">';
 		echo '<p>' . esc_html__( 'No charges are pending.', 'dahu-deferred-sepa' ) . '</p>';
+		echo '</div>';
 
 		return;
 	}
 
+	echo '<div class="dahu-ui-card">';
 	echo '<table class="widefat striped dahu-sepa-charges__table"><thead><tr>';
 	echo '<th>' . esc_html__( 'Order', 'dahu-deferred-sepa' ) . '</th>';
 	echo '<th>' . esc_html__( 'Ordered', 'dahu-deferred-sepa' ) . '</th>';
@@ -340,6 +476,7 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 	}
 
 	echo '</tbody></table>';
+	echo '</div>';
 }
 
 /* ------------------------------------------------------------------
@@ -844,6 +981,7 @@ function dahu_deferred_sepa_render_history_tab() {
 		'dahu_deferred_sepa_export_history'
 	);
 
+	echo '<div class="dahu-ui-card">';
 	echo '<p class="description">'
 		. esc_html__( 'Charges sent by this gateway. Stripe\'s own immediate SEPA option is not listed here.', 'dahu-deferred-sepa' )
 		. '</p>';
@@ -870,15 +1008,18 @@ function dahu_deferred_sepa_render_history_tab() {
 	}
 
 	echo '</select></label>';
-	echo '<button class="button">' . esc_html__( 'Filter', 'dahu-deferred-sepa' ) . '</button>';
-	echo '<a class="button" href="'
+	echo '<button class="dahu-ui-btn">' . esc_html__( 'Filter', 'dahu-deferred-sepa' ) . '</button>';
+	echo '<a class="dahu-ui-btn" href="'
 		. esc_url( admin_url( 'admin.php?page=' . DAHU_DEFERRED_SEPA_CHARGES_PAGE . '&tab=history' ) ) . '">'
 		. esc_html__( 'Reset', 'dahu-deferred-sepa' ) . '</a>';
-	echo '<a class="button button-primary" href="' . esc_url( $export_url ) . '">'
+	echo '<a class="dahu-ui-btn dahu-ui-btn--go" href="' . esc_url( $export_url ) . '">'
 		. esc_html__( 'Export CSV', 'dahu-deferred-sepa' ) . '</a>';
 	echo '</form>';
+	echo '</div>';
 
+	echo '<div class="dahu-ui-card">';
 	$table->display();
+	echo '</div>';
 }
 
 /* ------------------------------------------------------------------

@@ -120,6 +120,37 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 		return new WP_REST_Response( 'not this payment', 200 );
 	}
 
+	dahu_deferred_sepa_apply_event( $order, $type, $object );
+
+	return new WP_REST_Response( 'ok', 200 );
+}
+
+/**
+ * What this plugin does about one verified Stripe event.
+ *
+ * Separated from `dahu_deferred_sepa_webhook_handler()` on purpose, and the
+ * split is where it is for a reason: the handler owns everything that decides
+ * whether an event may be BELIEVED — signature, ownership, which site, which
+ * payment intent — and this function owns what the plugin then DOES about it.
+ *
+ * Two things follow. The handler can refuse an event without this function
+ * ever being reached, which is what keeps those checks un-bypassable. And the
+ * decisions below can be exercised on their own by a caller that already knows
+ * the event is genuine — which is the only way the bench can measure them,
+ * because the bench deliberately runs with NO webhook secret configured, so
+ * every signature it could produce is refused long before the handler gets
+ * this far.
+ *
+ * Takes no decision about authenticity. Call it only with an event the handler
+ * has already vouched for.
+ *
+ * @param WC_Order $order  The order the event is about.
+ * @param string   $type   Stripe event type.
+ * @param array    $object The event's data object.
+ * @return void
+ */
+function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object ) {
+
 	switch ( $type ) {
 		case 'payment_intent.succeeded':
 			// Not guarded by is_paid(): an order charged on the normal path is
@@ -134,18 +165,58 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 			break;
 
 		case 'payment_intent.payment_failed':
-			// A failure for a superseded payment must not undo a later success.
-			if ( 'succeeded' === $order->get_meta( '_dahu_deferred_sepa_result' ) ) {
-				dahu_deferred_sepa_log(
-					sprintf( 'Webhook: a failure arrived for order %d, which has already been collected. Ignored.', $order->get_id() ),
-					'warning'
-				);
-				break;
-			}
+			$before = (string) $order->get_meta( '_dahu_deferred_sepa_result' );
 
 			$reason = isset( $object['last_payment_error']['message'] )
 				? (string) $object['last_payment_error']['message']
 				: __( 'no reason given', 'dahu-deferred-sepa' );
+
+			// Already settled, and now Stripe says this charge failed.
+			//
+			// Two different things look like this and the payload does not tell
+			// them apart: a genuine post-settlement return, and a stale or
+			// duplicate event for the intent that did settle. So the order is
+			// left exactly as it is — undoing a settlement on an ambiguous
+			// event is the one move here that could cost money — but it is
+			// SAID, because of the two halves of that uncertainty, silence is
+			// the expensive one. Before today this path logged a warning and
+			// told nobody.
+			if ( 'succeeded' === $before ) {
+				$order->add_order_note(
+					sprintf(
+						/* translators: %s: the reason Stripe gave. */
+						__( 'Deferred SEPA: Stripe reports a failure on this charge, which is recorded as collected. Nothing has been changed here — check the Stripe dashboard. Reason given: %s', 'dahu-deferred-sepa' ),
+						$reason
+					)
+				);
+
+				dahu_deferred_sepa_log(
+					sprintf( 'Webhook: a failure arrived for order %d, which is recorded as collected. The order was left alone and the shop was told.', $order->get_id() ),
+					'warning'
+				);
+
+				dahu_deferred_sepa_alert_reversal( $order, 'failed' );
+				break;
+			}
+
+			// A debit that was submitted and is now refused BEFORE settlement.
+			// `processing` means it was on its way; nothing left the customer's
+			// account.
+			//
+			// This is where the plugin used to paint itself into a corner. The
+			// charge path calls mark_done() as soon as Stripe accepts the
+			// intent, and `_dahu_deferred_sepa_done` is what every guard reads
+			// as "a debit is confirmed": it refuses a reschedule, and
+			// mark_settled_offline() refuses the mark as well. So an order in
+			// exactly this state — submitted, refused, unpaid, goods gone —
+			// had no route left at all. Neither charge, nor reschedule, nor
+			// "settled another way".
+			//
+			// Stripe has now said this intent is dead, and that is precisely
+			// the fact that makes another attempt safe, so the flag comes off.
+			// `_executed_ts` stays: an attempt WAS made, the history is built
+			// on it, and erasing it would hide the attempt from the record.
+			$submitted = 'processing' === $before || 'yes' === $order->get_meta( '_dahu_deferred_sepa_done' );
 
 			$order->update_status(
 				'failed',
@@ -156,6 +227,32 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 				)
 			);
 			dahu_deferred_sepa_set_result( $order, 'failed' );
+
+			if ( $submitted ) {
+				$order->delete_meta_data( '_dahu_deferred_sepa_done' );
+				$order->save();
+
+				$order->add_order_note(
+					__( 'Deferred SEPA: no money left the customer\'s account, so this charge can be sent again. Set a new date on this order once the cause is put right.', 'dahu-deferred-sepa' )
+				);
+
+				// The ordinary refusal alert, and not the reversal one: nothing
+				// was taken, so "put it right and reschedule from the order" is
+				// both true and now achievable.
+				dahu_deferred_sepa_alert_failure(
+					$order,
+					'stripe refused the charge before settlement',
+					__( 'A SEPA charge was submitted and Stripe refused it before settlement. No money left the customer\'s account, and this order has been reopened so the charge can be scheduled again.', 'dahu-deferred-sepa' )
+				);
+			} else {
+				// Said in the log and not by email: the charge path owns this
+				// one and has already written to the shop. Logged all the same,
+				// because "no email was sent here" is the kind of decision that
+				// looks like a bug when somebody comes to check why.
+				dahu_deferred_sepa_log(
+					sprintf( 'Webhook: order %d failed before anything was submitted. The charge path has already reported it.', $order->get_id() )
+				);
+			}
 			break;
 
 		case 'charge.dispute.created':
@@ -163,10 +260,12 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 				__( 'Deferred SEPA: the customer has disputed this charge (reported by Stripe). Check the Stripe dashboard.', 'dahu-deferred-sepa' )
 			);
 			dahu_deferred_sepa_set_result( $order, 'disputed' );
+
+			// Always, with no condition: a dispute only exists for money that
+			// was taken, and no other path in this plugin reports one.
+			dahu_deferred_sepa_alert_reversal( $order, 'disputed' );
 			break;
 	}
-
-	return new WP_REST_Response( 'ok', 200 );
 }
 
 /**
