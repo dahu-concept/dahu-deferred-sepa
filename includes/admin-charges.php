@@ -661,13 +661,61 @@ function dahu_deferred_sepa_ids_where( $key, $value, $compare = '=', $type = '' 
 /**
  * The ids of every charge matching the filters, in the right order.
  *
+ * ## WHY THE ANSWER IS KEPT FOR THE REQUEST
+ *
+ * This is the most expensive read on the screen: one UNBOUNDED order query for
+ * the ordered set, plus one more per active filter. The pager asks for it to
+ * count the rows and the table asks for it again to build the page, so a single
+ * view paid for the whole set twice -- four times with one filter on.
+ *
+ * The answer is kept for the CURRENT REQUEST ONLY, keyed on the filters: a
+ * different set of filters is a different question and is asked again. Nothing
+ * on this screen writes a charge -- it is a read-only report, and
+ * `_dahu_deferred_sepa_executed_ts` is written by the charge paths, in other
+ * requests. Within one request the second ask could therefore only ever get
+ * the same answer back. A caller that is not sure of that calls
+ * `dahu_deferred_sepa_forget_history_ids()` first.
+ *
+ * @param array $args Filters.
+ * @return int[]
+ */
+function dahu_deferred_sepa_history_ids( $args ) {
+
+	if ( ! isset( $GLOBALS['dahu_deferred_sepa_history_ids'] ) || ! is_array( $GLOBALS['dahu_deferred_sepa_history_ids'] ) ) {
+		$GLOBALS['dahu_deferred_sepa_history_ids'] = array();
+	}
+
+	$signature = md5( (string) wp_json_encode( $args ) );
+
+	if ( ! isset( $GLOBALS['dahu_deferred_sepa_history_ids'][ $signature ] ) ) {
+		$GLOBALS['dahu_deferred_sepa_history_ids'][ $signature ] = dahu_deferred_sepa_read_history_ids( $args );
+	}
+
+	return $GLOBALS['dahu_deferred_sepa_history_ids'][ $signature ];
+}
+
+/**
+ * Forget the ids kept for this request.
+ *
+ * For a caller that changed a charge and then wants the screen rebuilt in the
+ * same request: the kept answer would be one marker out of date.
+ *
+ * @return void
+ */
+function dahu_deferred_sepa_forget_history_ids() {
+	$GLOBALS['dahu_deferred_sepa_history_ids'] = array();
+}
+
+/**
+ * The ids, actually read from the shop.
+ *
  * array_intersect keeps the first array's order, which is what makes the
  * ordering survive the intersection.
  *
  * @param array $args Filters.
  * @return int[]
  */
-function dahu_deferred_sepa_history_ids( $args ) {
+function dahu_deferred_sepa_read_history_ids( $args ) {
 	$ordered = array_map( 'intval', (array) wc_get_orders( dahu_deferred_sepa_history_query( $args, 0 ) + array( 'return' => 'ids' ) ) );
 
 	if ( ! dahu_deferred_sepa_history_is_filtered( $args ) ) {
