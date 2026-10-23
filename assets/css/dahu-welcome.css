@@ -37,21 +37,60 @@
 		radial-gradient( 120% 140% at 0% 0%, var( --dui-accent-wash ) 0%, rgba( 255, 255, 255, 0 ) 62% ),
 		linear-gradient( 135deg, #ffffff 0%, var( --dui-paper ) 100% );
 	box-sizing: border-box;
+
+	/* Le filigrane est posé par rapport à ce bloc, et déborde sans élargir la page. */
+	position: relative;
+	overflow: hidden;
 }
 
 .dahu-welcome .dahu-welcome-hero__mark {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 56px;
-	height: 56px;
+	width: 64px;
+	height: 64px;
 	margin-bottom: 18px;
-	border-radius: 16px;
+	border-radius: 20px;
 	background: var( --dui-accent );
 	color: var( --dui-accent-ink );
 	font-size: 22px;
 	font-weight: 600;
 	letter-spacing: 0.02em;
+}
+
+/*
+ * The plugin's own drawing, when it passes one. It inherits `currentColor`
+ * from the tile above, so the mark keeps working whatever a palette does to
+ * the accent -- there is no second colour to keep in step.
+ */
+.dahu-welcome .dahu-welcome-hero__glyph {
+	display: block;
+	width: 36px;
+	height: 36px;
+}
+
+/*
+ * The same drawing again, large and pale, where the banner used to run out of
+ * anything to say. It is decoration, so it never takes a pointer and never
+ * reaches a screen reader -- the words beside it already say the name.
+ */
+.dahu-welcome .dahu-welcome-hero__wash {
+	position: absolute;
+	right: -40px;
+	top: 50%;
+	width: 300px;
+	height: 300px;
+	transform: translateY( -50% );
+	color: var( --dui-accent );
+	opacity: 0.13;
+	pointer-events: none;
+}
+
+@media ( max-width: 782px ) {
+
+	.dahu-welcome .dahu-welcome-hero__wash {
+		display: none;
+	}
 }
 
 .dahu-welcome .dahu-welcome-hero__title {

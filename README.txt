@@ -4,7 +4,7 @@ Tags: woocommerce, sepa, direct debit, stripe, payment terms
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -184,6 +184,20 @@ answered — is a payment record and is kept.
 
 == Changelog ==
 
+= 1.2.1 =
+* An empty Upcoming tab now says what will appear there instead of showing a bare line of text, and an empty History tab no longer blames filters that were never set.
+
+= 1.2.0 =
+* The activation screen now opens on the plugin's own mark rather than its initials, and the banner carries the same drawing as a watermark.
+
+= 1.1.1 =
+* A per-customer charge delay of zero days — "charge as soon as it ships" — is
+  now saved. It was silently discarded, and that customer fell back to the
+  shop's global delay with nothing on screen to say so.
+* Uninstalling now also removes the overdue-sweep marker, any charge claim left
+  behind by a worker killed mid-charge, and the daily sweep's own cron event,
+  which used to keep waking the site up for a hook nothing answered.
+
 = 1.1.0 =
 * A charge Stripe accepted and then refused before settlement no longer leaves
   the order stuck. Nothing left the customer's account, so the order is
@@ -199,6 +213,9 @@ answered — is a payment record and is kept.
 * First release.
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+Fixes a per-customer charge delay of zero days being discarded, and completes the uninstaller.
 
 = 1.1.0 =
 Reports charges that came back after being collected, and unsticks orders whose

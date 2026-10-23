@@ -81,6 +81,21 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 					'capability'  => 'manage_options',
 
 					/*
+					 * The plugin's own mark, for the hero. Its shape is
+					 * deliberately the narrowest one that can carry a drawing:
+					 * a viewBox and a list of `d` strings, nothing else. This
+					 * file is copied byte for byte into fourteen plugins, so
+					 * the less it has to interpret, the less there is to go
+					 * wrong in fourteen places at once -- and a renderer that
+					 * only ever writes <path d="…"> through esc_attr() is one
+					 * a reviewer can check at a glance.
+					 *
+					 * Left empty, the hero falls back to the initials, which
+					 * is what every plugin showed before there was artwork.
+					 */
+					'mark'        => array(),
+
+					/*
 					 * Every word this file prints comes from the caller.
 					 *
 					 * It has to: the file is copied into fourteen plugins and
@@ -300,9 +315,10 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 			echo '<div class="wrap dahu-ui dahu-welcome">';
 
 			printf(
-				'<div class="dahu-welcome-hero"><div class="dahu-welcome-hero__mark" aria-hidden="true">%s</div>' .
+				'<div class="dahu-welcome-hero">%s<div class="dahu-welcome-hero__mark" aria-hidden="true">%s</div>' .
 				'<h1 class="dahu-welcome-hero__title">%s</h1><p class="dahu-welcome-hero__line">%s</p></div>',
-				esc_html( self::initials( $spec['name'] ) ),
+				self::glyph( $spec, 'dahu-welcome-hero__wash' ),
+				self::mark( $spec ),
 				esc_html( $spec['name'] ),
 				esc_html( $spec['tagline'] )
 			);
@@ -362,6 +378,64 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 		 * @param string $name Plugin name.
 		 * @return string
 		 */
+		/**
+		 * The hero's mark: the plugin's own drawing, or its initials.
+		 *
+		 * Nothing from the spec is echoed as markup. The element name and the
+		 * attribute names are written here, literally; only the viewBox and
+		 * each `d` come from the caller, and both go through esc_attr(). So a
+		 * plugin cannot inject anything through its own spec, which matters
+		 * because this file is the one copy that runs in fourteen plugins.
+		 *
+		 * `aria-hidden` is already on the wrapper: the mark repeats the name
+		 * printed right beside it, so a screen reader should not read it twice.
+		 *
+		 * @param array $spec The registered spec.
+		 * @return string Ready-to-print HTML.
+		 */
+		protected static function mark( array $spec ) {
+
+			$svg = self::glyph( $spec, 'dahu-welcome-hero__glyph' );
+
+			return '' !== $svg ? $svg : esc_html( self::initials( $spec['name'] ) );
+		}
+
+		/**
+		 * The plugin's drawing as an SVG, under a given class, or ''.
+		 *
+		 * Printed twice on the hero: once small inside the tile, once large and
+		 * pale behind the words. The second is why the banner no longer ends in
+		 * half a screen of nothing -- and it costs no new asset, because it is
+		 * the same seven paths drawn again by the browser.
+		 *
+		 * @param array  $spec  The registered spec.
+		 * @param string $class The class to carry.
+		 * @return string HTML, or '' when the plugin passes no mark.
+		 */
+		protected static function glyph( array $spec, $class ) {
+
+			$mark  = isset( $spec['mark'] ) && is_array( $spec['mark'] ) ? $spec['mark'] : array();
+			$paths = isset( $mark['paths'] ) && is_array( $mark['paths'] ) ? $mark['paths'] : array();
+
+			if ( ! $paths ) {
+				return '';
+			}
+
+			$view = isset( $mark['view'] ) ? (string) $mark['view'] : '0 0 112 112';
+			$out  = '<svg class="' . esc_attr( $class ) . '" viewBox="' . esc_attr( $view ) . '" fill="none" '
+				. 'stroke="currentColor" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round" '
+				. 'focusable="false" aria-hidden="true">';
+
+			foreach ( $paths as $d ) {
+				if ( ! is_string( $d ) || '' === $d ) {
+					continue;
+				}
+				$out .= '<path d="' . esc_attr( $d ) . '"/>';
+			}
+
+			return $out . '</svg>';
+		}
+
 		protected static function initials( $name ) {
 
 			$words = preg_split( '/\s+/', trim( wp_strip_all_tags( (string) $name ) ) );

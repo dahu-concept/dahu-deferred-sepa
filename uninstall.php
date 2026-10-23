@@ -28,6 +28,18 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
  * @return void
  */
 function dahu_deferred_sepa_uninstall_site() {
+
+	// The welcome screen's own three flags.
+	//
+	// They are interface state, not the shop's data, which is why they sit
+	// BEFORE any “remove data on uninstall” guard: whatever a shop chose to
+	// keep, a reinstall has to greet it again. `includes/dahu-welcome.php`
+	// writes them with update_option(), so they outlive the plugin unless
+	// they are deleted here — and the welcome screen and the guided tour
+	// would then stay silent for good, with nothing on screen to explain why.
+	delete_option( 'dahu_welcome_seen_dahu-deferred-sepa' );
+	delete_option( 'dahu_welcome_pending_dahu-deferred-sepa' );
+	delete_option( 'dahu_welcome_tour_dahu-deferred-sepa' );
 	global $wpdb;
 
 	$wipe = (bool) get_option( 'dahu_deferred_sepa_remove_data_on_uninstall', false );
@@ -35,12 +47,45 @@ function dahu_deferred_sepa_uninstall_site() {
 	delete_option( 'woocommerce_dahu_deferred_sepa_settings' );
 	delete_option( 'dahu_deferred_sepa_remove_data_on_uninstall' );
 
+	// When the overdue sweep last reported. Interface state of a watchdog that
+	// is going away with the plugin, so it goes too — like the welcome flags,
+	// whatever the shop chose to keep of its own data.
+	delete_option( 'dahu_deferred_sepa_last_sweep' );
+
+	/*
+	 * The per-order charge claims.
+	 *
+	 * `dahu_deferred_sepa_claim()` takes one with add_option() and releases it
+	 * with delete_option(), so in normal operation none is left. One survives
+	 * exactly when a worker was killed in the middle of a charge — which is
+	 * the case the claim exists for — and there is no API that deletes options
+	 * by prefix. A LIKE on the name prefix is the only way, and it runs once,
+	 * on uninstall.
+	 */
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- no API deletes options by prefix; uninstall only.
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+			$wpdb->esc_like( 'dahu_deferred_sepa_claim_' ) . '%'
+		)
+	);
+
 	// Any charge still queued. Both schedulers, since either may have taken it.
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
 		as_unschedule_all_actions( 'dahu_deferred_sepa_confirm_payment', array(), 'dahu-deferred-sepa' );
 	}
 
 	wp_clear_scheduled_hook( 'dahu_deferred_sepa_confirm_payment' );
+
+	/*
+	 * And the daily sweep, which is a WP-Cron event of its own.
+	 *
+	 * `dahu_deferred_sepa_keep_sweep_scheduled()` puts it back on every admin
+	 * load, so it is certainly there. Leaving it behind leaves WP-Cron waking
+	 * up once a day for a hook nothing answers any more — the very thing the
+	 * charge hook above is cleared to avoid.
+	 */
+	wp_clear_scheduled_hook( 'dahu_deferred_sepa_sweep' );
 
 	/*
 	 * Order meta is not touched, even when $wipe is set. There is no safe way

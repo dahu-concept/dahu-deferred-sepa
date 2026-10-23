@@ -319,10 +319,29 @@ function dahu_deferred_sepa_save_profile_section( $user_id ) {
 	if ( isset( $_POST['dahu_deferred_sepa_delay_days'] ) ) {
 		$delay = sanitize_text_field( wp_unslash( $_POST['dahu_deferred_sepa_delay_days'] ) );
 
-		if ( '' === $delay || (int) $delay < 1 ) {
+		/*
+		 * EMPTY is what clears the override, and nothing else is.
+		 *
+		 * Zero is a real answer — "charge as soon as it ships" — and the
+		 * field offers it: its `min` is 0, and
+		 * dahu_deferred_sepa_get_delay_days() accepts any value from 0 up,
+		 * testing each source for being SET rather than for being non-zero.
+		 * Treating 0 as "clear" made the writer disagree with the reader: an
+		 * administrator who set zero days for a customer had it silently
+		 * thrown away, that customer fell back to the shop's global delay,
+		 * and the only visible trace was a charge date days later than the
+		 * one agreed. On the field that decides when money is taken, a
+		 * silently discarded setting is the worst outcome of the three.
+		 *
+		 * A value that is not a number is treated as empty rather than as
+		 * zero: reading "soon" as "charge today" would be inventing an
+		 * instruction nobody gave. A negative one is clamped to zero, which
+		 * is what the reader does with it anyway.
+		 */
+		if ( '' === $delay || ! is_numeric( $delay ) ) {
 			delete_user_meta( $user_id, DAHU_DEFERRED_SEPA_DELAY_META );
 		} else {
-			update_user_meta( $user_id, DAHU_DEFERRED_SEPA_DELAY_META, (int) $delay );
+			update_user_meta( $user_id, DAHU_DEFERRED_SEPA_DELAY_META, max( 0, (int) $delay ) );
 		}
 	}
 }

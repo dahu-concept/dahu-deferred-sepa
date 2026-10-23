@@ -3,7 +3,7 @@
  * Plugin Name: Dahu Deferred SEPA
  * Plugin URI:  https://dahu-concept.fr
  * Description: Charges a Stripe SEPA Direct Debit mandate a configurable number of days after an order is completed, instead of at checkout. The charge date can be viewed and moved from the order screen.
- * Version:     1.1.0
+ * Version:     1.2.1
  * Author:      Hugo Vial-Jaime
  * Author URI:  mailto:contact@dahu-concept.fr
  * License:     MIT
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'DAHU_DEFERRED_SEPA_VERSION', '1.1.0' );
+define( 'DAHU_DEFERRED_SEPA_VERSION', '1.2.1' );
 define( 'DAHU_DEFERRED_SEPA_FILE', __FILE__ );
 define( 'DAHU_DEFERRED_SEPA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DAHU_DEFERRED_SEPA_URL', plugin_dir_url( __FILE__ ) );
@@ -380,10 +380,19 @@ add_action(
 				'file'       => DAHU_DEFERRED_SEPA_FILE,
 				'version'    => DAHU_DEFERRED_SEPA_VERSION,
 				'textdomain' => 'dahu-deferred-sepa',
+				'mark'       => array(
+					'view'  => '0 0 112 112',
+					'paths' => array(
+						'M18.0 20.0 H94.0 A10.0 10.0 0 0 1 104.0 30.0 V96.0 A10.0 10.0 0 0 1 94.0 106.0 H18.0 A10.0 10.0 0 0 1 8.0 96.0 V30.0 A10.0 10.0 0 0 1 18.0 20.0 Z',
+						'M8 44 L104 44 M34 8 L34 30 M78 8 L78 30',
+						'M74 64 a16 16 0 1 0 0 26',
+						'M42 72 L70 72 M42 82 L66 82',
+					),
+				),
 				/*
-				 * Les mots de l'accueil viennent d'ici : le fichier partagé est
-				 * recopié dans toute la famille et ne peut donc porter aucun
-				 * domaine de traduction.
+				 * The welcome screen's words come from here: the shared file is
+				 * copied byte for byte across the whole family, so it can carry
+				 * no text domain of its own.
 				 */
 				'strings'    => array(
 					'next'   => __( 'Next', 'dahu-deferred-sepa' ),

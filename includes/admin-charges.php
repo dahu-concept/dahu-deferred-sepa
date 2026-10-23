@@ -432,8 +432,16 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 	echo '</div>';
 
 	if ( ! $rows ) {
+		// Three different nothings, and only one of them is this one. "No
+		// charge has been sent yet" belongs to the History tab; "no charge
+		// matched what you asked for" belongs to its filters. Here the shop
+		// has simply not got a deferred order waiting, so the sentence says
+		// what will land here rather than leaving an empty card that reads
+		// like a screen that failed to load.
 		echo '<div class="dahu-ui-card">';
-		echo '<p>' . esc_html__( 'No charges are pending.', 'dahu-deferred-sepa' ) . '</p>';
+		echo '<p class="dahu-ui-hint">'
+			. esc_html__( 'Nothing is due: an order paid with this gateway appears here as soon as it is marked Completed.', 'dahu-deferred-sepa' )
+			. '</p>';
 		echo '</div>';
 
 		return;
@@ -876,7 +884,19 @@ function dahu_deferred_sepa_history_table() {
 			 * @return void
 			 */
 			public function no_items() {
-				esc_html_e( 'No charges match these filters.', 'dahu-deferred-sepa' );
+				// A fresh install has no history and no filters either, and
+				// blaming filters nobody set is what makes a new screen look
+				// broken. dahu_deferred_sepa_history_is_filtered() is the
+				// same predicate the query uses to decide whether to
+				// intersect id sets, so the message and the query can never
+				// disagree about what counts as a filter.
+				if ( dahu_deferred_sepa_history_is_filtered( dahu_deferred_sepa_history_request_args() ) ) {
+					esc_html_e( 'No charges match these filters.', 'dahu-deferred-sepa' );
+
+					return;
+				}
+
+				esc_html_e( 'No charge has been sent yet: every charge this gateway takes is listed here.', 'dahu-deferred-sepa' );
 			}
 
 			/**
