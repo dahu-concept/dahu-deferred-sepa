@@ -92,8 +92,8 @@ function dahu_deferred_sepa_load_gateway_class() {
 				'description'     => array(
 					'title'       => __( 'Description', 'dahu-deferred-sepa' ),
 					'type'        => 'textarea',
-					/* translators: %s: the {days} placeholder, shown literally. */
 					'description' => sprintf(
+						/* translators: %s: the {days} placeholder, shown literally. */
 						__( 'What the customer sees under the title at checkout. %s is replaced by the delay that applies to this customer, plus two working days for the bank.', 'dahu-deferred-sepa' ),
 						'<code>{days}</code>'
 					),

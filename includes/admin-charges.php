@@ -221,8 +221,8 @@ function dahu_deferred_sepa_render_overdue_block( array $late ) {
 	echo '<div class="dahu-ui-band"><div><p class="dahu-ui-band__title">';
 
 	printf(
-		/* translators: %d: number of orders. */
 		esc_html(
+			/* translators: %d: number of orders. */
 			_n(
 				'%d charge was due and never ran.',
 				'%d charges were due and never ran.',
@@ -997,7 +997,7 @@ function dahu_deferred_sepa_history_table() {
 							$out .= '<br><span class="description">' . esc_html(
 								sprintf(
 									/* translators: %d: how many times the charge was moved. */
-									_n( 'moved once', 'moved %d times', $item['reschedule'], 'dahu-deferred-sepa' ),
+									_n( 'moved %d time', 'moved %d times', $item['reschedule'], 'dahu-deferred-sepa' ),
 									$item['reschedule']
 								)
 							) . '</span>';

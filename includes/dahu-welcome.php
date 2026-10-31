@@ -317,7 +317,9 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 			printf(
 				'<div class="dahu-welcome-hero">%s<div class="dahu-welcome-hero__mark" aria-hidden="true">%s</div>' .
 				'<h1 class="dahu-welcome-hero__title">%s</h1><p class="dahu-welcome-hero__line">%s</p></div>',
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup built in glyph(), every dynamic part through esc_attr(); wp_kses_post() would strip the SVG.
 				self::glyph( $spec, 'dahu-welcome-hero__wash' ),
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- same markup, or esc_html() initials when there is none.
 				self::mark( $spec ),
 				esc_html( $spec['name'] ),
 				esc_html( $spec['tagline'] )

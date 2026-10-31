@@ -5,7 +5,7 @@
  * Description: Charges a Stripe SEPA Direct Debit mandate a configurable number of days after an order is completed, instead of at checkout. The charge date can be viewed and moved from the order screen.
  * Version:     1.2.2
  * Author:      Hugo Vial-Jaime
- * Author URI:  mailto:contact@dahu-concept.fr
+ * Author URI:  https://dahu-concept.fr
  * License:     MIT
  * License URI: https://opensource.org/licenses/MIT
  * Text Domain: dahu-deferred-sepa
@@ -14,7 +14,7 @@
  * Requires PHP:      7.4
  * Requires Plugins: woocommerce
  * WC requires at least: 7.0
- * WC tested up to: 11.1
+ * WC tested up to: 11.2
  *
  * @package DahuDeferredSepa
  */
@@ -325,6 +325,7 @@ add_filter(
 			// plugin does not control, and Plugin Check flags a call with no
 			// domain, which is a submission blocker for two words we can
 			// translate ourselves.
+			/* translators: %s: plugin version number. */
 			sprintf( esc_html__( 'Version %s', 'dahu-deferred-sepa' ), esc_html( DAHU_DEFERRED_SEPA_VERSION ) ),
 			'<a href="https://dahu-concept.fr" target="_blank" rel="noopener">' . esc_html__( 'By Hugo Vial-Jaime — Dahu-Concept', 'dahu-deferred-sepa' ) . '</a>',
 		);

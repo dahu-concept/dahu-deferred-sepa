@@ -1,5 +1,5 @@
 === Dahu Deferred SEPA ===
-Contributors: hugovialjaime
+Contributors: dahuconcept
 Tags: woocommerce, sepa, direct debit, stripe, payment terms
 Requires at least: 6.0
 Tested up to: 7.1
