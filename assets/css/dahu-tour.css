@@ -1,0 +1,98 @@
+/*
+ * THE TOUR BUBBLE -- copied, byte for byte, into every plugin.
+ *
+ * Deliberately NOT a modal. There is no backdrop and nothing is trapped:
+ * the page underneath stays usable, scrollable and clickable throughout. A
+ * tour that holds the screen hostage is a tour people learn to dismiss
+ * without reading, and then the one time it matters they dismiss that too.
+ *
+ * The ring is drawn OUTSIDE the control it points at, with pointer events
+ * off, so the control it is teaching can still be used while it is being
+ * explained. That is the whole trick: the lesson and the doing are the same
+ * gesture.
+ *
+ * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
+ */
+
+.dahu-tour {
+	position: absolute;
+	z-index: 100000;
+	width: 320px;
+	max-width: calc( 100vw - 24px );
+	padding: 16px 18px;
+	border: 1px solid var( --dui-accent-edge );
+	border-radius: var( --dui-radius-card );
+	background: #fff;
+	box-shadow: 0 10px 30px rgba( 0, 0, 0, .18 );
+	box-sizing: border-box;
+}
+
+.dahu-tour .dahu-tour__count {
+	margin: 0 0 8px;
+	font-size: 11.5px;
+	font-weight: 600;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+	color: var( --dui-accent-deep );
+}
+
+.dahu-tour .dahu-tour__title {
+	margin: 0 0 6px;
+	padding: 0;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var( --dui-ink );
+}
+
+.dahu-tour .dahu-tour__text {
+	margin: 0 0 14px;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var( --dui-ink-soft );
+}
+
+.dahu-tour .dahu-tour__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 0;
+}
+
+.dahu-tour .dahu-tour__skip {
+	border: 0;
+	background: none;
+	padding: 6px 2px;
+	font-size: 12.5px;
+	color: var( --dui-ink-mute );
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.dahu-tour .dahu-tour__skip:hover,
+.dahu-tour .dahu-tour__skip:focus {
+	color: var( --dui-ink );
+}
+
+/*
+ * The ring. `pointer-events: none` is load-bearing, not tidiness: without it
+ * the ring sits on top of the very control it is pointing at and swallows
+ * the click the step is asking for.
+ */
+.dahu-tour-ring {
+	position: absolute;
+	z-index: 99999;
+	pointer-events: none;
+	border: 2px solid var( --dui-accent );
+	border-radius: 10px;
+	box-shadow: 0 0 0 4px var( --dui-accent-wash );
+	transition: top .18s ease, left .18s ease, width .18s ease, height .18s ease;
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+
+	.dahu-tour-ring {
+		transition: none;
+	}
+}

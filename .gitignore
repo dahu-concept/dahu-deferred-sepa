@@ -1,0 +1,21 @@
+# Never published
+# Les notes de session restent hors de l'extension : elles n'y ont pas leur
+# place du tout, et une ligne d'exclusion n'est pas ce qui l'empeche.
+*.zip
+
+# Build output
+/build/
+/dist/
+
+# Working files
+*.log
+*.bak
+*.orig
+.DS_Store
+Thumbs.db
+.vscode/
+*.code-workspace
+
+# Dependencies
+/vendor/
+/node_modules/

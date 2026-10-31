@@ -1,0 +1,694 @@
+/*
+ * THE DAHU FAMILY ADMIN SHEET -- copied, byte for byte, into every plugin.
+ *
+ * WHY A COPY AND NOT A SHARED FILE. The plugins are independent: each must
+ * work with none of the others installed, so there is nowhere to put a
+ * common stylesheet and a plugin that depended on one would break the moment
+ * it was installed alone. The only way for fourteen separate plugins to look
+ * like one product is for each to carry the same bytes under the same names.
+ * Copies that drift are worse than no system at all -- they produce an
+ * inconsistency nobody looks for, because the mechanism meant to prevent it
+ * is visibly in place. `_harness/test-ui.php` compares them.
+ *
+ * WHY IT IS SCOPED. Everything lives under `.dahu-ui`, so a plugin screen
+ * opts in by wrapping its own markup and nothing here can reach the rest of
+ * the admin. A stylesheet that leaks into WordPress's own screens is a bug
+ * that gets blamed on the plugin for years.
+ *
+ * THE COLOURS, and why these ones. The accent is teal, the attention colour
+ * is orange, and both are bright on purpose: these screens are read quickly,
+ * often from a metre away. But bright means light here, and white text on a
+ * bright fill fails contrast -- white on the teal is 2.2:1, not legible at an
+ * angle, let alone with poor vision. So every bright fill carries very dark
+ * text of its own hue family, measured above 4.5:1. The state colours differ
+ * in LIGHTNESS as well as hue, so they stay distinguishable without colour
+ * vision.
+ *
+ * WHAT IT DOES NOT CONTAIN. No typeface, no page chrome, no opinion about
+ * WordPress's own furniture. A plugin screen lives inside an admin it does
+ * not own, and the ones that forget it read as foreign objects.
+ *
+ * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
+ */
+
+
+.dahu-ui {
+	/* Ground and ink. */
+	--dui-paper: #fbfaf8;
+	--dui-ground: #f3f2ef;
+	--dui-ink: #16191d;
+	--dui-ink-soft: #4e545a;
+	--dui-ink-mute: #6b716f;
+	--dui-rule: #dfdcd5;
+	--dui-rule-soft: #efede7;
+
+	/* The accent: an action is teal, and nothing else is. */
+	--dui-accent: #2bbdac;
+	--dui-accent-edge: #1fa396;
+	--dui-accent-ink: #052e2a;
+	--dui-accent-wash: #d4f4f0;
+	--dui-accent-deep: #0e7c73;
+
+	/* Attention: something needs a human. Never used for decoration. */
+	--dui-warn: #ff833b;
+	--dui-warn-edge: #e85b20;
+	--dui-warn-ink: #3b1703;
+	--dui-warn-wash: #fff1e6;
+	--dui-warn-wash-edge: #ffc49b;
+
+	/* The states, by lightness as much as by hue. One name per meaning. */
+	--dui-state-live: #7fd3f7;
+	--dui-state-live-edge: #39b6e8;
+	--dui-state-live-ink: #06374f;
+
+	--dui-state-wait: #ffc02e;
+	--dui-state-wait-edge: #e8a400;
+	--dui-state-wait-ink: #3b2600;
+
+	--dui-state-unknown: #ff7a45;
+	--dui-state-unknown-edge: #e85b20;
+	--dui-state-unknown-ink: #3b1703;
+
+	--dui-state-done: #6fe3b4;
+	--dui-state-done-edge: #27c98d;
+	--dui-state-done-ink: #04392a;
+
+	--dui-state-off: #c9ced6;
+	--dui-state-off-edge: #aeb5bf;
+	--dui-state-off-ink: #2b323c;
+
+	/* Shape. Buttons are noticeably round; cards are not. */
+	--dui-radius-button: 14px;
+	--dui-radius-field: 10px;
+	--dui-radius-card: 10px;
+	--dui-radius-pill: 999px;
+
+	color: var( --dui-ink );
+}
+
+/* ---------------------------------------------------------------------------
+ * Numbers.
+ *
+ * `font-variant-numeric: tabular-nums` is the point: a column of numbers
+ * only reads as a column when the digits are the same width.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-num {
+	font-family: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Buttons.
+ *
+ * Three, and no more: the action, the neutral, and the one that needs a
+ * human. A fourth kind of button is a decision nobody made.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 9px 16px;
+	border: 1px solid var( --dui-rule );
+	border-radius: var( --dui-radius-button );
+	background: #fff;
+	color: var( --dui-ink );
+	font-size: 13.5px;
+	font-weight: 500;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+	min-height: 40px;
+	box-sizing: border-box;
+}
+
+.dahu-ui .dahu-ui-btn:hover,
+.dahu-ui .dahu-ui-btn:focus {
+	border-color: #b9bec5;
+	color: var( --dui-ink );
+}
+
+.dahu-ui .dahu-ui-btn:focus-visible {
+	outline: 2px solid var( --dui-accent-deep );
+	outline-offset: 2px;
+}
+
+.dahu-ui .dahu-ui-btn--go {
+	border-color: var( --dui-accent-edge );
+	background: var( --dui-accent );
+	color: var( --dui-accent-ink );
+}
+
+.dahu-ui .dahu-ui-btn--go:hover,
+.dahu-ui .dahu-ui-btn--go:focus {
+	border-color: var( --dui-accent-deep );
+	background: #25ab9b;
+	color: var( --dui-accent-ink );
+}
+
+.dahu-ui .dahu-ui-btn--warn {
+	border-color: var( --dui-warn-edge );
+	background: var( --dui-warn );
+	color: var( --dui-warn-ink );
+}
+
+.dahu-ui .dahu-ui-btn--warn:hover,
+.dahu-ui .dahu-ui-btn--warn:focus {
+	border-color: #d14e18;
+	background: #f4762c;
+	color: var( --dui-warn-ink );
+}
+
+/*
+ * A refused action is shown, not hidden: an operator who cannot find the
+ * button assumes the product is broken, where a disabled button with a reason
+ * beside it tells them what to fix. `cursor: not-allowed` and nothing else --
+ * the reason is text, not a tooltip nobody hovers.
+ */
+.dahu-ui .dahu-ui-btn[disabled],
+.dahu-ui .dahu-ui-btn[aria-disabled="true"] {
+	border-color: #cdd2d9;
+	background: #eceef1;
+	color: #5e6462;
+	cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------------
+ * State pills.
+ *
+ * A filled pill, dark text of its own hue. One class per state, named after
+ * the state in the ledger and not after a colour, so that renaming a colour
+ * never silently renames a meaning.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-pill {
+	display: inline-block;
+	padding: 3px 10px;
+	border: 1px solid transparent;
+	border-radius: var( --dui-radius-pill );
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.5;
+	white-space: nowrap;
+}
+
+.dahu-ui .dahu-ui-pill--live {
+	border-color: var( --dui-state-live-edge );
+	background: var( --dui-state-live );
+	color: var( --dui-state-live-ink );
+}
+
+.dahu-ui .dahu-ui-pill--waiting {
+	border-color: var( --dui-state-wait-edge );
+	background: var( --dui-state-wait );
+	color: var( --dui-state-wait-ink );
+}
+
+.dahu-ui .dahu-ui-pill--unknown {
+	border-color: var( --dui-state-unknown-edge );
+	background: var( --dui-state-unknown );
+	color: var( --dui-state-unknown-ink );
+}
+
+.dahu-ui .dahu-ui-pill--settled {
+	border-color: var( --dui-state-done-edge );
+	background: var( --dui-state-done );
+	color: var( --dui-state-done-ink );
+}
+
+.dahu-ui .dahu-ui-pill--off {
+	border-color: var( --dui-state-off-edge );
+	background: var( --dui-state-off );
+	color: var( --dui-state-off-ink );
+}
+
+/* ---------------------------------------------------------------------------
+ * Cards, tiles, and the one band.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-card {
+	background: var( --dui-paper );
+	border: 1px solid var( --dui-rule );
+	border-radius: var( --dui-radius-card );
+	padding: 16px 18px;
+	box-sizing: border-box;
+}
+
+.dahu-ui .dahu-ui-card--warn {
+	border-color: var( --dui-warn-wash-edge );
+}
+
+.dahu-ui .dahu-ui-card__head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-bottom: 13px;
+}
+
+.dahu-ui .dahu-ui-card__title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+.dahu-ui .dahu-ui-tiles {
+	display: grid;
+	grid-template-columns: repeat( 4, minmax( 0, 1fr ) );
+	gap: 14px;
+}
+
+@media screen and ( max-width: 960px ) {
+	.dahu-ui .dahu-ui-tiles {
+		grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
+	}
+}
+
+@media screen and ( max-width: 540px ) {
+	.dahu-ui .dahu-ui-tiles {
+		grid-template-columns: minmax( 0, 1fr );
+	}
+}
+
+.dahu-ui .dahu-ui-tile__label {
+	font-size: 12.5px;
+	color: var( --dui-ink-soft );
+	margin-bottom: 9px;
+}
+
+.dahu-ui .dahu-ui-tile__value {
+	font-size: 32px;
+	font-weight: 500;
+	line-height: 1;
+	letter-spacing: -0.02em;
+}
+
+.dahu-ui .dahu-ui-tile__note {
+	font-size: 12px;
+	color: var( --dui-ink-mute );
+	margin-top: 8px;
+}
+
+/*
+ * The band. One per screen at most, and only for something a human must
+ * settle: an undetermined outcome, a licence about to lapse, a job refused
+ * before anything was sent. Used for anything less it stops being read.
+ */
+.dahu-ui .dahu-ui-band {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+	align-items: center;
+	justify-content: space-between;
+	padding: 15px 18px;
+	border: 1px solid var( --dui-warn-wash-edge );
+	border-radius: var( --dui-radius-card );
+	background: var( --dui-warn-wash );
+	box-sizing: border-box;
+}
+
+.dahu-ui .dahu-ui-band__title {
+	font-size: 14.5px;
+	font-weight: 600;
+	color: #8f3206;
+	margin: 0 0 3px;
+}
+
+.dahu-ui .dahu-ui-band__text {
+	margin: 0;
+	font-size: 13px;
+	color: #5c3a22;
+	line-height: 1.55;
+}
+
+/* An inset explanation, inside a card: quieter than a band, same family. */
+.dahu-ui .dahu-ui-inset {
+	margin: 0;
+	padding: 11px 13px;
+	border: 1px solid #ffcfad;
+	border-radius: 9px;
+	background: #fff4ea;
+	font-size: 12.5px;
+	color: #5c3a22;
+	line-height: 1.6;
+}
+
+.dahu-ui .dahu-ui-inset--quiet {
+	border-color: var( --dui-rule );
+	background: var( --dui-ground );
+	color: var( --dui-ink-soft );
+}
+
+/* ---------------------------------------------------------------------------
+ * Tables.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-tablewrap {
+	overflow-x: auto;
+}
+
+.dahu-ui .dahu-ui-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13.5px;
+}
+
+.dahu-ui .dahu-ui-table th {
+	text-align: left;
+	padding: 10px 14px;
+	border-bottom: 1px solid #e7e4dd;
+	font-size: 12px;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var( --dui-ink-soft );
+	white-space: nowrap;
+}
+
+.dahu-ui .dahu-ui-table td {
+	padding: 12px 14px;
+	border-bottom: 1px solid var( --dui-rule-soft );
+	vertical-align: top;
+}
+
+.dahu-ui .dahu-ui-table tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.dahu-ui .dahu-ui-table__num {
+	text-align: right;
+}
+
+/* ---------------------------------------------------------------------------
+ * Fields, labels, and the footnote.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-field {
+	display: block;
+	font-size: 12.5px;
+	color: var( --dui-ink-soft );
+}
+
+.dahu-ui .dahu-ui-input,
+.dahu-ui input[type="text"].dahu-ui-input,
+.dahu-ui input[type="search"].dahu-ui-input,
+.dahu-ui input[type="password"].dahu-ui-input,
+.dahu-ui textarea.dahu-ui-input {
+	box-sizing: border-box;
+	margin-top: 6px;
+	padding: 9px 11px;
+	border: 1px solid #c3c8d0;
+	border-radius: var( --dui-radius-field );
+	background: #fff;
+	font-size: 13px;
+	line-height: 1.4;
+	min-height: 40px;
+}
+
+.dahu-ui .dahu-ui-input:focus {
+	border-color: var( --dui-accent-deep );
+	outline: 2px solid var( --dui-accent-wash );
+	outline-offset: 0;
+}
+
+.dahu-ui .dahu-ui-foot {
+	margin: 0;
+	padding: 13px 18px;
+	border-top: 1px solid var( --dui-rule-soft );
+	font-size: 12.5px;
+	color: var( --dui-ink-mute );
+	line-height: 1.6;
+}
+
+.dahu-ui .dahu-ui-hint {
+	font-size: 12.5px;
+	color: var( --dui-ink-mute );
+	line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------------------
+ * Layout helpers. Deliberately few: a layout that needs a tenth helper needs
+ * a component instead.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+}
+
+.dahu-ui .dahu-ui-row--between {
+	justify-content: space-between;
+}
+
+.dahu-ui .dahu-ui-stack > * + * {
+	margin-top: 14px;
+}
+
+.dahu-ui .dahu-ui-split {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	align-items: flex-start;
+}
+
+.dahu-ui .dahu-ui-split__main {
+	flex: 999 1 560px;
+	min-width: 0;
+}
+
+.dahu-ui .dahu-ui-split__side {
+	flex: 1 1 320px;
+	min-width: 0;
+	max-width: 460px;
+}
+
+/* A screen heading, under the WordPress one rather than instead of it. */
+.dahu-ui .dahu-ui-eyebrow {
+	font-size: 11.5px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var( --dui-ink-mute );
+	margin-bottom: 5px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Lists, and the folded aside.
+ *
+ * ADDED, and why. These two are not decoration: they replace inline `style`
+ * attributes that were on the screens before this sheet existed — a
+ * `list-style:disc;margin-left:2em` repeated six times, and a `margin` on a
+ * `<details>`. An inline style wins over every rule in this file, which makes
+ * it the one thing a shop retinting the product from the block above cannot
+ * reach; and the lists are load-bearing content, not ornament. Every list on
+ * these screens is a service saying what it will not do, or a register of
+ * what no source settles, so it is read, which is why it keeps its disc: an
+ * unbulleted paragraph of four such sentences reads as one.
+ *
+ * Deliberately not a list reset: an admin screen's `ul` already comes from
+ * WordPress, and a rule here that disagreed with it on one and not the other
+ * is how a list goes flat on half the screens after a WordPress release.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-list {
+	margin: 9px 0 0;
+	padding-left: 20px;
+	list-style: disc;
+	font-size: 13px;
+	line-height: 1.65;
+	color: var( --dui-ink-soft );
+}
+
+.dahu-ui .dahu-ui-list > li + li {
+	margin-top: 6px;
+}
+
+/*
+ * Folded, because it is long and it is for the person who wants to know why a
+ * field is empty. The summary stays a real `<summary>`: the open and shut is
+ * the browser's, keyboard included, and no script is loaded on these screens
+ * at all.
+ */
+.dahu-ui .dahu-ui-details {
+	margin: 13px 0 0;
+	font-size: 12.5px;
+	color: var( --dui-ink-soft );
+}
+
+.dahu-ui .dahu-ui-details > summary {
+	cursor: pointer;
+	padding: 9px 0;
+	min-height: 40px;
+	box-sizing: border-box;
+	font-weight: 500;
+	color: var( --dui-ink );
+}
+
+/* ---------------------------------------------------------------------------
+ * Tabs.
+ *
+ * For one question asked several ways — lists read by the same person within
+ * a minute of each other. Separate screens would mean separate menu entries
+ * and a navigation per answer; a filter in a select would mean a control
+ * whose current value is only visible if you open it.
+ *
+ * WordPress does have `nav-tab-wrapper`, and it is deliberately not used:
+ * every selector in this sheet is ours, so that a WordPress release that
+ * restyles its own admin tabs cannot move these screens, and so that a shop
+ * retinting the family from the block at the top of this file reaches these
+ * too. That is the same reason the rest of the sheet exists.
+ *
+ * The count rides in the tab, because a tab labelled "Blocked" with nothing
+ * beside it is a tab nobody opens — and the whole point of such a list is
+ * that somebody opens it. The active tab is marked by WEIGHT and a solid
+ * underline, never by colour alone: tabs differ in what they hold, not in how
+ * urgent they are, and the attention colour is kept for the band.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin: 0 0 16px;
+	padding: 0;
+	border-bottom: 1px solid var( --dui-rule );
+	list-style: none;
+}
+
+.dahu-ui .dahu-ui-tabs__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 10px 14px;
+	border: 0;
+	border-bottom: 3px solid transparent;
+	background: none;
+	color: var( --dui-ink-soft );
+	font-size: 13.5px;
+	font-weight: 500;
+	line-height: 1.2;
+	text-decoration: none;
+	min-height: 40px;
+	box-sizing: border-box;
+}
+
+.dahu-ui .dahu-ui-tabs__link:hover,
+.dahu-ui .dahu-ui-tabs__link:focus {
+	color: var( --dui-ink );
+}
+
+.dahu-ui .dahu-ui-tabs__link:focus-visible {
+	outline: 2px solid var( --dui-accent-deep );
+	outline-offset: 2px;
+}
+
+.dahu-ui .dahu-ui-tabs__link--on {
+	border-bottom-color: var( --dui-accent-edge );
+	color: var( --dui-ink );
+	font-weight: 600;
+}
+
+/* The figure in a tab. Tabular, like every other number on these screens. */
+.dahu-ui .dahu-ui-tabs__count {
+	font-variant-numeric: tabular-nums;
+	color: var( --dui-ink-mute );
+}
+
+/* ---------------------------------------------------------------------------
+ * The page header.
+ *
+ * Every screen in the family opens the same way: the name of the thing, and
+ * at most one line saying what it is for. One line is the rule, not a
+ * suggestion — a settings screen that opens with a paragraph is a screen
+ * whose author was unsure, and the person reading it has already decided
+ * what they came to do. Anything longer belongs in the README, where someone
+ * who wants it will go looking.
+ *
+ * `wp-header-end` still goes after this block: WordPress moves its own
+ * notices to that marker, and a screen without one collects them in
+ * whatever place the last plugin left them.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-head {
+	margin: 0 0 20px;
+	padding: 0;
+}
+
+.dahu-ui .dahu-ui-head__title {
+	margin: 0;
+	padding: 0;
+	font-size: 23px;
+	font-weight: 500;
+	line-height: 1.3;
+	letter-spacing: -0.015em;
+	color: var( --dui-ink );
+}
+
+.dahu-ui .dahu-ui-head__sub {
+	margin: 6px 0 0;
+	font-size: 13.5px;
+	line-height: 1.5;
+	color: var( --dui-ink-soft );
+	max-width: 70ch;
+}
+
+/* ---------------------------------------------------------------------------
+ * WordPress's own settings table, inside one of our cards.
+ *
+ * `form-table` is what `add_settings_field()` produces, and rewriting every
+ * settings screen to avoid it would be a lot of work to gain nothing: it is
+ * a perfectly good two-column layout that every WordPress user already
+ * reads. So it is dressed rather than replaced — the label column loses its
+ * heavy weight, the rows lose the top padding that makes them drift apart
+ * inside a card, and the description text picks up our muted ink.
+ *
+ * Scoped to a card on purpose: a `form-table` that is NOT in one of our
+ * cards is on a screen we have not styled, and it should keep looking
+ * exactly like WordPress until somebody does.
+ * ------------------------------------------------------------------------ */
+
+.dahu-ui .dahu-ui-card .form-table {
+	margin: 0;
+}
+
+.dahu-ui .dahu-ui-card .form-table th {
+	padding: 14px 20px 14px 0;
+	font-size: 13.5px;
+	font-weight: 500;
+	color: var( --dui-ink );
+	width: 220px;
+}
+
+.dahu-ui .dahu-ui-card .form-table td {
+	padding: 12px 0;
+}
+
+.dahu-ui .dahu-ui-card .form-table tr:first-child th,
+.dahu-ui .dahu-ui-card .form-table tr:first-child td {
+	padding-top: 0;
+}
+
+.dahu-ui .dahu-ui-card .form-table tr:last-child th,
+.dahu-ui .dahu-ui-card .form-table tr:last-child td {
+	padding-bottom: 0;
+}
+
+.dahu-ui .dahu-ui-card .form-table .description {
+	margin: 6px 0 0;
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: var( --dui-ink-mute );
+}
+
+@media screen and ( max-width: 782px ) {
+
+	.dahu-ui .dahu-ui-card .form-table th {
+		width: auto;
+		padding-bottom: 4px;
+	}
+}

@@ -1,0 +1,23 @@
+/*
+ * Customer-facing styles, for the payment-methods page only.
+ *
+ * Deliberately not the admin token block: this loads on the shop front, where
+ * the theme owns the palette and a plugin declaring colours on :root would be
+ * fighting it. Only the badge needs a colour, and it takes WooCommerce's own
+ * success green.
+ */
+
+.dahu-sepa-approved {
+	display: inline-block;
+	margin-left: .5em;
+	padding: 1px 8px;
+	border-radius: 9px;
+	font-size: .8em;
+	font-weight: 600;
+	color: #fff;
+	background: #008a20;
+}
+
+.dahu-sepa-account-note {
+	margin-top: 1em;
+}
