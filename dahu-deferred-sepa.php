@@ -1,7 +1,6 @@
 <?php
 /**
  * Plugin Name: Dahu Deferred SEPA
- * Plugin URI:  https://dahu-concept.fr
  * Description: Charges a Stripe SEPA Direct Debit mandate a configurable number of days after an order is completed, instead of at checkout. The charge date can be viewed and moved from the order screen.
  * Version:     1.2.2
  * Author:      Hugo Vial-Jaime
