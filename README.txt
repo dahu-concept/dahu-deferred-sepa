@@ -1,6 +1,6 @@
 === Dahu Deferred SEPA ===
 Contributors: dahuconcept
-Tags: woocommerce, sepa, direct debit, stripe, payment terms
+Tags: payment terms, mandate, deferred payment, direct debit, sepa
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
