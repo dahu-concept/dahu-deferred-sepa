@@ -141,10 +141,10 @@ function ubac_sepa_uninstall_users( $wipe ) {
 	}
 }
 
-$wipe_users = (bool) get_option( 'ubac_sepa_remove_data_on_uninstall', false );
+$ubac_sepa_wipe_users = (bool) get_option( 'ubac_sepa_remove_data_on_uninstall', false );
 
 if ( is_multisite() ) {
-	$site_ids = get_sites(
+	$ubac_sepa_site_ids = get_sites(
 		array(
 			'fields'        => 'ids',
 			'number'        => 0,
@@ -152,13 +152,13 @@ if ( is_multisite() ) {
 		)
 	);
 
-	foreach ( $site_ids as $site_id ) {
-		switch_to_blog( (int) $site_id );
+	foreach ( $ubac_sepa_site_ids as $ubac_sepa_site_id ) {
+		switch_to_blog( (int) $ubac_sepa_site_id );
 
 		// Read per site: only a site that asked for it gets its own options
 		// removed, and any one site asking is enough for the shared user meta.
 		if ( get_option( 'ubac_sepa_remove_data_on_uninstall', false ) ) {
-			$wipe_users = true;
+			$ubac_sepa_wipe_users = true;
 		}
 
 		ubac_sepa_uninstall_site();
@@ -168,4 +168,4 @@ if ( is_multisite() ) {
 	ubac_sepa_uninstall_site();
 }
 
-ubac_sepa_uninstall_users( $wipe_users );
+ubac_sepa_uninstall_users( $ubac_sepa_wipe_users );
