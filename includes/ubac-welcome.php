@@ -22,7 +22,8 @@
  * offers the two or three first steps — and a tour that points at the real
  * controls on the real screen rather than describing them.
  *
- * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
+ * These rules are kept in one place and copied into each extension of the
+ * range, so that the same screen reads the same way everywhere.
  *
  * @package UbacFamily
  */

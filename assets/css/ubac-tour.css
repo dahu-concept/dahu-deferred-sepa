@@ -11,7 +11,8 @@
  * explained. That is the whole trick: the lesson and the doing are the same
  * gesture.
  *
- * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
+ * These rules are kept in one place and copied into each extension of the
+ * range, so that the same screen reads the same way everywhere.
  */
 
 .ubac-tour {

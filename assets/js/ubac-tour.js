@@ -14,7 +14,8 @@
  * screens differ by what the shop has configured, and a tour that points at
  * an absent button teaches the wrong thing.
  *
- * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
+ * These rules are kept in one place and copied into each extension of the
+ * range, so that the same screen reads the same way everywhere.
  */
 ( function () {
 	'use strict';

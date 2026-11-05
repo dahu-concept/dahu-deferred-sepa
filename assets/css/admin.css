@@ -18,7 +18,8 @@
  * here. Two plugins declaring it write the same values, so neither can
  * surprise the other, and nothing outside the family can collide with it.
  *
- * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
+ * These rules are kept in one place and copied into each extension of the
+ * range, so that the same screen reads the same way everywhere.
  */
 
 :root {
