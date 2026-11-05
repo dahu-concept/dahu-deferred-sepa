@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Dahu Deferred SEPA
+ * Plugin Name: Ubac Deferred SEPA
  * Description: Charges a Stripe SEPA Direct Debit mandate a configurable number of days after an order is completed, instead of at checkout. The charge date can be viewed and moved from the order screen.
  * Version:     1.2.2
  * Author:      Hugo Vial-Jaime
  * Author URI:  https://dahu-concept.fr
  * License:     MIT
  * License URI: https://opensource.org/licenses/MIT
- * Text Domain: dahu-deferred-sepa
+ * Text Domain: ubac-sepa
  * Domain Path: /languages
  * Requires at least: 6.0
  * Requires PHP:      7.4
@@ -301,7 +301,7 @@ add_filter(
 
 		array_unshift(
 			$links,
-			'<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'dahu-deferred-sepa' ) . '</a>'
+			'<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'ubac-sepa' ) . '</a>'
 		);
 
 		return $links;
@@ -328,8 +328,8 @@ add_filter(
 			// domain, which is a submission blocker for two words we can
 			// translate ourselves.
 			/* translators: %s: plugin version number. */
-			sprintf( esc_html__( 'Version %s', 'dahu-deferred-sepa' ), esc_html( DAHU_DEFERRED_SEPA_VERSION ) ),
-			'<a href="https://dahu-concept.fr" target="_blank" rel="noopener">' . esc_html__( 'By Hugo Vial-Jaime — Dahu-Concept', 'dahu-deferred-sepa' ) . '</a>',
+			sprintf( esc_html__( 'Version %s', 'ubac-sepa' ), esc_html( DAHU_DEFERRED_SEPA_VERSION ) ),
+			'<a href="https://dahu-concept.fr" target="_blank" rel="noopener">' . esc_html__( 'By Hugo Vial-Jaime — Dahu-Concept', 'ubac-sepa' ) . '</a>',
 		);
 	},
 	10,
@@ -378,8 +378,8 @@ add_action(
 		Dahu_Welcome::register(
 			array(
 				'slug'       => 'dahu-deferred-sepa',
-				'name'       => __( 'Deferred SEPA', 'dahu-deferred-sepa' ),
-				'tagline'    => __( 'Takes a SEPA payment a set number of days after the order ships.', 'dahu-deferred-sepa' ),
+				'name'       => __( 'Deferred SEPA', 'ubac-sepa' ),
+				'tagline'    => __( 'Takes a SEPA payment a set number of days after the order ships.', 'ubac-sepa' ),
 				'file'       => DAHU_DEFERRED_SEPA_FILE,
 				'version'    => DAHU_DEFERRED_SEPA_VERSION,
 				'textdomain' => 'dahu-deferred-sepa',
@@ -398,24 +398,24 @@ add_action(
 				 * no text domain of its own.
 				 */
 				'strings'    => array(
-					'next'   => __( 'Next', 'dahu-deferred-sepa' ),
-					'done'   => __( 'Done', 'dahu-deferred-sepa' ),
-					'skip'   => __( 'Skip', 'dahu-deferred-sepa' ),
-					'of'     => __( 'of', 'dahu-deferred-sepa' ),
-					'denied' => __( 'You are not allowed to view this page.', 'dahu-deferred-sepa' ),
+					'next'   => __( 'Next', 'ubac-sepa' ),
+					'done'   => __( 'Done', 'ubac-sepa' ),
+					'skip'   => __( 'Skip', 'ubac-sepa' ),
+					'of'     => __( 'of', 'ubac-sepa' ),
+					'denied' => __( 'You are not allowed to view this page.', 'ubac-sepa' ),
 				),
 				'points'     => array(
 				array(
-					'title' => __( 'Charged once', 'dahu-deferred-sepa' ),
-					'text'  => __( 'One key per order, so a retry or a timeout cannot debit twice.', 'dahu-deferred-sepa' ),
+					'title' => __( 'Charged once', 'ubac-sepa' ),
+					'text'  => __( 'One key per order, so a retry or a timeout cannot debit twice.', 'ubac-sepa' ),
 				),
 				array(
-					'title' => __( 'Nothing fails quietly', 'dahu-deferred-sepa' ),
-					'text'  => __( 'A refused or returned charge is emailed to the shop.', 'dahu-deferred-sepa' ),
+					'title' => __( 'Nothing fails quietly', 'ubac-sepa' ),
+					'text'  => __( 'A refused or returned charge is emailed to the shop.', 'ubac-sepa' ),
 				),
 				array(
-					'title' => __( 'You keep the date', 'dahu-deferred-sepa' ),
-					'text'  => __( 'Movable until it fires, and every move is recorded.', 'dahu-deferred-sepa' ),
+					'title' => __( 'You keep the date', 'ubac-sepa' ),
+					'text'  => __( 'Movable until it fires, and every move is recorded.', 'ubac-sepa' ),
 				),
 				),
 
@@ -431,18 +431,18 @@ add_action(
 				'tour'        => array(
 					array(
 						'selector' => '.dahu-ui-head__title',
-						'title'    => __( 'Charged after shipping', 'dahu-deferred-sepa' ),
-						'text'     => __( 'Each SEPA payment is taken a set number of days after the order ships.', 'dahu-deferred-sepa' ),
+						'title'    => __( 'Charged after shipping', 'ubac-sepa' ),
+						'text'     => __( 'Each SEPA payment is taken a set number of days after the order ships.', 'ubac-sepa' ),
 					),
 					array(
 						'selector' => '.nav-tab-wrapper a[href*="tab=upcoming"]',
-						'title'    => __( 'What is due', 'dahu-deferred-sepa' ),
-						'text'     => __( 'Charges still to come, with the date each one is sent.', 'dahu-deferred-sepa' ),
+						'title'    => __( 'What is due', 'ubac-sepa' ),
+						'text'     => __( 'Charges still to come, with the date each one is sent.', 'ubac-sepa' ),
 					),
 					array(
 						'selector' => '.nav-tab-wrapper a[href*="tab=history"]',
-						'title'    => __( 'What was taken', 'dahu-deferred-sepa' ),
-						'text'     => __( 'Every charge already sent, with its outcome. Export it as CSV.', 'dahu-deferred-sepa' ),
+						'title'    => __( 'What was taken', 'ubac-sepa' ),
+						'text'     => __( 'Every charge already sent, with its outcome. Export it as CSV.', 'ubac-sepa' ),
 					),
 				),
 			)

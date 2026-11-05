@@ -157,7 +157,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 				'unbound-' . $type,
 				sprintf(
 					/* translators: %s: the event type Stripe sent. */
-					__( 'Deferred SEPA: a Stripe event (%s) arrived for this order, but no charge of this plugin is recorded against it, so nothing was changed. Check the Stripe dashboard before treating this order as collected.', 'dahu-deferred-sepa' ),
+					__( 'Deferred SEPA: a Stripe event (%s) arrived for this order, but no charge of this plugin is recorded against it, so nothing was changed. Check the Stripe dashboard before treating this order as collected.', 'ubac-sepa' ),
 					$type
 				)
 			);
@@ -319,7 +319,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 			 */
 			dahu_deferred_sepa_record_payment( $order, sanitize_text_field( dahu_deferred_sepa_event_intent( $object ) ) );
 
-			$order->add_order_note( __( 'Deferred SEPA: charge collected (confirmed by Stripe).', 'dahu-deferred-sepa' ) );
+			$order->add_order_note( __( 'Deferred SEPA: charge collected (confirmed by Stripe).', 'ubac-sepa' ) );
 			dahu_deferred_sepa_set_result( $order, 'succeeded' );
 			break;
 
@@ -328,7 +328,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 
 			$reason = isset( $object['last_payment_error']['message'] )
 				? (string) $object['last_payment_error']['message']
-				: __( 'no reason given', 'dahu-deferred-sepa' );
+				: __( 'no reason given', 'ubac-sepa' );
 
 			// Already settled, and now Stripe says this charge failed.
 			//
@@ -344,7 +344,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 				$order->add_order_note(
 					sprintf(
 						/* translators: %s: the reason Stripe gave. */
-						__( 'Deferred SEPA: Stripe reports a failure on this charge, which is recorded as collected. Nothing has been changed here — check the Stripe dashboard. Reason given: %s', 'dahu-deferred-sepa' ),
+						__( 'Deferred SEPA: Stripe reports a failure on this charge, which is recorded as collected. Nothing has been changed here — check the Stripe dashboard. Reason given: %s', 'ubac-sepa' ),
 						$reason
 					)
 				);
@@ -381,7 +381,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 				'failed',
 				sprintf(
 					/* translators: %s: the reason Stripe gave. */
-					__( 'Deferred SEPA: charge failed (reported by Stripe) — %s', 'dahu-deferred-sepa' ),
+					__( 'Deferred SEPA: charge failed (reported by Stripe) — %s', 'ubac-sepa' ),
 					$reason
 				)
 			);
@@ -392,7 +392,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 				$order->save();
 
 				$order->add_order_note(
-					__( 'Deferred SEPA: no money left the customer\'s account, so this charge can be sent again. Set a new date on this order once the cause is put right.', 'dahu-deferred-sepa' )
+					__( 'Deferred SEPA: no money left the customer\'s account, so this charge can be sent again. Set a new date on this order once the cause is put right.', 'ubac-sepa' )
 				);
 
 				// The ordinary refusal alert, and not the reversal one: nothing
@@ -401,7 +401,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 				dahu_deferred_sepa_alert_failure(
 					$order,
 					'stripe refused the charge before settlement',
-					__( 'A SEPA charge was submitted and Stripe refused it before settlement. No money left the customer\'s account, and this order has been reopened so the charge can be scheduled again.', 'dahu-deferred-sepa' )
+					__( 'A SEPA charge was submitted and Stripe refused it before settlement. No money left the customer\'s account, and this order has been reopened so the charge can be scheduled again.', 'ubac-sepa' )
 				);
 			} else {
 				// Said in the log and not by email: the charge path owns this
@@ -416,7 +416,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 
 		case 'charge.dispute.created':
 			$order->add_order_note(
-				__( 'Deferred SEPA: the customer has disputed this charge (reported by Stripe). Check the Stripe dashboard.', 'dahu-deferred-sepa' )
+				__( 'Deferred SEPA: the customer has disputed this charge (reported by Stripe). Check the Stripe dashboard.', 'ubac-sepa' )
 			);
 			dahu_deferred_sepa_set_result( $order, 'disputed' );
 

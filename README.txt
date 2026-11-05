@@ -1,4 +1,4 @@
-=== Dahu Deferred SEPA ===
+=== Ubac Deferred SEPA ===
 Contributors: dahuconcept
 Tags: payment terms, mandate, deferred payment, direct debit, sepa
 Requires at least: 6.0
