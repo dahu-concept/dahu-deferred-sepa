@@ -2,7 +2,7 @@
 /**
  * The welcome screen and the one-time tour, shared by the whole family.
  *
- * WHY THIS FILE IS A COPY. Same reasoning as `assets/css/dahu-ui.css`: the
+ * WHY THIS FILE IS A COPY. Same reasoning as `assets/css/ubac-ui.css`: the
  * plugins are independent, so there is nowhere to put a shared library, and
  * the only way for fourteen of them to greet a shop the same way is for each
  * to carry the same bytes. `_harness/test-ui.php` compares them.
@@ -24,17 +24,17 @@
  *
  * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
  *
- * @package DahuFamily
+ * @package UbacFamily
  */
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'Dahu_Welcome' ) ) {
+if ( ! class_exists( 'Ubac_Welcome' ) ) {
 
 	/**
 	 * Greets a shop that has just installed one of the family.
 	 */
-	class Dahu_Welcome {
+	class Ubac_Welcome {
 
 		/** Every registered plugin, by slug. */
 		protected static $plugins = array();
@@ -46,7 +46,7 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 		 * Declares a plugin to the welcome machinery.
 		 *
 		 * @param array $spec {
-		 *     @type string $slug     Plugin slug, e.g. 'dahu-role-backup'.
+		 *     @type string $slug     Plugin slug, e.g. 'ubac-role-backup'.
 		 *     @type string $name     Shown as the title.
 		 *     @type string $tagline  ONE line. What it is for.
 		 *     @type string $file     Main plugin file, for plugins_url().
@@ -151,11 +151,11 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 		 */
 		public static function mark_activated( $slug ) {
 
-			if ( get_option( 'dahu_welcome_seen_' . $slug ) ) {
+			if ( get_option( 'ubac_welcome_seen_' . $slug ) ) {
 				return;
 			}
 
-			update_option( 'dahu_welcome_pending_' . $slug, 1, false );
+			update_option( 'ubac_welcome_pending_' . $slug, 1, false );
 		}
 
 		/**
@@ -200,7 +200,7 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading WordPress's own bulk-activation marker, not acting on it.
 			if ( isset( $_GET['activate-multi'] ) ) {
 				foreach ( array_keys( self::$plugins ) as $slug ) {
-					delete_option( 'dahu_welcome_pending_' . $slug );
+					delete_option( 'ubac_welcome_pending_' . $slug );
 				}
 
 				return;
@@ -208,11 +208,11 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 
 			foreach ( self::$plugins as $slug => $spec ) {
 
-				if ( ! get_option( 'dahu_welcome_pending_' . $slug ) ) {
+				if ( ! get_option( 'ubac_welcome_pending_' . $slug ) ) {
 					continue;
 				}
 
-				delete_option( 'dahu_welcome_pending_' . $slug );
+				delete_option( 'ubac_welcome_pending_' . $slug );
 
 				if ( ! current_user_can( $spec['capability'] ) ) {
 					continue;
@@ -237,7 +237,7 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 					continue;
 				}
 
-				if ( $hook !== $spec['tour_screen'] || get_option( 'dahu_welcome_tour_' . $slug ) ) {
+				if ( $hook !== $spec['tour_screen'] || get_option( 'ubac_welcome_tour_' . $slug ) ) {
 					continue;
 				}
 
@@ -247,23 +247,23 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 
 				$base = $spec['file'] ? plugins_url( 'assets/', $spec['file'] ) : '';
 
-				wp_enqueue_style( 'dahu-ui', $base . 'css/dahu-ui.css', array(), $spec['version'] );
-				wp_enqueue_style( 'dahu-tour', $base . 'css/dahu-tour.css', array( 'dahu-ui' ), $spec['version'] );
-				wp_enqueue_script( 'dahu-tour', $base . 'js/dahu-tour.js', array(), $spec['version'], true );
+				wp_enqueue_style( 'ubac-ui', $base . 'css/ubac-ui.css', array(), $spec['version'] );
+				wp_enqueue_style( 'ubac-tour', $base . 'css/ubac-tour.css', array( 'ubac-ui' ), $spec['version'] );
+				wp_enqueue_script( 'ubac-tour', $base . 'js/ubac-tour.js', array(), $spec['version'], true );
 
 				wp_localize_script(
-					'dahu-tour',
-					'dahuTour',
+					'ubac-tour',
+					'ubacTour',
 					array(
 						'steps' => array_values( $spec['tour'] ),
 						'slug'  => $slug,
-						'nonce' => wp_create_nonce( 'dahu_welcome_tour' ),
+						'nonce' => wp_create_nonce( 'ubac_welcome_tour' ),
 						'ajax'  => admin_url( 'admin-ajax.php' ),
 						'i18n'  => $spec['strings'],
 					)
 				);
 
-				add_action( 'wp_ajax_dahu_welcome_tour_done', array( __CLASS__, 'tour_done' ) );
+				add_action( 'wp_ajax_ubac_welcome_tour_done', array( __CLASS__, 'tour_done' ) );
 			}
 		}
 
@@ -274,7 +274,7 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 		 */
 		public static function tour_done() {
 
-			check_ajax_referer( 'dahu_welcome_tour' );
+			check_ajax_referer( 'ubac_welcome_tour' );
 
 			$slug = isset( $_POST['slug'] ) ? sanitize_key( wp_unslash( $_POST['slug'] ) ) : '';
 
@@ -282,7 +282,7 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 				wp_send_json_error( null, 403 );
 			}
 
-			update_option( 'dahu_welcome_tour_' . $slug, 1, false );
+			update_option( 'ubac_welcome_tour_' . $slug, 1, false );
 
 			wp_send_json_success();
 		}
@@ -305,20 +305,20 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 				wp_die( esc_html( $spec['strings']['denied'] ), '', array( 'response' => 403 ) );
 			}
 
-			update_option( 'dahu_welcome_seen_' . $slug, 1, false );
+			update_option( 'ubac_welcome_seen_' . $slug, 1, false );
 
 			$base = $spec['file'] ? plugins_url( 'assets/', $spec['file'] ) : '';
 
-			wp_enqueue_style( 'dahu-ui', $base . 'css/dahu-ui.css', array(), $spec['version'] );
-			wp_enqueue_style( 'dahu-welcome', $base . 'css/dahu-welcome.css', array( 'dahu-ui' ), $spec['version'] );
+			wp_enqueue_style( 'ubac-ui', $base . 'css/ubac-ui.css', array(), $spec['version'] );
+			wp_enqueue_style( 'ubac-welcome', $base . 'css/ubac-welcome.css', array( 'ubac-ui' ), $spec['version'] );
 
-			echo '<div class="wrap dahu-ui dahu-welcome">';
+			echo '<div class="wrap ubac-ui ubac-welcome">';
 
 			printf(
-				'<div class="dahu-welcome-hero">%s<div class="dahu-welcome-hero__mark" aria-hidden="true">%s</div>' .
-				'<h1 class="dahu-welcome-hero__title">%s</h1><p class="dahu-welcome-hero__line">%s</p></div>',
+				'<div class="ubac-welcome-hero">%s<div class="ubac-welcome-hero__mark" aria-hidden="true">%s</div>' .
+				'<h1 class="ubac-welcome-hero__title">%s</h1><p class="ubac-welcome-hero__line">%s</p></div>',
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup built in glyph(), every dynamic part through esc_attr(); wp_kses_post() would strip the SVG.
-				self::glyph( $spec, 'dahu-welcome-hero__wash' ),
+				self::glyph( $spec, 'ubac-welcome-hero__wash' ),
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- same markup, or esc_html() initials when there is none.
 				self::mark( $spec ),
 				esc_html( $spec['name'] ),
@@ -329,12 +329,12 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 
 			if ( $spec['points'] ) {
 
-				echo '<div class="dahu-welcome-points">';
+				echo '<div class="ubac-welcome-points">';
 
 				foreach ( array_slice( $spec['points'], 0, 3 ) as $i => $point ) {
 					printf(
-						'<div class="dahu-welcome-point"><span class="dahu-welcome-point__n" aria-hidden="true">%d</span>' .
-						'<h2 class="dahu-welcome-point__title">%s</h2><p class="dahu-welcome-point__text">%s</p></div>',
+						'<div class="ubac-welcome-point"><span class="ubac-welcome-point__n" aria-hidden="true">%d</span>' .
+						'<h2 class="ubac-welcome-point__title">%s</h2><p class="ubac-welcome-point__text">%s</p></div>',
 						(int) $i + 1,
 						esc_html( isset( $point['title'] ) ? $point['title'] : '' ),
 						esc_html( isset( $point['text'] ) ? $point['text'] : '' )
@@ -346,7 +346,7 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 
 			if ( $spec['actions'] ) {
 
-				echo '<div class="dahu-welcome-actions">';
+				echo '<div class="ubac-welcome-actions">';
 
 				foreach ( $spec['actions'] as $action ) {
 
@@ -354,7 +354,7 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 					// family's own harness reads these out of the source to
 					// check every class is defined somewhere, and it cannot
 					// read one that is assembled at run time.
-					$class = empty( $action['primary'] ) ? 'dahu-ui-btn' : 'dahu-ui-btn dahu-ui-btn--go';
+					$class = empty( $action['primary'] ) ? 'ubac-ui-btn' : 'ubac-ui-btn ubac-ui-btn--go';
 
 					printf(
 						'<a class="%s" href="%s">%s</a>',
@@ -397,7 +397,7 @@ if ( ! class_exists( 'Dahu_Welcome' ) ) {
 		 */
 		protected static function mark( array $spec ) {
 
-			$svg = self::glyph( $spec, 'dahu-welcome-hero__glyph' );
+			$svg = self::glyph( $spec, 'ubac-welcome-hero__glyph' );
 
 			return '' !== $svg ? $svg : esc_html( self::initials( $spec['name'] ) );
 		}

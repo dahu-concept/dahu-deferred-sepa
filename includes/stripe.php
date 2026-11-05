@@ -7,7 +7,7 @@
  * form-encoded, all through wp_remote_request(). A vendored SDK would be more
  * code than the plugin and another thing to keep patched.
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,13 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Stripe's live API root. */
-define( 'DAHU_DEFERRED_SEPA_API', 'https://api.stripe.com/v1/' );
+define( 'UBAC_SEPA_API', 'https://api.stripe.com/v1/' );
 
 /**
  * Currency Stripe accepts for SEPA Direct Debit. Everything else has to be
  * refused rather than charged in the wrong unit.
  */
-define( 'DAHU_DEFERRED_SEPA_CURRENCY', 'EUR' );
+define( 'UBAC_SEPA_CURRENCY', 'EUR' );
 
 /**
  * The Stripe secret key to charge with.
@@ -40,8 +40,8 @@ define( 'DAHU_DEFERRED_SEPA_CURRENCY', 'EUR' );
  *
  * @return string Secret key, or '' when none is configured.
  */
-function dahu_deferred_sepa_get_secret_key() {
-	$own  = dahu_deferred_sepa_settings();
+function ubac_sepa_get_secret_key() {
+	$own  = ubac_sepa_settings();
 	$test = 'yes' === ( $own['testmode'] ?? 'no' );
 
 	$key = $test ? ( $own['test_secret_key'] ?? '' ) : ( $own['secret_key'] ?? '' );
@@ -66,7 +66,7 @@ function dahu_deferred_sepa_get_secret_key() {
 	 *
 	 * @param string $key Resolved secret key, possibly ''.
 	 */
-	return (string) apply_filters( 'dahu_deferred_sepa_secret_key', $key );
+	return (string) apply_filters( 'ubac_sepa_secret_key', $key );
 }
 
 /**
@@ -77,8 +77,8 @@ function dahu_deferred_sepa_get_secret_key() {
  *
  * @return bool
  */
-function dahu_deferred_sepa_is_test_mode() {
-	$key = dahu_deferred_sepa_get_secret_key();
+function ubac_sepa_is_test_mode() {
+	$key = ubac_sepa_get_secret_key();
 
 	return 0 === strpos( $key, 'sk_test_' ) || 0 === strpos( $key, 'rk_test_' );
 }
@@ -93,13 +93,13 @@ function dahu_deferred_sepa_is_test_mode() {
  * @param WC_Order $order Order.
  * @return string
  */
-function dahu_deferred_sepa_get_idempotency_key( WC_Order $order ) {
-	$key = $order->get_meta( '_dahu_deferred_sepa_idem' );
+function ubac_sepa_get_idempotency_key( WC_Order $order ) {
+	$key = $order->get_meta( '_ubac_sepa_idem' );
 
 	if ( ! $key ) {
-		$key = 'dahu_deferred_sepa_' . $order->get_id() . '_' . wp_generate_uuid4();
+		$key = 'ubac_sepa_' . $order->get_id() . '_' . wp_generate_uuid4();
 
-		$order->update_meta_data( '_dahu_deferred_sepa_idem', $key );
+		$order->update_meta_data( '_ubac_sepa_idem', $key );
 		$order->save();
 	}
 
@@ -120,7 +120,7 @@ function dahu_deferred_sepa_get_idempotency_key( WC_Order $order ) {
  * @param string $idempotency_key Idempotency key, POST only.
  * @return array|WP_Error Decoded response, or an error.
  */
-function dahu_deferred_sepa_stripe_request( $method, $endpoint, $body, $secret_key, $idempotency_key = '' ) {
+function ubac_sepa_stripe_request( $method, $endpoint, $body, $secret_key, $idempotency_key = '' ) {
 	$args = array(
 		'method'  => $method,
 		'timeout' => 45,
@@ -136,14 +136,14 @@ function dahu_deferred_sepa_stripe_request( $method, $endpoint, $body, $secret_k
 		}
 
 		if ( ! empty( $body ) ) {
-			$args['body'] = dahu_deferred_sepa_flatten_body( $body );
+			$args['body'] = ubac_sepa_flatten_body( $body );
 		}
 	}
 
-	$response = wp_remote_request( DAHU_DEFERRED_SEPA_API . $endpoint, $args );
+	$response = wp_remote_request( UBAC_SEPA_API . $endpoint, $args );
 
 	if ( is_wp_error( $response ) ) {
-		dahu_deferred_sepa_log( sprintf( '%s %s failed: %s', $method, $endpoint, $response->get_error_message() ), 'error' );
+		ubac_sepa_log( sprintf( '%s %s failed: %s', $method, $endpoint, $response->get_error_message() ), 'error' );
 
 		return $response;
 	}
@@ -151,19 +151,19 @@ function dahu_deferred_sepa_stripe_request( $method, $endpoint, $body, $secret_k
 	$decoded = json_decode( wp_remote_retrieve_body( $response ), true );
 
 	if ( ! is_array( $decoded ) ) {
-		dahu_deferred_sepa_log(
+		ubac_sepa_log(
 			sprintf( '%s %s returned unreadable JSON (HTTP %d)', $method, $endpoint, (int) wp_remote_retrieve_response_code( $response ) ),
 			'error'
 		);
 
 		return new WP_Error(
-			'dahu_deferred_sepa_bad_json',
+			'ubac_sepa_bad_json',
 			__( 'Stripe returned a response that could not be read.', 'ubac-sepa' )
 		);
 	}
 
 	if ( isset( $decoded['error'] ) ) {
-		dahu_deferred_sepa_log(
+		ubac_sepa_log(
 			sprintf(
 				'%s %s returned error: %s',
 				$method,
@@ -185,14 +185,14 @@ function dahu_deferred_sepa_stripe_request( $method, $endpoint, $body, $secret_k
  * @param string $prefix Key prefix, used by the recursion.
  * @return array<string,scalar>
  */
-function dahu_deferred_sepa_flatten_body( array $body, $prefix = '' ) {
+function ubac_sepa_flatten_body( array $body, $prefix = '' ) {
 	$flat = array();
 
 	foreach ( $body as $key => $value ) {
 		$full = $prefix ? $prefix . '[' . $key . ']' : $key;
 
 		if ( is_array( $value ) ) {
-			$flat = array_merge( $flat, dahu_deferred_sepa_flatten_body( $value, $full ) );
+			$flat = array_merge( $flat, ubac_sepa_flatten_body( $value, $full ) );
 		} else {
 			$flat[ $full ] = $value;
 		}
@@ -206,13 +206,13 @@ function dahu_deferred_sepa_flatten_body( array $body, $prefix = '' ) {
  *
  * SEPA Direct Debit is euro-only at Stripe, and the euro has two decimals, so
  * this is a multiplication by 100. The currency is checked before any charge
- * (see dahu_deferred_sepa_currency_error()) rather than guessed here, because a
+ * (see ubac_sepa_currency_error()) rather than guessed here, because a
  * wrong unit would charge a hundred times too much or too little.
  *
  * @param WC_Order $order Order.
  * @return int
  */
-function dahu_deferred_sepa_amount_in_cents( WC_Order $order ) {
+function ubac_sepa_amount_in_cents( WC_Order $order ) {
 	return (int) round( (float) $order->get_total() * 100 );
 }
 
@@ -223,10 +223,10 @@ function dahu_deferred_sepa_amount_in_cents( WC_Order $order ) {
  * @param WC_Order $order Order.
  * @return string Reason, or '' when the currency is fine.
  */
-function dahu_deferred_sepa_currency_error( WC_Order $order ) {
+function ubac_sepa_currency_error( WC_Order $order ) {
 	$currency = strtoupper( (string) $order->get_currency() );
 
-	if ( DAHU_DEFERRED_SEPA_CURRENCY === $currency ) {
+	if ( UBAC_SEPA_CURRENCY === $currency ) {
 		return '';
 	}
 
@@ -234,7 +234,7 @@ function dahu_deferred_sepa_currency_error( WC_Order $order ) {
 		/* translators: 1: the order's currency, 2: the only currency SEPA accepts. */
 		__( 'This order is in %1$s. Stripe only accepts SEPA Direct Debit in %2$s, so no charge was attempted.', 'ubac-sepa' ),
 		$currency,
-		DAHU_DEFERRED_SEPA_CURRENCY
+		UBAC_SEPA_CURRENCY
 	);
 }
 
@@ -244,7 +244,7 @@ function dahu_deferred_sepa_currency_error( WC_Order $order ) {
  * @param int $timestamp Unix timestamp.
  * @return string
  */
-function dahu_deferred_sepa_format_date( $timestamp ) {
+function ubac_sepa_format_date( $timestamp ) {
 	$format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 
 	return (string) wp_date( $format, (int) $timestamp, wp_timezone() );
@@ -256,7 +256,7 @@ function dahu_deferred_sepa_format_date( $timestamp ) {
  * @param int $timestamp Unix timestamp.
  * @return string
  */
-function dahu_deferred_sepa_format_day( $timestamp ) {
+function ubac_sepa_format_day( $timestamp ) {
 	return (string) wp_date( get_option( 'date_format' ), (int) $timestamp, wp_timezone() );
 }
 
@@ -271,12 +271,12 @@ function dahu_deferred_sepa_format_day( $timestamp ) {
  * @param string $level   A WC_Log_Levels level.
  * @return void
  */
-function dahu_deferred_sepa_log( $message, $level = 'info' ) {
+function ubac_sepa_log( $message, $level = 'info' ) {
 	if ( ! function_exists( 'wc_get_logger' ) ) {
 		return;
 	}
 
-	wc_get_logger()->log( $level, $message, array( 'source' => 'dahu-deferred-sepa' ) );
+	wc_get_logger()->log( $level, $message, array( 'source' => 'ubac-sepa' ) );
 }
 
 /**
@@ -289,15 +289,15 @@ function dahu_deferred_sepa_log( $message, $level = 'info' ) {
  * @param WC_Order|int|null $order Order or order id.
  * @return bool
  */
-function dahu_deferred_sepa_order_is_sepa( $order ) {
+function ubac_sepa_order_is_sepa( $order ) {
 	if ( $order instanceof WC_Order ) {
-		return in_array( $order->get_payment_method(), DAHU_DEFERRED_SEPA_GATEWAYS, true );
+		return in_array( $order->get_payment_method(), UBAC_SEPA_GATEWAYS, true );
 	}
 
 	if ( is_numeric( $order ) ) {
 		$maybe = wc_get_order( (int) $order );
 
-		return $maybe && in_array( $maybe->get_payment_method(), DAHU_DEFERRED_SEPA_GATEWAYS, true );
+		return $maybe && in_array( $maybe->get_payment_method(), UBAC_SEPA_GATEWAYS, true );
 	}
 
 	return false;
@@ -314,8 +314,8 @@ function dahu_deferred_sepa_order_is_sepa( $order ) {
  * @param int    $user_id WordPress user.
  * @return string Customer id, or ''.
  */
-function dahu_deferred_sepa_fetch_customer_from_stripe( $pm_id, $user_id ) {
-	$cached = get_user_meta( $user_id, '_dahu_deferred_sepa_customer_for_pm', true );
+function ubac_sepa_fetch_customer_from_stripe( $pm_id, $user_id ) {
+	$cached = get_user_meta( $user_id, '_ubac_sepa_customer_for_pm', true );
 
 	if ( is_array( $cached )
 		&& ( $cached['pm'] ?? '' ) === $pm_id
@@ -324,13 +324,13 @@ function dahu_deferred_sepa_fetch_customer_from_stripe( $pm_id, $user_id ) {
 		return (string) $cached['cus'];
 	}
 
-	$secret_key = dahu_deferred_sepa_get_secret_key();
+	$secret_key = ubac_sepa_get_secret_key();
 
 	if ( ! $secret_key ) {
 		return '';
 	}
 
-	$pm = dahu_deferred_sepa_stripe_request( 'GET', 'payment_methods/' . $pm_id, array(), $secret_key );
+	$pm = ubac_sepa_stripe_request( 'GET', 'payment_methods/' . $pm_id, array(), $secret_key );
 
 	if ( is_wp_error( $pm ) || empty( $pm['customer'] ) || 0 !== strpos( (string) $pm['customer'], 'cus_' ) ) {
 		return '';
@@ -340,7 +340,7 @@ function dahu_deferred_sepa_fetch_customer_from_stripe( $pm_id, $user_id ) {
 
 	update_user_meta(
 		$user_id,
-		'_dahu_deferred_sepa_customer_for_pm',
+		'_ubac_sepa_customer_for_pm',
 		array(
 			'pm'  => $pm_id,
 			'cus' => $customer,
@@ -362,7 +362,7 @@ function dahu_deferred_sepa_fetch_customer_from_stripe( $pm_id, $user_id ) {
  * @param int $user_id WordPress user.
  * @return string Customer id, or ''.
  */
-function dahu_deferred_sepa_resolve_customer_id( $user_id ) {
+function ubac_sepa_resolve_customer_id( $user_id ) {
 	foreach ( array( '_stripe_customer_id', 'stripe_customer_id', 'wp_stripe_customer_id' ) as $meta_key ) {
 		$value = get_user_meta( $user_id, $meta_key, true );
 

@@ -7,7 +7,7 @@
  * success green.
  */
 
-.dahu-sepa-approved {
+.ubac-sepa-approved {
 	display: inline-block;
 	margin-left: .5em;
 	padding: 1px 8px;
@@ -18,6 +18,6 @@
 	background: #008a20;
 }
 
-.dahu-sepa-account-note {
+.ubac-sepa-account-note {
 	margin-top: 1em;
 }

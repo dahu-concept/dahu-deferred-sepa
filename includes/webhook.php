@@ -11,9 +11,9 @@
  * cannot interfere with the other plugin's webhook, and the other plugin's
  * webhook secret is not needed here.
  *
- * Endpoint: /wp-json/dahu-deferred-sepa/v1/webhook
+ * Endpoint: /wp-json/ubac-sepa/v1/webhook
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,11 +24,11 @@ add_action(
 	'rest_api_init',
 	static function () {
 		register_rest_route(
-			'dahu-deferred-sepa/v1',
+			'ubac-sepa/v1',
 			'/webhook',
 			array(
 				'methods'  => 'POST',
-				'callback' => 'dahu_deferred_sepa_webhook_handler',
+				'callback' => 'ubac_sepa_webhook_handler',
 				// The route is public because Stripe calls it; the signature
 				// check below is what authenticates the caller, and nothing is
 				// read from the body until it passes.
@@ -47,11 +47,11 @@ add_action(
  * @param WP_REST_Request $request Request.
  * @return WP_REST_Response
  */
-function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
+function ubac_sepa_webhook_handler( WP_REST_Request $request ) {
 	$payload = $request->get_body();
 
-	if ( ! dahu_deferred_sepa_verify_webhook( $payload, $request->get_header( 'stripe-signature' ) ) ) {
-		dahu_deferred_sepa_log( 'Webhook rejected: signature did not verify.', 'warning' );
+	if ( ! ubac_sepa_verify_webhook( $payload, $request->get_header( 'stripe-signature' ) ) ) {
+		ubac_sepa_log( 'Webhook rejected: signature did not verify.', 'warning' );
 
 		return new WP_REST_Response( 'invalid signature', 400 );
 	}
@@ -65,7 +65,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 	$type   = isset( $event['type'] ) ? (string) $event['type'] : '';
 	$object = isset( $event['data']['object'] ) ? (array) $event['data']['object'] : array();
 
-	$order = dahu_deferred_sepa_resolve_webhook_order( $object );
+	$order = ubac_sepa_resolve_webhook_order( $object );
 
 	if ( ! $order ) {
 		return new WP_REST_Response( 'no matching order', 200 );
@@ -85,8 +85,8 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 	 * So the intent id has to match the one this plugin recorded when it sent
 	 * the charge, and the site has to be this site.
 	 */
-	$ours = DAHU_DEFERRED_SEPA_GATEWAY_ID === $order->get_payment_method()
-		|| 'dahu-deferred-sepa' === ( $object['metadata']['source'] ?? '' );
+	$ours = UBAC_SEPA_GATEWAY_ID === $order->get_payment_method()
+		|| 'ubac-sepa' === ( $object['metadata']['source'] ?? '' );
 
 	if ( ! $ours ) {
 		return new WP_REST_Response( 'not ours', 200 );
@@ -95,7 +95,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 	$site = isset( $object['metadata']['site_url'] ) ? (string) $object['metadata']['site_url'] : '';
 
 	if ( '' !== $site && untrailingslashit( $site ) !== untrailingslashit( home_url() ) ) {
-		dahu_deferred_sepa_log(
+		ubac_sepa_log(
 			sprintf( 'Webhook ignored: event for order %d carries another site (%s).', $order->get_id(), $site ),
 			'warning'
 		);
@@ -104,7 +104,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 	}
 
 	$recorded = (string) $order->get_meta( '_stripe_intent_id' );
-	$event_on = dahu_deferred_sepa_event_intent( $object );
+	$event_on = ubac_sepa_event_intent( $object );
 
 	/*
 	 * NO RECORDED PAYMENT MEANS NO CONFIRMATION, AND THE SHOP IS TOLD.
@@ -123,7 +123,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 	 *    chose.
 	 *  - an order genuinely charged, whose intent WAS recorded, could still be
 	 *    confirmed by an event whose object id did not start with `pi_`:
-	 *    `dahu_deferred_sepa_event_intent()` returns '' there, so `$event_on`
+	 *    `ubac_sepa_event_intent()` returns '' there, so `$event_on`
 	 *    was empty and the comparison was skipped. The reference written on the
 	 *    order was then the event's id, not the one this plugin had recorded.
 	 *
@@ -151,8 +151,8 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 		 * and per type, keeps the signal the refusal was added for and takes
 		 * the volume away.
 		 */
-		if ( in_array( $type, dahu_deferred_sepa_acted_types(), true ) ) {
-			dahu_deferred_sepa_say_once(
+		if ( in_array( $type, ubac_sepa_acted_types(), true ) ) {
+			ubac_sepa_say_once(
 				$order,
 				'unbound-' . $type,
 				sprintf(
@@ -163,7 +163,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 			);
 		}
 
-		dahu_deferred_sepa_log(
+		ubac_sepa_log(
 			sprintf(
 				'Webhook ignored: event %s for order %d has no payment to confirm (recorded "%s", event "%s").',
 				$type,
@@ -178,7 +178,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 	}
 
 	if ( $recorded !== $event_on ) {
-		dahu_deferred_sepa_log(
+		ubac_sepa_log(
 			sprintf(
 				'Webhook ignored: event is about %s, order %d is waiting on %s.',
 				$event_on,
@@ -209,14 +209,14 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 	 * is enough, and an unbounded one would be a meta that only ever grows.
 	 */
 	$event_id = isset( $event['id'] ) ? (string) $event['id'] : '';
-	$remember = '' !== $event_id && in_array( $type, dahu_deferred_sepa_acted_types(), true );
+	$remember = '' !== $event_id && in_array( $type, ubac_sepa_acted_types(), true );
 
 	if ( $remember ) {
-		$seen = $order->get_meta( '_dahu_deferred_sepa_events' );
+		$seen = $order->get_meta( '_ubac_sepa_events' );
 		$seen = is_array( $seen ) ? array_map( 'strval', $seen ) : array();
 
 		if ( in_array( $event_id, $seen, true ) ) {
-			dahu_deferred_sepa_log(
+			ubac_sepa_log(
 				sprintf( 'Webhook: event %s was already applied to order %d; nothing done.', $event_id, $order->get_id() ),
 				'info'
 			);
@@ -225,7 +225,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 		}
 	}
 
-	dahu_deferred_sepa_apply_event( $order, $type, $object );
+	ubac_sepa_apply_event( $order, $type, $object );
 
 	/*
 	 * REMEMBERED AFTER, NOT BEFORE.
@@ -249,7 +249,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 	 * list and evict a real confirmation, which then applied a second time.
 	 */
 	if ( $remember ) {
-		$seen = $order->get_meta( '_dahu_deferred_sepa_events' );
+		$seen = $order->get_meta( '_ubac_sepa_events' );
 		$seen = is_array( $seen ) ? array_map( 'strval', $seen ) : array();
 		$seen[] = $event_id;
 
@@ -258,10 +258,10 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 		 *
 		 * @param int $keep Number of ids.
 		 */
-		$keep = (int) apply_filters( 'dahu_deferred_sepa_events_remembered', 20 );
+		$keep = (int) apply_filters( 'ubac_sepa_events_remembered', 20 );
 		$keep = $keep > 0 ? $keep : 1;
 
-		$order->update_meta_data( '_dahu_deferred_sepa_events', array_slice( $seen, -$keep ) );
+		$order->update_meta_data( '_ubac_sepa_events', array_slice( $seen, -$keep ) );
 		$order->save();
 	}
 
@@ -271,7 +271,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
 /**
  * What this plugin does about one verified Stripe event.
  *
- * Separated from `dahu_deferred_sepa_webhook_handler()` on purpose, and the
+ * Separated from `ubac_sepa_webhook_handler()` on purpose, and the
  * split is where it is for a reason: the handler owns everything that decides
  * whether an event may be BELIEVED — signature, ownership, which site, which
  * payment intent — and this function owns what the plugin then DOES about it.
@@ -292,7 +292,7 @@ function dahu_deferred_sepa_webhook_handler( WP_REST_Request $request ) {
  * @param array    $object The event's data object.
  * @return void
  */
-function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object ) {
+function ubac_sepa_apply_event( WC_Order $order, $type, array $object ) {
 
 	switch ( $type ) {
 		case 'payment_intent.succeeded':
@@ -300,13 +300,13 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 			// already Completed, which is_paid() reports as paid, so the guard
 			// would skip recording the paid date and the transaction id — the
 			// very things this event is confirming. See
-			// dahu_deferred_sepa_record_payment().
+			// ubac_sepa_record_payment().
 			/*
 			 * ONE READING OF THE ID, USED EVERYWHERE.
 			 *
 			 * This line cast `$object['id']` straight to a string while the
 			 * binding above read the same field through
-			 * dahu_deferred_sepa_event_intent(), which unwraps the expanded
+			 * ubac_sepa_event_intent(), which unwraps the expanded
 			 * object form Stripe sends when a payment intent is expanded. The
 			 * two readings disagreed: an event whose id arrived expanded passed
 			 * the binding and then wrote the literal string "Array" as the
@@ -317,14 +317,14 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 			 * recorded. A field read twice in two ways is a field that will
 			 * eventually be read wrongly once.
 			 */
-			dahu_deferred_sepa_record_payment( $order, sanitize_text_field( dahu_deferred_sepa_event_intent( $object ) ) );
+			ubac_sepa_record_payment( $order, sanitize_text_field( ubac_sepa_event_intent( $object ) ) );
 
 			$order->add_order_note( __( 'Deferred SEPA: charge collected (confirmed by Stripe).', 'ubac-sepa' ) );
-			dahu_deferred_sepa_set_result( $order, 'succeeded' );
+			ubac_sepa_set_result( $order, 'succeeded' );
 			break;
 
 		case 'payment_intent.payment_failed':
-			$before = (string) $order->get_meta( '_dahu_deferred_sepa_result' );
+			$before = (string) $order->get_meta( '_ubac_sepa_result' );
 
 			$reason = isset( $object['last_payment_error']['message'] )
 				? (string) $object['last_payment_error']['message']
@@ -349,12 +349,12 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 					)
 				);
 
-				dahu_deferred_sepa_log(
+				ubac_sepa_log(
 					sprintf( 'Webhook: a failure arrived for order %d, which is recorded as collected. The order was left alone and the shop was told.', $order->get_id() ),
 					'warning'
 				);
 
-				dahu_deferred_sepa_alert_reversal( $order, 'failed' );
+				ubac_sepa_alert_reversal( $order, 'failed' );
 				break;
 			}
 
@@ -364,7 +364,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 			//
 			// This is where the plugin used to paint itself into a corner. The
 			// charge path calls mark_done() as soon as Stripe accepts the
-			// intent, and `_dahu_deferred_sepa_done` is what every guard reads
+			// intent, and `_ubac_sepa_done` is what every guard reads
 			// as "a debit is confirmed": it refuses a reschedule, and
 			// mark_settled_offline() refuses the mark as well. So an order in
 			// exactly this state — submitted, refused, unpaid, goods gone —
@@ -375,7 +375,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 			// the fact that makes another attempt safe, so the flag comes off.
 			// `_executed_ts` stays: an attempt WAS made, the history is built
 			// on it, and erasing it would hide the attempt from the record.
-			$submitted = 'processing' === $before || 'yes' === $order->get_meta( '_dahu_deferred_sepa_done' );
+			$submitted = 'processing' === $before || 'yes' === $order->get_meta( '_ubac_sepa_done' );
 
 			$order->update_status(
 				'failed',
@@ -385,10 +385,10 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 					$reason
 				)
 			);
-			dahu_deferred_sepa_set_result( $order, 'failed' );
+			ubac_sepa_set_result( $order, 'failed' );
 
 			if ( $submitted ) {
-				$order->delete_meta_data( '_dahu_deferred_sepa_done' );
+				$order->delete_meta_data( '_ubac_sepa_done' );
 				$order->save();
 
 				$order->add_order_note(
@@ -398,7 +398,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 				// The ordinary refusal alert, and not the reversal one: nothing
 				// was taken, so "put it right and reschedule from the order" is
 				// both true and now achievable.
-				dahu_deferred_sepa_alert_failure(
+				ubac_sepa_alert_failure(
 					$order,
 					'stripe refused the charge before settlement',
 					__( 'A SEPA charge was submitted and Stripe refused it before settlement. No money left the customer\'s account, and this order has been reopened so the charge can be scheduled again.', 'ubac-sepa' )
@@ -408,7 +408,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 				// one and has already written to the shop. Logged all the same,
 				// because "no email was sent here" is the kind of decision that
 				// looks like a bug when somebody comes to check why.
-				dahu_deferred_sepa_log(
+				ubac_sepa_log(
 					sprintf( 'Webhook: order %d failed before anything was submitted. The charge path has already reported it.', $order->get_id() )
 				);
 			}
@@ -418,11 +418,11 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
 			$order->add_order_note(
 				__( 'Deferred SEPA: the customer has disputed this charge (reported by Stripe). Check the Stripe dashboard.', 'ubac-sepa' )
 			);
-			dahu_deferred_sepa_set_result( $order, 'disputed' );
+			ubac_sepa_set_result( $order, 'disputed' );
 
 			// Always, with no condition: a dispute only exists for money that
 			// was taken, and no other path in this plugin reports one.
-			dahu_deferred_sepa_alert_reversal( $order, 'disputed' );
+			ubac_sepa_alert_reversal( $order, 'disputed' );
 			break;
 	}
 }
@@ -436,7 +436,7 @@ function dahu_deferred_sepa_apply_event( WC_Order $order, $type, array $object )
  * @param array $object The event's data object.
  * @return WC_Order|false
  */
-function dahu_deferred_sepa_resolve_webhook_order( $object ) {
+function ubac_sepa_resolve_webhook_order( $object ) {
 	$order_id = absint( $object['metadata']['order_id'] ?? 0 );
 
 	if ( $order_id ) {
@@ -447,7 +447,7 @@ function dahu_deferred_sepa_resolve_webhook_order( $object ) {
 		}
 	}
 
-	$intent = dahu_deferred_sepa_event_intent( $object );
+	$intent = ubac_sepa_event_intent( $object );
 
 	if ( ! $intent ) {
 		return false;
@@ -477,7 +477,7 @@ function dahu_deferred_sepa_resolve_webhook_order( $object ) {
  * @param array $object The event's data object.
  * @return string Intent id, or '' when there is none.
  */
-function dahu_deferred_sepa_event_intent( $object ) {
+function ubac_sepa_event_intent( $object ) {
 	$intent = isset( $object['payment_intent'] ) ? $object['payment_intent'] : ( $object['id'] ?? '' );
 
 	if ( is_array( $intent ) ) {
@@ -503,7 +503,7 @@ function dahu_deferred_sepa_event_intent( $object ) {
  *
  * @return string[]
  */
-function dahu_deferred_sepa_acted_types() {
+function ubac_sepa_acted_types() {
 	return array(
 		'payment_intent.succeeded',
 		'payment_intent.payment_failed',
@@ -526,9 +526,9 @@ function dahu_deferred_sepa_acted_types() {
  * @param string   $note    The message, already translated.
  * @return void
  */
-function dahu_deferred_sepa_say_once( WC_Order $order, $subject, $note ) {
+function ubac_sepa_say_once( WC_Order $order, $subject, $note ) {
 
-	$said = $order->get_meta( '_dahu_deferred_sepa_said' );
+	$said = $order->get_meta( '_ubac_sepa_said' );
 	$said = is_array( $said ) ? array_map( 'strval', $said ) : array();
 
 	if ( in_array( (string) $subject, $said, true ) ) {
@@ -536,7 +536,7 @@ function dahu_deferred_sepa_say_once( WC_Order $order, $subject, $note ) {
 	}
 
 	$said[] = (string) $subject;
-	$order->update_meta_data( '_dahu_deferred_sepa_said', array_values( array_unique( $said ) ) );
+	$order->update_meta_data( '_ubac_sepa_said', array_values( array_unique( $said ) ) );
 	$order->add_order_note( $note );
 	$order->save();
 }
@@ -555,8 +555,8 @@ function dahu_deferred_sepa_say_once( WC_Order $order, $subject, $note ) {
  * @param string $sig_header The Stripe-Signature header.
  * @return bool
  */
-function dahu_deferred_sepa_verify_webhook( $payload, $sig_header ) {
-	$secret = DAHU_DEFERRED_SEPA_WEBHOOK_SECRET;
+function ubac_sepa_verify_webhook( $payload, $sig_header ) {
+	$secret = UBAC_SEPA_WEBHOOK_SECRET;
 
 	if ( ! $secret || ! $sig_header || ! $payload ) {
 		return false;
@@ -595,7 +595,7 @@ function dahu_deferred_sepa_verify_webhook( $payload, $sig_header ) {
 	 *
 	 * @param int $tolerance Seconds.
 	 */
-	$tolerance = (int) apply_filters( 'dahu_deferred_sepa_webhook_tolerance', 5 * MINUTE_IN_SECONDS );
+	$tolerance = (int) apply_filters( 'ubac_sepa_webhook_tolerance', 5 * MINUTE_IN_SECONDS );
 
 	if ( abs( time() - (int) $timestamp ) > $tolerance ) {
 		return false;

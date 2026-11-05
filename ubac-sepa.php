@@ -15,24 +15,24 @@
  * WC requires at least: 7.0
  * WC tested up to: 11.2
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'DAHU_DEFERRED_SEPA_VERSION', '1.2.2' );
-define( 'DAHU_DEFERRED_SEPA_FILE', __FILE__ );
-define( 'DAHU_DEFERRED_SEPA_PATH', plugin_dir_path( __FILE__ ) );
-define( 'DAHU_DEFERRED_SEPA_URL', plugin_dir_url( __FILE__ ) );
-define( 'DAHU_DEFERRED_SEPA_BASENAME', plugin_basename( __FILE__ ) );
+define( 'UBAC_SEPA_VERSION', '1.2.2' );
+define( 'UBAC_SEPA_FILE', __FILE__ );
+define( 'UBAC_SEPA_PATH', plugin_dir_path( __FILE__ ) );
+define( 'UBAC_SEPA_URL', plugin_dir_url( __FILE__ ) );
+define( 'UBAC_SEPA_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
  * This plugin's own payment gateway: a checkout option that saves nothing to
  * charge now and everything to charge later.
  */
-define( 'DAHU_DEFERRED_SEPA_GATEWAY_ID', 'dahu_deferred_sepa' );
+define( 'UBAC_SEPA_GATEWAY_ID', 'ubac_sepa' );
 
 /**
  * Gateways whose orders this plugin will schedule a charge for: its own, plus
@@ -40,8 +40,8 @@ define( 'DAHU_DEFERRED_SEPA_GATEWAY_ID', 'dahu_deferred_sepa' );
  * was installed is still recognised.
  */
 define(
-	'DAHU_DEFERRED_SEPA_GATEWAYS',
-	array( DAHU_DEFERRED_SEPA_GATEWAY_ID, 'stripe_sepa', 'stripe_sepa_debit' )
+	'UBAC_SEPA_GATEWAYS',
+	array( UBAC_SEPA_GATEWAY_ID, 'stripe_sepa', 'stripe_sepa_debit' )
 );
 
 /**
@@ -49,30 +49,30 @@ define(
  * immediately. Optionally hidden at checkout and on the order screen so they
  * cannot be picked as a competing, immediate alternative.
  */
-define( 'DAHU_DEFERRED_SEPA_NATIVE_GATEWAYS', array( 'stripe_sepa_debit', 'stripe_sepa' ) );
+define( 'UBAC_SEPA_NATIVE_GATEWAYS', array( 'stripe_sepa_debit', 'stripe_sepa' ) );
 
 /** Scheduled-action hook that performs the charge. */
-define( 'DAHU_DEFERRED_SEPA_HOOK', 'dahu_deferred_sepa_confirm_payment' );
+define( 'UBAC_SEPA_HOOK', 'ubac_sepa_confirm_payment' );
 
 /** Action Scheduler group, so this plugin's actions are identifiable. */
-define( 'DAHU_DEFERRED_SEPA_GROUP', 'dahu-deferred-sepa' );
+define( 'UBAC_SEPA_GROUP', 'ubac-sepa' );
 
 /** Admin screen listing upcoming and past charges. */
-define( 'DAHU_DEFERRED_SEPA_CHARGES_PAGE', 'dahu-deferred-sepa-charges' );
+define( 'UBAC_SEPA_CHARGES_PAGE', 'ubac-sepa-charges' );
 
 /* ------------------------------------------------------------------
  * User meta
  * ------------------------------------------------------------------ */
 
 /** Per-customer charge delay in days. Empty means "use the global setting". */
-define( 'DAHU_DEFERRED_SEPA_DELAY_META', '_dahu_deferred_sepa_delay_days' );
+define( 'UBAC_SEPA_DELAY_META', '_ubac_sepa_delay_days' );
 
 /**
  * Which saved mandate an administrator has made the active one for this
  * customer. A customer may have several IBANs saved at Stripe; only the one
  * named here is used for a deferred charge.
  */
-define( 'DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META', '_dahu_deferred_sepa_active_token_id' );
+define( 'UBAC_SEPA_ACTIVE_TOKEN_META', '_ubac_sepa_active_token_id' );
 
 /**
  * The customer's default SEPA token as this plugin last saw it. Making an IBAN
@@ -80,7 +80,7 @@ define( 'DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META', '_dahu_deferred_sepa_active_toke
  * is done on each visit to the payment-methods page rather than by hooking an
  * event whose name varies between WooCommerce versions.
  */
-define( 'DAHU_DEFERRED_SEPA_KNOWN_DEFAULT_META', '_dahu_deferred_sepa_known_default_token' );
+define( 'UBAC_SEPA_KNOWN_DEFAULT_META', '_ubac_sepa_known_default_token' );
 
 /* ------------------------------------------------------------------
  * Overridable from wp-config.php
@@ -88,33 +88,33 @@ define( 'DAHU_DEFERRED_SEPA_KNOWN_DEFAULT_META', '_dahu_deferred_sepa_known_defa
 
 /**
  * Last-resort charge delay, in days. The delay actually applied is resolved by
- * dahu_deferred_sepa_get_delay_days(): the customer's own delay first, then the
+ * ubac_sepa_get_delay_days(): the customer's own delay first, then the
  * gateway setting, then this.
  */
-if ( ! defined( 'DAHU_DEFERRED_SEPA_DELAY_DAYS' ) ) {
-	define( 'DAHU_DEFERRED_SEPA_DELAY_DAYS', 8 );
+if ( ! defined( 'UBAC_SEPA_DELAY_DAYS' ) ) {
+	define( 'UBAC_SEPA_DELAY_DAYS', 8 );
 }
 
 /**
  * Signing secret of this plugin's own Stripe webhook endpoint. Define it in
  * wp-config.php, never in a plugin file:
  *
- *     define( 'DAHU_DEFERRED_SEPA_WEBHOOK_SECRET', 'whsec_...' );
+ *     define( 'UBAC_SEPA_WEBHOOK_SECRET', 'whsec_...' );
  *
  * Test mode and live mode use different endpoints with different secrets. While
  * this is empty the webhook rejects everything, which is the safe default: a
  * forged notification must never be able to mark an order paid.
  */
-if ( ! defined( 'DAHU_DEFERRED_SEPA_WEBHOOK_SECRET' ) ) {
-	define( 'DAHU_DEFERRED_SEPA_WEBHOOK_SECRET', '' );
+if ( ! defined( 'UBAC_SEPA_WEBHOOK_SECRET' ) ) {
+	define( 'UBAC_SEPA_WEBHOOK_SECRET', '' );
 }
 
 /**
  * Diagnostics override. Normally the gateway setting decides; this constant
  * forces them on for a site where the settings screen is not reachable.
  */
-if ( ! defined( 'DAHU_DEFERRED_SEPA_DEBUG' ) ) {
-	define( 'DAHU_DEFERRED_SEPA_DEBUG', false );
+if ( ! defined( 'UBAC_SEPA_DEBUG' ) ) {
+	define( 'UBAC_SEPA_DEBUG', false );
 }
 
 /* ------------------------------------------------------------------
@@ -126,8 +126,8 @@ if ( ! defined( 'DAHU_DEFERRED_SEPA_DEBUG' ) ) {
  *
  * @return array<string,mixed>
  */
-function dahu_deferred_sepa_settings() {
-	$settings = get_option( 'woocommerce_' . DAHU_DEFERRED_SEPA_GATEWAY_ID . '_settings', array() );
+function ubac_sepa_settings() {
+	$settings = get_option( 'woocommerce_' . UBAC_SEPA_GATEWAY_ID . '_settings', array() );
 
 	return is_array( $settings ) ? $settings : array();
 }
@@ -139,8 +139,8 @@ function dahu_deferred_sepa_settings() {
  * @param mixed  $fallback Value to return when the setting is absent.
  * @return mixed
  */
-function dahu_deferred_sepa_setting( $key, $fallback = '' ) {
-	$settings = dahu_deferred_sepa_settings();
+function ubac_sepa_setting( $key, $fallback = '' ) {
+	$settings = ubac_sepa_settings();
 
 	return isset( $settings[ $key ] ) && '' !== $settings[ $key ] ? $settings[ $key ] : $fallback;
 }
@@ -153,7 +153,7 @@ function dahu_deferred_sepa_setting( $key, $fallback = '' ) {
  * @param int $user_id Customer, or 0 for the global value.
  * @return int
  */
-function dahu_deferred_sepa_get_delay_days( $user_id = 0 ) {
+function ubac_sepa_get_delay_days( $user_id = 0 ) {
 	// A delay of zero is a real answer — "charge as soon as it ships" — so each
 	// source is tested for being SET, not for being non-zero. Treating 0 as
 	// absent would tell the customer one date at checkout and debit them on
@@ -161,7 +161,7 @@ function dahu_deferred_sepa_get_delay_days( $user_id = 0 ) {
 	$days = null;
 
 	if ( $user_id ) {
-		$custom = get_user_meta( $user_id, DAHU_DEFERRED_SEPA_DELAY_META, true );
+		$custom = get_user_meta( $user_id, UBAC_SEPA_DELAY_META, true );
 
 		if ( '' !== $custom && is_numeric( $custom ) && (int) $custom >= 0 ) {
 			$days = (int) $custom;
@@ -169,7 +169,7 @@ function dahu_deferred_sepa_get_delay_days( $user_id = 0 ) {
 	}
 
 	if ( null === $days ) {
-		$settings = dahu_deferred_sepa_settings();
+		$settings = ubac_sepa_settings();
 
 		if ( isset( $settings['delay_days'] ) && '' !== $settings['delay_days'] && is_numeric( $settings['delay_days'] ) ) {
 			$days = (int) $settings['delay_days'];
@@ -177,7 +177,7 @@ function dahu_deferred_sepa_get_delay_days( $user_id = 0 ) {
 	}
 
 	if ( null === $days ) {
-		$days = (int) DAHU_DEFERRED_SEPA_DELAY_DAYS;
+		$days = (int) UBAC_SEPA_DELAY_DAYS;
 	}
 
 	/**
@@ -186,7 +186,7 @@ function dahu_deferred_sepa_get_delay_days( $user_id = 0 ) {
 	 * @param int $days    Resolved delay.
 	 * @param int $user_id Customer the delay was resolved for, or 0.
 	 */
-	return max( 0, (int) apply_filters( 'dahu_deferred_sepa_delay_days', $days, $user_id ) );
+	return max( 0, (int) apply_filters( 'ubac_sepa_delay_days', $days, $user_id ) );
 }
 
 /**
@@ -196,13 +196,13 @@ function dahu_deferred_sepa_get_delay_days( $user_id = 0 ) {
  *
  * @return string[]
  */
-function dahu_deferred_sepa_excluded_roles() {
+function ubac_sepa_excluded_roles() {
 	/**
 	 * Filters the roles barred from the deferred gateway.
 	 *
 	 * @param string[] $roles Role slugs.
 	 */
-	return (array) apply_filters( 'dahu_deferred_sepa_excluded_roles', array() );
+	return (array) apply_filters( 'ubac_sepa_excluded_roles', array() );
 }
 
 /**
@@ -215,12 +215,12 @@ function dahu_deferred_sepa_excluded_roles() {
  *
  * @return bool
  */
-function dahu_deferred_sepa_diagnostics_enabled() {
-	if ( DAHU_DEFERRED_SEPA_DEBUG ) {
+function ubac_sepa_diagnostics_enabled() {
+	if ( UBAC_SEPA_DEBUG ) {
 		return true;
 	}
 
-	return 'yes' === dahu_deferred_sepa_setting( 'diagnostics', 'no' );
+	return 'yes' === ubac_sepa_setting( 'diagnostics', 'no' );
 }
 
 /**
@@ -229,8 +229,8 @@ function dahu_deferred_sepa_diagnostics_enabled() {
  *
  * @return string
  */
-function dahu_deferred_sepa_notify_email() {
-	$email = (string) dahu_deferred_sepa_setting( 'notify_email', '' );
+function ubac_sepa_notify_email() {
+	$email = (string) ubac_sepa_setting( 'notify_email', '' );
 
 	return is_email( $email ) ? $email : (string) get_option( 'admin_email' );
 }
@@ -240,8 +240,8 @@ function dahu_deferred_sepa_notify_email() {
  *
  * @return string
  */
-function dahu_deferred_sepa_contact_email() {
-	$email = (string) dahu_deferred_sepa_setting( 'contact_email', '' );
+function ubac_sepa_contact_email() {
+	$email = (string) ubac_sepa_setting( 'contact_email', '' );
 
 	return is_email( $email ) ? $email : (string) get_option( 'admin_email' );
 }
@@ -260,19 +260,19 @@ function dahu_deferred_sepa_contact_email() {
  * to cover. Translations come from translate.wordpress.org.
  * ---------------------------------------------------------------------- */
 
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/stripe.php';
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/schedule.php';
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/offline.php';
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/alerts.php';
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/gateway.php';
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/mandates.php';
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/checkout.php';
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/webhook.php';
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/diagnostics.php';
+require_once UBAC_SEPA_PATH . 'includes/stripe.php';
+require_once UBAC_SEPA_PATH . 'includes/schedule.php';
+require_once UBAC_SEPA_PATH . 'includes/offline.php';
+require_once UBAC_SEPA_PATH . 'includes/alerts.php';
+require_once UBAC_SEPA_PATH . 'includes/gateway.php';
+require_once UBAC_SEPA_PATH . 'includes/mandates.php';
+require_once UBAC_SEPA_PATH . 'includes/checkout.php';
+require_once UBAC_SEPA_PATH . 'includes/webhook.php';
+require_once UBAC_SEPA_PATH . 'includes/diagnostics.php';
 
 if ( is_admin() ) {
-	require_once DAHU_DEFERRED_SEPA_PATH . 'includes/order-screen.php';
-	require_once DAHU_DEFERRED_SEPA_PATH . 'includes/admin-charges.php';
+	require_once UBAC_SEPA_PATH . 'includes/order-screen.php';
+	require_once UBAC_SEPA_PATH . 'includes/admin-charges.php';
 }
 
 /**
@@ -284,7 +284,7 @@ add_action(
 		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
 				'custom_order_tables',
-				DAHU_DEFERRED_SEPA_FILE,
+				UBAC_SEPA_FILE,
 				true
 			);
 		}
@@ -295,9 +295,9 @@ add_action(
  * Plugins screen: "Settings" before "Deactivate".
  */
 add_filter(
-	'plugin_action_links_' . DAHU_DEFERRED_SEPA_BASENAME,
+	'plugin_action_links_' . UBAC_SEPA_BASENAME,
 	static function ( $links ) {
-		$url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . DAHU_DEFERRED_SEPA_GATEWAY_ID );
+		$url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . UBAC_SEPA_GATEWAY_ID );
 
 		array_unshift(
 			$links,
@@ -315,7 +315,7 @@ add_filter(
 add_filter(
 	'plugin_row_meta',
 	static function ( $links, $file ) {
-		if ( DAHU_DEFERRED_SEPA_BASENAME !== $file ) {
+		if ( UBAC_SEPA_BASENAME !== $file ) {
 			return $links;
 		}
 
@@ -328,7 +328,7 @@ add_filter(
 			// domain, which is a submission blocker for two words we can
 			// translate ourselves.
 			/* translators: %s: plugin version number. */
-			sprintf( esc_html__( 'Version %s', 'ubac-sepa' ), esc_html( DAHU_DEFERRED_SEPA_VERSION ) ),
+			sprintf( esc_html__( 'Version %s', 'ubac-sepa' ), esc_html( UBAC_SEPA_VERSION ) ),
 			'<a href="https://dahu-concept.fr" target="_blank" rel="noopener">' . esc_html__( 'By Hugo Vial-Jaime — Dahu-Concept', 'ubac-sepa' ) . '</a>',
 		);
 	},
@@ -341,13 +341,13 @@ add_filter(
  * not leave actions that would fire with nothing to run them.
  */
 register_deactivation_hook(
-	DAHU_DEFERRED_SEPA_FILE,
+	UBAC_SEPA_FILE,
 	static function () {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( DAHU_DEFERRED_SEPA_HOOK, array(), DAHU_DEFERRED_SEPA_GROUP );
+			as_unschedule_all_actions( UBAC_SEPA_HOOK, array(), UBAC_SEPA_GROUP );
 		}
 
-		wp_clear_scheduled_hook( DAHU_DEFERRED_SEPA_HOOK );
+		wp_clear_scheduled_hook( UBAC_SEPA_HOOK );
 	}
 );
 
@@ -357,7 +357,7 @@ register_deactivation_hook(
  * Registered here rather than inside the admin include, because the
  * activation flag has to be set whatever else is loaded.
  */
-require_once DAHU_DEFERRED_SEPA_PATH . 'includes/dahu-welcome.php';
+require_once UBAC_SEPA_PATH . 'includes/ubac-welcome.php';
 
 /*
  * The flag, not a redirect: an activation hook that redirects breaks bulk
@@ -368,21 +368,21 @@ require_once DAHU_DEFERRED_SEPA_PATH . 'includes/dahu-welcome.php';
 register_activation_hook(
 	__FILE__,
 	static function () {
-		Dahu_Welcome::mark_activated( 'dahu-deferred-sepa' );
+		Ubac_Welcome::mark_activated( 'ubac-sepa' );
 	}
 );
 
 add_action(
 	'init',
 	static function () {
-		Dahu_Welcome::register(
+		Ubac_Welcome::register(
 			array(
-				'slug'       => 'dahu-deferred-sepa',
+				'slug'       => 'ubac-sepa',
 				'name'       => __( 'Deferred SEPA', 'ubac-sepa' ),
 				'tagline'    => __( 'Takes a SEPA payment a set number of days after the order ships.', 'ubac-sepa' ),
-				'file'       => DAHU_DEFERRED_SEPA_FILE,
-				'version'    => DAHU_DEFERRED_SEPA_VERSION,
-				'textdomain' => 'dahu-deferred-sepa',
+				'file'       => UBAC_SEPA_FILE,
+				'version'    => UBAC_SEPA_VERSION,
+				'textdomain' => 'ubac-sepa',
 				'mark'       => array(
 					'view'  => '0 0 112 112',
 					'paths' => array(
@@ -427,10 +427,10 @@ add_action(
 				 * whose target is missing is skipped without a sound, so nothing
 				 * here may sit inside the empty-list branch or the overdue block.
 				 */
-				'tour_screen' => 'woocommerce_page_dahu-deferred-sepa-charges',
+				'tour_screen' => 'woocommerce_page_ubac-sepa-charges',
 				'tour'        => array(
 					array(
-						'selector' => '.dahu-ui-head__title',
+						'selector' => '.ubac-ui-head__title',
 						'title'    => __( 'Charged after shipping', 'ubac-sepa' ),
 						'text'     => __( 'Each SEPA payment is taken a set number of days after the order ships.', 'ubac-sepa' ),
 					),

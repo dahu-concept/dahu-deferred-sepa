@@ -7,7 +7,7 @@ msgstr ""
 "Language: fr_FR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "PO-Revision-Date: 2026-10-24 10:37+0000\n"
-"X-Generator: dahu i18n-build\n"
+"X-Generator: ubac i18n-build\n"
 
 #. translators: 1: order number, 2: amount, 3: the date the charge was due, 4: what is in the way, already a sentence. */
 #: includes/alerts.php:440

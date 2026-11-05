@@ -15,7 +15,7 @@
  * plugin that is gone means a hook nothing answers.
  *
  * AND NO OPTION CHANGES THAT. This header used to say that a shop wanting the
- * order meta gone could set `dahu_deferred_sepa_remove_data_on_uninstall`
+ * order meta gone could set `ubac_sepa_remove_data_on_uninstall`
  * first, and that was false: the body of this file declines to touch order
  * meta *even when that option is set*, deliberately and for the reason above.
  * The option governs this plugin's own data and the mandate approvals it put
@@ -30,7 +30,7 @@
  * Measured 30/10/2026: the two statements had contradicted each other since
  * the option existed.
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
@@ -40,35 +40,35 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
  *
  * @return void
  */
-function dahu_deferred_sepa_uninstall_site() {
+function ubac_sepa_uninstall_site() {
 
 	// The welcome screen's own three flags.
 	//
 	// They are interface state, not the shop's data, which is why they sit
 	// BEFORE any “remove data on uninstall” guard: whatever a shop chose to
-	// keep, a reinstall has to greet it again. `includes/dahu-welcome.php`
+	// keep, a reinstall has to greet it again. `includes/ubac-welcome.php`
 	// writes them with update_option(), so they outlive the plugin unless
 	// they are deleted here — and the welcome screen and the guided tour
 	// would then stay silent for good, with nothing on screen to explain why.
-	delete_option( 'dahu_welcome_seen_dahu-deferred-sepa' );
-	delete_option( 'dahu_welcome_pending_dahu-deferred-sepa' );
-	delete_option( 'dahu_welcome_tour_dahu-deferred-sepa' );
+	delete_option( 'ubac_welcome_seen_ubac-sepa' );
+	delete_option( 'ubac_welcome_pending_ubac-sepa' );
+	delete_option( 'ubac_welcome_tour_ubac-sepa' );
 	global $wpdb;
 
-	$wipe = (bool) get_option( 'dahu_deferred_sepa_remove_data_on_uninstall', false );
+	$wipe = (bool) get_option( 'ubac_sepa_remove_data_on_uninstall', false );
 
-	delete_option( 'woocommerce_dahu_deferred_sepa_settings' );
-	delete_option( 'dahu_deferred_sepa_remove_data_on_uninstall' );
+	delete_option( 'woocommerce_ubac_sepa_settings' );
+	delete_option( 'ubac_sepa_remove_data_on_uninstall' );
 
 	// When the overdue sweep last reported. Interface state of a watchdog that
 	// is going away with the plugin, so it goes too — like the welcome flags,
 	// whatever the shop chose to keep of its own data.
-	delete_option( 'dahu_deferred_sepa_last_sweep' );
+	delete_option( 'ubac_sepa_last_sweep' );
 
 	/*
 	 * The per-order charge claims.
 	 *
-	 * `dahu_deferred_sepa_claim()` takes one with add_option() and releases it
+	 * `ubac_sepa_claim()` takes one with add_option() and releases it
 	 * with delete_option(), so in normal operation none is left. One survives
 	 * exactly when a worker was killed in the middle of a charge — which is
 	 * the case the claim exists for — and there is no API that deletes options
@@ -79,26 +79,26 @@ function dahu_deferred_sepa_uninstall_site() {
 	$wpdb->query(
 		$wpdb->prepare(
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-			$wpdb->esc_like( 'dahu_deferred_sepa_claim_' ) . '%'
+			$wpdb->esc_like( 'ubac_sepa_claim_' ) . '%'
 		)
 	);
 
 	// Any charge still queued. Both schedulers, since either may have taken it.
 	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'dahu_deferred_sepa_confirm_payment', array(), 'dahu-deferred-sepa' );
+		as_unschedule_all_actions( 'ubac_sepa_confirm_payment', array(), 'ubac-sepa' );
 	}
 
-	wp_clear_scheduled_hook( 'dahu_deferred_sepa_confirm_payment' );
+	wp_clear_scheduled_hook( 'ubac_sepa_confirm_payment' );
 
 	/*
 	 * And the daily sweep, which is a WP-Cron event of its own.
 	 *
-	 * `dahu_deferred_sepa_keep_sweep_scheduled()` puts it back on every admin
+	 * `ubac_sepa_keep_sweep_scheduled()` puts it back on every admin
 	 * load, so it is certainly there. Leaving it behind leaves WP-Cron waking
 	 * up once a day for a hook nothing answers any more — the very thing the
 	 * charge hook above is cleared to avoid.
 	 */
-	wp_clear_scheduled_hook( 'dahu_deferred_sepa_sweep' );
+	wp_clear_scheduled_hook( 'ubac_sepa_sweep' );
 
 	/*
 	 * Order meta is not touched, even when $wipe is set. There is no safe way
@@ -109,7 +109,7 @@ function dahu_deferred_sepa_uninstall_site() {
 	 * NETWORK-GLOBAL table: deleting from it inside a per-site loop would wipe
 	 * every mandate approval on every site of a network because one site
 	 * uninstalled the plugin, and would repeat the work once per site. It is
-	 * handled once, after the loop, by dahu_deferred_sepa_uninstall_users().
+	 * handled once, after the loop, by ubac_sepa_uninstall_users().
 	 */
 	unset( $wipe );
 }
@@ -120,28 +120,28 @@ function dahu_deferred_sepa_uninstall_site() {
  * @param bool $wipe Whether the approvals go too.
  * @return void
  */
-function dahu_deferred_sepa_uninstall_users( $wipe ) {
+function ubac_sepa_uninstall_users( $wipe ) {
 	global $wpdb;
 
 	// The cached Stripe customer lookup is derived data: always safe to drop.
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- uninstall routine; no caching layer is available here.
-	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => '_dahu_deferred_sepa_customer_for_pm' ) );
+	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => '_ubac_sepa_customer_for_pm' ) );
 
 	if ( ! $wipe ) {
 		return;
 	}
 
 	foreach ( array(
-		'_dahu_deferred_sepa_delay_days',
-		'_dahu_deferred_sepa_active_token_id',
-		'_dahu_deferred_sepa_known_default_token',
+		'_ubac_sepa_delay_days',
+		'_ubac_sepa_active_token_id',
+		'_ubac_sepa_known_default_token',
 	) as $meta_key ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- as above.
 		$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => $meta_key ) );
 	}
 }
 
-$wipe_users = (bool) get_option( 'dahu_deferred_sepa_remove_data_on_uninstall', false );
+$wipe_users = (bool) get_option( 'ubac_sepa_remove_data_on_uninstall', false );
 
 if ( is_multisite() ) {
 	$site_ids = get_sites(
@@ -157,15 +157,15 @@ if ( is_multisite() ) {
 
 		// Read per site: only a site that asked for it gets its own options
 		// removed, and any one site asking is enough for the shared user meta.
-		if ( get_option( 'dahu_deferred_sepa_remove_data_on_uninstall', false ) ) {
+		if ( get_option( 'ubac_sepa_remove_data_on_uninstall', false ) ) {
 			$wipe_users = true;
 		}
 
-		dahu_deferred_sepa_uninstall_site();
+		ubac_sepa_uninstall_site();
 		restore_current_blog();
 	}
 } else {
-	dahu_deferred_sepa_uninstall_site();
+	ubac_sepa_uninstall_site();
 }
 
-dahu_deferred_sepa_uninstall_users( $wipe_users );
+ubac_sepa_uninstall_users( $wipe_users );

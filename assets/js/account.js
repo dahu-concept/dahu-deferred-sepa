@@ -19,7 +19,7 @@
 ( function () {
 	'use strict';
 
-	var data = window.dahuDeferredSepaAccount || {};
+	var data = window.ubacDeferredSepaAccount || {};
 
 	function badgeApprovedRow() {
 		if ( ! data.last4 || ! data.approvedLabel ) {
@@ -31,7 +31,7 @@
 		);
 
 		Array.prototype.forEach.call( cells, function ( cell ) {
-			if ( cell.querySelector( '.dahu-sepa-approved' ) ) {
+			if ( cell.querySelector( '.ubac-sepa-approved' ) ) {
 				return;
 			}
 
@@ -41,7 +41,7 @@
 
 			var badge = document.createElement( 'span' );
 
-			badge.className = 'dahu-sepa-approved';
+			badge.className = 'ubac-sepa-approved';
 			badge.textContent = data.approvedLabel;
 			cell.appendChild( badge );
 		} );

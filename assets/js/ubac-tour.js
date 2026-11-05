@@ -19,7 +19,7 @@
 ( function () {
 	'use strict';
 
-	var data = window.dahuTour;
+	var data = window.ubacTour;
 
 	if ( ! data || ! data.steps || ! data.steps.length ) {
 		return;
@@ -35,13 +35,13 @@
 
 	var index = 0;
 	var bubble = document.createElement( 'div' );
-	bubble.className = 'dahu-ui dahu-tour';
+	bubble.className = 'ubac-ui ubac-tour';
 	bubble.setAttribute( 'role', 'dialog' );
 	bubble.setAttribute( 'aria-live', 'polite' );
 	document.body.appendChild( bubble );
 
 	var ring = document.createElement( 'div' );
-	ring.className = 'dahu-tour-ring';
+	ring.className = 'ubac-tour-ring';
 	ring.setAttribute( 'aria-hidden', 'true' );
 	document.body.appendChild( ring );
 
@@ -52,7 +52,7 @@
 		window.removeEventListener( 'scroll', place, true );
 
 		var body = new URLSearchParams();
-		body.append( 'action', 'dahu_welcome_tour_done' );
+		body.append( 'action', 'ubac_welcome_tour_done' );
 		body.append( 'slug', data.slug );
 		body.append( '_wpnonce', data.nonce );
 
@@ -90,29 +90,29 @@
 		bubble.innerHTML = '';
 
 		var count = document.createElement( 'p' );
-		count.className = 'dahu-tour__count';
+		count.className = 'ubac-tour__count';
 		count.textContent = ( index + 1 ) + ' ' + data.i18n.of + ' ' + steps.length;
 
 		var title = document.createElement( 'h2' );
-		title.className = 'dahu-tour__title';
+		title.className = 'ubac-tour__title';
 		title.textContent = step.title || '';
 
 		var text = document.createElement( 'p' );
-		text.className = 'dahu-tour__text';
+		text.className = 'ubac-tour__text';
 		text.textContent = step.text || '';
 
 		var row = document.createElement( 'p' );
-		row.className = 'dahu-tour__row';
+		row.className = 'ubac-tour__row';
 
 		var skip = document.createElement( 'button' );
 		skip.type = 'button';
-		skip.className = 'dahu-tour__skip';
+		skip.className = 'ubac-tour__skip';
 		skip.textContent = data.i18n.skip;
 		skip.addEventListener( 'click', finish );
 
 		var next = document.createElement( 'button' );
 		next.type = 'button';
-		next.className = 'dahu-ui-btn dahu-ui-btn--go';
+		next.className = 'ubac-ui-btn ubac-ui-btn--go';
 		next.textContent = last ? data.i18n.done : data.i18n.next;
 		next.addEventListener( 'click', function () {
 			if ( last ) {

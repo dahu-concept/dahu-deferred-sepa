@@ -14,7 +14,7 @@
  * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
  */
 
-.dahu-tour {
+.ubac-tour {
 	position: absolute;
 	z-index: 100000;
 	width: 320px;
@@ -27,7 +27,7 @@
 	box-sizing: border-box;
 }
 
-.dahu-tour .dahu-tour__count {
+.ubac-tour .ubac-tour__count {
 	margin: 0 0 8px;
 	font-size: 11.5px;
 	font-weight: 600;
@@ -36,7 +36,7 @@
 	color: var( --dui-accent-deep );
 }
 
-.dahu-tour .dahu-tour__title {
+.ubac-tour .ubac-tour__title {
 	margin: 0 0 6px;
 	padding: 0;
 	font-size: 15px;
@@ -45,14 +45,14 @@
 	color: var( --dui-ink );
 }
 
-.dahu-tour .dahu-tour__text {
+.ubac-tour .ubac-tour__text {
 	margin: 0 0 14px;
 	font-size: 13px;
 	line-height: 1.55;
 	color: var( --dui-ink-soft );
 }
 
-.dahu-tour .dahu-tour__row {
+.ubac-tour .ubac-tour__row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -60,7 +60,7 @@
 	margin: 0;
 }
 
-.dahu-tour .dahu-tour__skip {
+.ubac-tour .ubac-tour__skip {
 	border: 0;
 	background: none;
 	padding: 6px 2px;
@@ -70,8 +70,8 @@
 	cursor: pointer;
 }
 
-.dahu-tour .dahu-tour__skip:hover,
-.dahu-tour .dahu-tour__skip:focus {
+.ubac-tour .ubac-tour__skip:hover,
+.ubac-tour .ubac-tour__skip:focus {
 	color: var( --dui-ink );
 }
 
@@ -80,7 +80,7 @@
  * the ring sits on top of the very control it is pointing at and swallows
  * the click the step is asking for.
  */
-.dahu-tour-ring {
+.ubac-tour-ring {
 	position: absolute;
 	z-index: 99999;
 	pointer-events: none;
@@ -92,7 +92,7 @@
 
 @media ( prefers-reduced-motion: reduce ) {
 
-	.dahu-tour-ring {
+	.ubac-tour-ring {
 		transition: none;
 	}
 }

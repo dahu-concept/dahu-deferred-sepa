@@ -1,5 +1,5 @@
 /*
- * THE DAHU FAMILY ADMIN SHEET -- copied, byte for byte, into every plugin.
+ * THE UBAC FAMILY ADMIN SHEET -- copied, byte for byte, into every plugin.
  *
  * WHY A COPY AND NOT A SHARED FILE. The plugins are independent: each must
  * work with none of the others installed, so there is nowhere to put a
@@ -10,7 +10,7 @@
  * inconsistency nobody looks for, because the mechanism meant to prevent it
  * is visibly in place. `_harness/test-ui.php` compares them.
  *
- * WHY IT IS SCOPED. Everything lives under `.dahu-ui`, so a plugin screen
+ * WHY IT IS SCOPED. Everything lives under `.ubac-ui`, so a plugin screen
  * opts in by wrapping its own markup and nothing here can reach the rest of
  * the admin. A stylesheet that leaks into WordPress's own screens is a bug
  * that gets blamed on the plugin for years.
@@ -32,7 +32,7 @@
  */
 
 
-.dahu-ui {
+.ubac-ui {
 	/* Ground and ink. */
 	--dui-paper: #fbfaf8;
 	--dui-ground: #f3f2ef;
@@ -93,7 +93,7 @@
  * only reads as a column when the digits are the same width.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-num {
+.ubac-ui .ubac-ui-num {
 	font-family: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
 	font-variant-numeric: tabular-nums;
 	letter-spacing: 0;
@@ -106,7 +106,7 @@
  * human. A fourth kind of button is a decision nobody made.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-btn {
+.ubac-ui .ubac-ui-btn {
 	display: inline-flex;
 	align-items: center;
 	gap: 7px;
@@ -124,38 +124,38 @@
 	box-sizing: border-box;
 }
 
-.dahu-ui .dahu-ui-btn:hover,
-.dahu-ui .dahu-ui-btn:focus {
+.ubac-ui .ubac-ui-btn:hover,
+.ubac-ui .ubac-ui-btn:focus {
 	border-color: #b9bec5;
 	color: var( --dui-ink );
 }
 
-.dahu-ui .dahu-ui-btn:focus-visible {
+.ubac-ui .ubac-ui-btn:focus-visible {
 	outline: 2px solid var( --dui-accent-deep );
 	outline-offset: 2px;
 }
 
-.dahu-ui .dahu-ui-btn--go {
+.ubac-ui .ubac-ui-btn--go {
 	border-color: var( --dui-accent-edge );
 	background: var( --dui-accent );
 	color: var( --dui-accent-ink );
 }
 
-.dahu-ui .dahu-ui-btn--go:hover,
-.dahu-ui .dahu-ui-btn--go:focus {
+.ubac-ui .ubac-ui-btn--go:hover,
+.ubac-ui .ubac-ui-btn--go:focus {
 	border-color: var( --dui-accent-deep );
 	background: #25ab9b;
 	color: var( --dui-accent-ink );
 }
 
-.dahu-ui .dahu-ui-btn--warn {
+.ubac-ui .ubac-ui-btn--warn {
 	border-color: var( --dui-warn-edge );
 	background: var( --dui-warn );
 	color: var( --dui-warn-ink );
 }
 
-.dahu-ui .dahu-ui-btn--warn:hover,
-.dahu-ui .dahu-ui-btn--warn:focus {
+.ubac-ui .ubac-ui-btn--warn:hover,
+.ubac-ui .ubac-ui-btn--warn:focus {
 	border-color: #d14e18;
 	background: #f4762c;
 	color: var( --dui-warn-ink );
@@ -167,8 +167,8 @@
  * beside it tells them what to fix. `cursor: not-allowed` and nothing else --
  * the reason is text, not a tooltip nobody hovers.
  */
-.dahu-ui .dahu-ui-btn[disabled],
-.dahu-ui .dahu-ui-btn[aria-disabled="true"] {
+.ubac-ui .ubac-ui-btn[disabled],
+.ubac-ui .ubac-ui-btn[aria-disabled="true"] {
 	border-color: #cdd2d9;
 	background: #eceef1;
 	color: #5e6462;
@@ -183,7 +183,7 @@
  * never silently renames a meaning.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-pill {
+.ubac-ui .ubac-ui-pill {
 	display: inline-block;
 	padding: 3px 10px;
 	border: 1px solid transparent;
@@ -194,31 +194,31 @@
 	white-space: nowrap;
 }
 
-.dahu-ui .dahu-ui-pill--live {
+.ubac-ui .ubac-ui-pill--live {
 	border-color: var( --dui-state-live-edge );
 	background: var( --dui-state-live );
 	color: var( --dui-state-live-ink );
 }
 
-.dahu-ui .dahu-ui-pill--waiting {
+.ubac-ui .ubac-ui-pill--waiting {
 	border-color: var( --dui-state-wait-edge );
 	background: var( --dui-state-wait );
 	color: var( --dui-state-wait-ink );
 }
 
-.dahu-ui .dahu-ui-pill--unknown {
+.ubac-ui .ubac-ui-pill--unknown {
 	border-color: var( --dui-state-unknown-edge );
 	background: var( --dui-state-unknown );
 	color: var( --dui-state-unknown-ink );
 }
 
-.dahu-ui .dahu-ui-pill--settled {
+.ubac-ui .ubac-ui-pill--settled {
 	border-color: var( --dui-state-done-edge );
 	background: var( --dui-state-done );
 	color: var( --dui-state-done-ink );
 }
 
-.dahu-ui .dahu-ui-pill--off {
+.ubac-ui .ubac-ui-pill--off {
 	border-color: var( --dui-state-off-edge );
 	background: var( --dui-state-off );
 	color: var( --dui-state-off-ink );
@@ -228,7 +228,7 @@
  * Cards, tiles, and the one band.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-card {
+.ubac-ui .ubac-ui-card {
 	background: var( --dui-paper );
 	border: 1px solid var( --dui-rule );
 	border-radius: var( --dui-radius-card );
@@ -236,11 +236,11 @@
 	box-sizing: border-box;
 }
 
-.dahu-ui .dahu-ui-card--warn {
+.ubac-ui .ubac-ui-card--warn {
 	border-color: var( --dui-warn-wash-edge );
 }
 
-.dahu-ui .dahu-ui-card__head {
+.ubac-ui .ubac-ui-card__head {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 12px;
@@ -249,45 +249,45 @@
 	margin-bottom: 13px;
 }
 
-.dahu-ui .dahu-ui-card__title {
+.ubac-ui .ubac-ui-card__title {
 	margin: 0;
 	font-size: 15px;
 	font-weight: 600;
 	letter-spacing: -0.01em;
 }
 
-.dahu-ui .dahu-ui-tiles {
+.ubac-ui .ubac-ui-tiles {
 	display: grid;
 	grid-template-columns: repeat( 4, minmax( 0, 1fr ) );
 	gap: 14px;
 }
 
 @media screen and ( max-width: 960px ) {
-	.dahu-ui .dahu-ui-tiles {
+	.ubac-ui .ubac-ui-tiles {
 		grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
 	}
 }
 
 @media screen and ( max-width: 540px ) {
-	.dahu-ui .dahu-ui-tiles {
+	.ubac-ui .ubac-ui-tiles {
 		grid-template-columns: minmax( 0, 1fr );
 	}
 }
 
-.dahu-ui .dahu-ui-tile__label {
+.ubac-ui .ubac-ui-tile__label {
 	font-size: 12.5px;
 	color: var( --dui-ink-soft );
 	margin-bottom: 9px;
 }
 
-.dahu-ui .dahu-ui-tile__value {
+.ubac-ui .ubac-ui-tile__value {
 	font-size: 32px;
 	font-weight: 500;
 	line-height: 1;
 	letter-spacing: -0.02em;
 }
 
-.dahu-ui .dahu-ui-tile__note {
+.ubac-ui .ubac-ui-tile__note {
 	font-size: 12px;
 	color: var( --dui-ink-mute );
 	margin-top: 8px;
@@ -298,7 +298,7 @@
  * settle: an undetermined outcome, a licence about to lapse, a job refused
  * before anything was sent. Used for anything less it stops being read.
  */
-.dahu-ui .dahu-ui-band {
+.ubac-ui .ubac-ui-band {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 14px;
@@ -311,14 +311,14 @@
 	box-sizing: border-box;
 }
 
-.dahu-ui .dahu-ui-band__title {
+.ubac-ui .ubac-ui-band__title {
 	font-size: 14.5px;
 	font-weight: 600;
 	color: #8f3206;
 	margin: 0 0 3px;
 }
 
-.dahu-ui .dahu-ui-band__text {
+.ubac-ui .ubac-ui-band__text {
 	margin: 0;
 	font-size: 13px;
 	color: #5c3a22;
@@ -326,7 +326,7 @@
 }
 
 /* An inset explanation, inside a card: quieter than a band, same family. */
-.dahu-ui .dahu-ui-inset {
+.ubac-ui .ubac-ui-inset {
 	margin: 0;
 	padding: 11px 13px;
 	border: 1px solid #ffcfad;
@@ -337,7 +337,7 @@
 	line-height: 1.6;
 }
 
-.dahu-ui .dahu-ui-inset--quiet {
+.ubac-ui .ubac-ui-inset--quiet {
 	border-color: var( --dui-rule );
 	background: var( --dui-ground );
 	color: var( --dui-ink-soft );
@@ -347,17 +347,17 @@
  * Tables.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-tablewrap {
+.ubac-ui .ubac-ui-tablewrap {
 	overflow-x: auto;
 }
 
-.dahu-ui .dahu-ui-table {
+.ubac-ui .ubac-ui-table {
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 13.5px;
 }
 
-.dahu-ui .dahu-ui-table th {
+.ubac-ui .ubac-ui-table th {
 	text-align: left;
 	padding: 10px 14px;
 	border-bottom: 1px solid #e7e4dd;
@@ -369,17 +369,17 @@
 	white-space: nowrap;
 }
 
-.dahu-ui .dahu-ui-table td {
+.ubac-ui .ubac-ui-table td {
 	padding: 12px 14px;
 	border-bottom: 1px solid var( --dui-rule-soft );
 	vertical-align: top;
 }
 
-.dahu-ui .dahu-ui-table tbody tr:last-child td {
+.ubac-ui .ubac-ui-table tbody tr:last-child td {
 	border-bottom: 0;
 }
 
-.dahu-ui .dahu-ui-table__num {
+.ubac-ui .ubac-ui-table__num {
 	text-align: right;
 }
 
@@ -387,17 +387,17 @@
  * Fields, labels, and the footnote.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-field {
+.ubac-ui .ubac-ui-field {
 	display: block;
 	font-size: 12.5px;
 	color: var( --dui-ink-soft );
 }
 
-.dahu-ui .dahu-ui-input,
-.dahu-ui input[type="text"].dahu-ui-input,
-.dahu-ui input[type="search"].dahu-ui-input,
-.dahu-ui input[type="password"].dahu-ui-input,
-.dahu-ui textarea.dahu-ui-input {
+.ubac-ui .ubac-ui-input,
+.ubac-ui input[type="text"].ubac-ui-input,
+.ubac-ui input[type="search"].ubac-ui-input,
+.ubac-ui input[type="password"].ubac-ui-input,
+.ubac-ui textarea.ubac-ui-input {
 	box-sizing: border-box;
 	margin-top: 6px;
 	padding: 9px 11px;
@@ -409,13 +409,13 @@
 	min-height: 40px;
 }
 
-.dahu-ui .dahu-ui-input:focus {
+.ubac-ui .ubac-ui-input:focus {
 	border-color: var( --dui-accent-deep );
 	outline: 2px solid var( --dui-accent-wash );
 	outline-offset: 0;
 }
 
-.dahu-ui .dahu-ui-foot {
+.ubac-ui .ubac-ui-foot {
 	margin: 0;
 	padding: 13px 18px;
 	border-top: 1px solid var( --dui-rule-soft );
@@ -424,7 +424,7 @@
 	line-height: 1.6;
 }
 
-.dahu-ui .dahu-ui-hint {
+.ubac-ui .ubac-ui-hint {
 	font-size: 12.5px;
 	color: var( --dui-ink-mute );
 	line-height: 1.6;
@@ -435,41 +435,41 @@
  * a component instead.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-row {
+.ubac-ui .ubac-ui-row {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 12px;
 	align-items: center;
 }
 
-.dahu-ui .dahu-ui-row--between {
+.ubac-ui .ubac-ui-row--between {
 	justify-content: space-between;
 }
 
-.dahu-ui .dahu-ui-stack > * + * {
+.ubac-ui .ubac-ui-stack > * + * {
 	margin-top: 14px;
 }
 
-.dahu-ui .dahu-ui-split {
+.ubac-ui .ubac-ui-split {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 16px;
 	align-items: flex-start;
 }
 
-.dahu-ui .dahu-ui-split__main {
+.ubac-ui .ubac-ui-split__main {
 	flex: 999 1 560px;
 	min-width: 0;
 }
 
-.dahu-ui .dahu-ui-split__side {
+.ubac-ui .ubac-ui-split__side {
 	flex: 1 1 320px;
 	min-width: 0;
 	max-width: 460px;
 }
 
 /* A screen heading, under the WordPress one rather than instead of it. */
-.dahu-ui .dahu-ui-eyebrow {
+.ubac-ui .ubac-ui-eyebrow {
 	font-size: 11.5px;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -495,7 +495,7 @@
  * is how a list goes flat on half the screens after a WordPress release.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-list {
+.ubac-ui .ubac-ui-list {
 	margin: 9px 0 0;
 	padding-left: 20px;
 	list-style: disc;
@@ -504,7 +504,7 @@
 	color: var( --dui-ink-soft );
 }
 
-.dahu-ui .dahu-ui-list > li + li {
+.ubac-ui .ubac-ui-list > li + li {
 	margin-top: 6px;
 }
 
@@ -514,13 +514,13 @@
  * the browser's, keyboard included, and no script is loaded on these screens
  * at all.
  */
-.dahu-ui .dahu-ui-details {
+.ubac-ui .ubac-ui-details {
 	margin: 13px 0 0;
 	font-size: 12.5px;
 	color: var( --dui-ink-soft );
 }
 
-.dahu-ui .dahu-ui-details > summary {
+.ubac-ui .ubac-ui-details > summary {
 	cursor: pointer;
 	padding: 9px 0;
 	min-height: 40px;
@@ -550,7 +550,7 @@
  * urgent they are, and the attention colour is kept for the band.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-tabs {
+.ubac-ui .ubac-ui-tabs {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 4px;
@@ -560,7 +560,7 @@
 	list-style: none;
 }
 
-.dahu-ui .dahu-ui-tabs__link {
+.ubac-ui .ubac-ui-tabs__link {
 	display: inline-flex;
 	align-items: center;
 	gap: 7px;
@@ -577,24 +577,24 @@
 	box-sizing: border-box;
 }
 
-.dahu-ui .dahu-ui-tabs__link:hover,
-.dahu-ui .dahu-ui-tabs__link:focus {
+.ubac-ui .ubac-ui-tabs__link:hover,
+.ubac-ui .ubac-ui-tabs__link:focus {
 	color: var( --dui-ink );
 }
 
-.dahu-ui .dahu-ui-tabs__link:focus-visible {
+.ubac-ui .ubac-ui-tabs__link:focus-visible {
 	outline: 2px solid var( --dui-accent-deep );
 	outline-offset: 2px;
 }
 
-.dahu-ui .dahu-ui-tabs__link--on {
+.ubac-ui .ubac-ui-tabs__link--on {
 	border-bottom-color: var( --dui-accent-edge );
 	color: var( --dui-ink );
 	font-weight: 600;
 }
 
 /* The figure in a tab. Tabular, like every other number on these screens. */
-.dahu-ui .dahu-ui-tabs__count {
+.ubac-ui .ubac-ui-tabs__count {
 	font-variant-numeric: tabular-nums;
 	color: var( --dui-ink-mute );
 }
@@ -614,12 +614,12 @@
  * whatever place the last plugin left them.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-head {
+.ubac-ui .ubac-ui-head {
 	margin: 0 0 20px;
 	padding: 0;
 }
 
-.dahu-ui .dahu-ui-head__title {
+.ubac-ui .ubac-ui-head__title {
 	margin: 0;
 	padding: 0;
 	font-size: 23px;
@@ -629,7 +629,7 @@
 	color: var( --dui-ink );
 }
 
-.dahu-ui .dahu-ui-head__sub {
+.ubac-ui .ubac-ui-head__sub {
 	margin: 6px 0 0;
 	font-size: 13.5px;
 	line-height: 1.5;
@@ -652,11 +652,11 @@
  * exactly like WordPress until somebody does.
  * ------------------------------------------------------------------------ */
 
-.dahu-ui .dahu-ui-card .form-table {
+.ubac-ui .ubac-ui-card .form-table {
 	margin: 0;
 }
 
-.dahu-ui .dahu-ui-card .form-table th {
+.ubac-ui .ubac-ui-card .form-table th {
 	padding: 14px 20px 14px 0;
 	font-size: 13.5px;
 	font-weight: 500;
@@ -664,21 +664,21 @@
 	width: 220px;
 }
 
-.dahu-ui .dahu-ui-card .form-table td {
+.ubac-ui .ubac-ui-card .form-table td {
 	padding: 12px 0;
 }
 
-.dahu-ui .dahu-ui-card .form-table tr:first-child th,
-.dahu-ui .dahu-ui-card .form-table tr:first-child td {
+.ubac-ui .ubac-ui-card .form-table tr:first-child th,
+.ubac-ui .ubac-ui-card .form-table tr:first-child td {
 	padding-top: 0;
 }
 
-.dahu-ui .dahu-ui-card .form-table tr:last-child th,
-.dahu-ui .dahu-ui-card .form-table tr:last-child td {
+.ubac-ui .ubac-ui-card .form-table tr:last-child th,
+.ubac-ui .ubac-ui-card .form-table tr:last-child td {
 	padding-bottom: 0;
 }
 
-.dahu-ui .dahu-ui-card .form-table .description {
+.ubac-ui .ubac-ui-card .form-table .description {
 	margin: 6px 0 0;
 	font-size: 12.5px;
 	line-height: 1.5;
@@ -687,7 +687,7 @@
 
 @media screen and ( max-width: 782px ) {
 
-	.dahu-ui .dahu-ui-card .form-table th {
+	.ubac-ui .ubac-ui-card .form-table th {
 		width: auto;
 		padding-bottom: 4px;
 	}

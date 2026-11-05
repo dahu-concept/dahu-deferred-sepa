@@ -11,7 +11,7 @@
  * has that same IBAN set as their own default. Either alone is not enough,
  * which is what stops a customer quietly moving to an IBAN nobody approved.
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,12 +36,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int $user_id WordPress user.
  * @return array{customer:string,payment_method:string}|false
  */
-function dahu_deferred_sepa_find_saved_mandate( $user_id ) {
+function ubac_sepa_find_saved_mandate( $user_id ) {
 	if ( ! $user_id || ! class_exists( 'WC_Payment_Tokens' ) ) {
 		return false;
 	}
 
-	$active_id = get_user_meta( $user_id, DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META, true );
+	$active_id = get_user_meta( $user_id, UBAC_SEPA_ACTIVE_TOKEN_META, true );
 
 	if ( ! $active_id ) {
 		return false;
@@ -62,7 +62,7 @@ function dahu_deferred_sepa_find_saved_mandate( $user_id ) {
 	// radio only offers SEPA tokens, but the stored id is a plain integer that
 	// any other code could set, and a card token here would advertise the
 	// gateway and then fail at charge time, days after shipping.
-	if ( ! dahu_deferred_sepa_token_is_sepa( $token ) ) {
+	if ( ! ubac_sepa_token_is_sepa( $token ) ) {
 		return false;
 	}
 
@@ -76,11 +76,11 @@ function dahu_deferred_sepa_find_saved_mandate( $user_id ) {
 	// method, with a cache keyed by the payment method itself, so a new mandate
 	// or a different Stripe account invalidates it rather than serving a stale
 	// customer id from another environment.
-	$customer = dahu_deferred_sepa_fetch_customer_from_stripe( $pm_id, $user_id );
+	$customer = ubac_sepa_fetch_customer_from_stripe( $pm_id, $user_id );
 
 	if ( ! $customer ) {
 		// Fallback for when the API key is unavailable: local meta and orders.
-		$customer = dahu_deferred_sepa_resolve_customer_id( $user_id );
+		$customer = ubac_sepa_resolve_customer_id( $user_id );
 	}
 
 	if ( ! $customer ) {
@@ -99,13 +99,13 @@ function dahu_deferred_sepa_find_saved_mandate( $user_id ) {
  * @param int $user_id WordPress user.
  * @return WC_Payment_Token|null
  */
-function dahu_deferred_sepa_get_default_sepa_token( $user_id ) {
+function ubac_sepa_get_default_sepa_token( $user_id ) {
 	if ( ! $user_id || ! class_exists( 'WC_Payment_Tokens' ) ) {
 		return null;
 	}
 
 	foreach ( WC_Payment_Tokens::get_customer_tokens( $user_id ) as $token ) {
-		if ( dahu_deferred_sepa_token_is_sepa( $token ) && $token->is_default() ) {
+		if ( ubac_sepa_token_is_sepa( $token ) && $token->is_default() ) {
 			return $token;
 		}
 	}
@@ -119,7 +119,7 @@ function dahu_deferred_sepa_get_default_sepa_token( $user_id ) {
  * @param int $user_id WordPress user.
  * @return WC_Payment_Token[]
  */
-function dahu_deferred_sepa_get_sepa_tokens( $user_id ) {
+function ubac_sepa_get_sepa_tokens( $user_id ) {
 	if ( ! $user_id || ! class_exists( 'WC_Payment_Tokens' ) ) {
 		return array();
 	}
@@ -127,7 +127,7 @@ function dahu_deferred_sepa_get_sepa_tokens( $user_id ) {
 	$tokens = array();
 
 	foreach ( WC_Payment_Tokens::get_customer_tokens( $user_id ) as $token ) {
-		if ( dahu_deferred_sepa_token_is_sepa( $token ) ) {
+		if ( ubac_sepa_token_is_sepa( $token ) ) {
 			$tokens[] = $token;
 		}
 	}
@@ -144,7 +144,7 @@ function dahu_deferred_sepa_get_sepa_tokens( $user_id ) {
  * @param WC_Payment_Token $token Token.
  * @return bool
  */
-function dahu_deferred_sepa_token_is_sepa( $token ) {
+function ubac_sepa_token_is_sepa( $token ) {
 	$type = (string) $token->get_type();
 
 	return 'SEPA' === $type || false !== stripos( $type, 'sepa' );
@@ -156,7 +156,7 @@ function dahu_deferred_sepa_token_is_sepa( $token ) {
  * @param WC_Payment_Token $token Token.
  * @return string
  */
-function dahu_deferred_sepa_token_last4( $token ) {
+function ubac_sepa_token_last4( $token ) {
 	$last4 = method_exists( $token, 'get_last4' ) ? (string) $token->get_last4() : '';
 
 	return '' !== $last4 ? $last4 : '••••';
@@ -166,8 +166,8 @@ function dahu_deferred_sepa_token_last4( $token ) {
  * User profile: naming the active mandate
  * ------------------------------------------------------------------ */
 
-add_action( 'show_user_profile', 'dahu_deferred_sepa_render_profile_section' );
-add_action( 'edit_user_profile', 'dahu_deferred_sepa_render_profile_section' );
+add_action( 'show_user_profile', 'ubac_sepa_render_profile_section' );
+add_action( 'edit_user_profile', 'ubac_sepa_render_profile_section' );
 
 /**
  * The "Deferred SEPA Direct Debit" section of a user profile.
@@ -175,7 +175,7 @@ add_action( 'edit_user_profile', 'dahu_deferred_sepa_render_profile_section' );
  * @param WP_User $user User being edited.
  * @return void
  */
-function dahu_deferred_sepa_render_profile_section( $user ) {
+function ubac_sepa_render_profile_section( $user ) {
 	if ( ! current_user_can( 'edit_user', $user->ID ) ) {
 		return;
 	}
@@ -187,23 +187,23 @@ function dahu_deferred_sepa_render_profile_section( $user ) {
 	// first serves all of them, and a shop with six of these installed
 	// downloads one copy.
 	wp_enqueue_style(
-		'dahu-ui',
-		DAHU_DEFERRED_SEPA_URL . 'assets/css/dahu-ui.css',
+		'ubac-ui',
+		UBAC_SEPA_URL . 'assets/css/ubac-ui.css',
 		array(),
-		DAHU_DEFERRED_SEPA_VERSION
+		UBAC_SEPA_VERSION
 	);
 
 	wp_enqueue_style(
-		'dahu-deferred-sepa-admin',
-		DAHU_DEFERRED_SEPA_URL . 'assets/css/admin.css',
-		array( 'dahu-ui' ),
-		DAHU_DEFERRED_SEPA_VERSION
+		'ubac-sepa-admin',
+		UBAC_SEPA_URL . 'assets/css/admin.css',
+		array( 'ubac-ui' ),
+		UBAC_SEPA_VERSION
 	);
 
-	$excluded = (bool) array_intersect( dahu_deferred_sepa_excluded_roles(), (array) $user->roles );
+	$excluded = (bool) array_intersect( ubac_sepa_excluded_roles(), (array) $user->roles );
 
 	// The notification email links straight to this anchor.
-	echo '<h2 id="dahu-deferred-sepa">' . esc_html__( 'Deferred SEPA Direct Debit', 'ubac-sepa' ) . '</h2>';
+	echo '<h2 id="ubac-sepa">' . esc_html__( 'Deferred SEPA Direct Debit', 'ubac-sepa' ) . '</h2>';
 
 	if ( $excluded ) {
 		echo '<p class="description">'
@@ -213,17 +213,17 @@ function dahu_deferred_sepa_render_profile_section( $user ) {
 		return;
 	}
 
-	$tokens    = dahu_deferred_sepa_get_sepa_tokens( $user->ID );
-	$active_id = (string) get_user_meta( $user->ID, DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META, true );
-	$custom    = (string) get_user_meta( $user->ID, DAHU_DEFERRED_SEPA_DELAY_META, true );
-	$global    = dahu_deferred_sepa_get_delay_days();
+	$tokens    = ubac_sepa_get_sepa_tokens( $user->ID );
+	$active_id = (string) get_user_meta( $user->ID, UBAC_SEPA_ACTIVE_TOKEN_META, true );
+	$custom    = (string) get_user_meta( $user->ID, UBAC_SEPA_DELAY_META, true );
+	$global    = ubac_sepa_get_delay_days();
 	?>
 	<table class="form-table" role="presentation">
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Active mandate', 'ubac-sepa' ); ?></th>
 			<td>
-				<label class="dahu-sepa-mandates__option">
-					<input type="radio" name="dahu_deferred_sepa_active_token" value="" <?php checked( '' === $active_id || '0' === $active_id ); ?>>
+				<label class="ubac-sepa-mandates__option">
+					<input type="radio" name="ubac_sepa_active_token" value="" <?php checked( '' === $active_id || '0' === $active_id ); ?>>
 					<?php esc_html_e( 'None — this customer will not be offered deferred payment', 'ubac-sepa' ); ?>
 				</label>
 
@@ -231,15 +231,15 @@ function dahu_deferred_sepa_render_profile_section( $user ) {
 					<p class="description"><?php esc_html_e( 'This customer has no IBAN saved at Stripe yet.', 'ubac-sepa' ); ?></p>
 				<?php else : ?>
 					<?php foreach ( $tokens as $token ) : ?>
-						<label class="dahu-sepa-mandates__option">
-							<input type="radio" name="dahu_deferred_sepa_active_token"
+						<label class="ubac-sepa-mandates__option">
+							<input type="radio" name="ubac_sepa_active_token"
 								value="<?php echo esc_attr( $token->get_id() ); ?>"
 								<?php checked( $active_id === (string) $token->get_id() ); ?>>
 							<?php
 							printf(
 								/* translators: %s: last four digits of an IBAN. */
 								esc_html__( 'IBAN ending %s', 'ubac-sepa' ),
-								esc_html( dahu_deferred_sepa_token_last4( $token ) )
+								esc_html( ubac_sepa_token_last4( $token ) )
 							);
 							?>
 							<?php if ( $token->is_default() ) : ?>
@@ -249,21 +249,21 @@ function dahu_deferred_sepa_render_profile_section( $user ) {
 					<?php endforeach; ?>
 				<?php endif; ?>
 
-				<p class="description dahu-sepa-mandates__hint">
+				<p class="description ubac-sepa-mandates__hint">
 					<?php esc_html_e( 'Naming an IBAN here approves it for deferred payment. The customer must also have that same IBAN set as their default under My account → Payment methods before the gateway is offered to them — that is what stops them moving to an IBAN you have not approved.', 'ubac-sepa' ); ?>
 				</p>
 
-				<p class="dahu-sepa-mandates__delay">
-					<label for="dahu_deferred_sepa_delay_days">
+				<p class="ubac-sepa-mandates__delay">
+					<label for="ubac_sepa_delay_days">
 						<strong><?php esc_html_e( 'Charge delay for this customer, in days', 'ubac-sepa' ); ?></strong>
 					</label>
-					<input type="number" id="dahu_deferred_sepa_delay_days" name="dahu_deferred_sepa_delay_days"
-						class="dahu-sepa-mandates__delay-input" min="0" step="1"
+					<input type="number" id="ubac_sepa_delay_days" name="ubac_sepa_delay_days"
+						class="ubac-sepa-mandates__delay-input" min="0" step="1"
 						value="<?php echo esc_attr( $custom ); ?>"
 						placeholder="<?php echo esc_attr( $global ); ?>">
 				</p>
 
-				<p class="description dahu-sepa-mandates__hint">
+				<p class="description ubac-sepa-mandates__hint">
 					<?php
 					printf(
 						/* translators: %d: the global delay in days. */
@@ -273,15 +273,15 @@ function dahu_deferred_sepa_render_profile_section( $user ) {
 					?>
 				</p>
 
-				<?php dahu_deferred_sepa_render_user_diagnostics( $user ); ?>
+				<?php ubac_sepa_render_user_diagnostics( $user ); ?>
 			</td>
 		</tr>
 	</table>
 	<?php
 }
 
-add_action( 'personal_options_update', 'dahu_deferred_sepa_save_profile_section' );
-add_action( 'edit_user_profile_update', 'dahu_deferred_sepa_save_profile_section' );
+add_action( 'personal_options_update', 'ubac_sepa_save_profile_section' );
+add_action( 'edit_user_profile_update', 'ubac_sepa_save_profile_section' );
 
 /**
  * Saves the active mandate and the per-customer delay.
@@ -289,7 +289,7 @@ add_action( 'edit_user_profile_update', 'dahu_deferred_sepa_save_profile_section
  * @param int $user_id User being saved.
  * @return void
  */
-function dahu_deferred_sepa_save_profile_section( $user_id ) {
+function ubac_sepa_save_profile_section( $user_id ) {
 	// Per user, not the blanket capability: approving a mandate is approving
 	// late payment for that person, and a role allowed to edit some users
 	// should not be able to approve one on any user.
@@ -303,28 +303,28 @@ function dahu_deferred_sepa_save_profile_section( $user_id ) {
 		return;
 	}
 
-	if ( isset( $_POST['dahu_deferred_sepa_active_token'] ) ) {
-		$new = absint( wp_unslash( $_POST['dahu_deferred_sepa_active_token'] ) );
-		$old = (int) get_user_meta( $user_id, DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META, true );
+	if ( isset( $_POST['ubac_sepa_active_token'] ) ) {
+		$new = absint( wp_unslash( $_POST['ubac_sepa_active_token'] ) );
+		$old = (int) get_user_meta( $user_id, UBAC_SEPA_ACTIVE_TOKEN_META, true );
 
-		update_user_meta( $user_id, DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META, $new );
+		update_user_meta( $user_id, UBAC_SEPA_ACTIVE_TOKEN_META, $new );
 
 		// Only on a newly approved IBAN: not when clearing it, and not when the
 		// administrator saved the profile without changing the choice.
 		if ( $new && $new !== $old ) {
-			dahu_deferred_sepa_notify_iban_approved( $user_id, $new );
+			ubac_sepa_notify_iban_approved( $user_id, $new );
 		}
 	}
 
-	if ( isset( $_POST['dahu_deferred_sepa_delay_days'] ) ) {
-		$delay = sanitize_text_field( wp_unslash( $_POST['dahu_deferred_sepa_delay_days'] ) );
+	if ( isset( $_POST['ubac_sepa_delay_days'] ) ) {
+		$delay = sanitize_text_field( wp_unslash( $_POST['ubac_sepa_delay_days'] ) );
 
 		/*
 		 * EMPTY is what clears the override, and nothing else is.
 		 *
 		 * Zero is a real answer — "charge as soon as it ships" — and the
 		 * field offers it: its `min` is 0, and
-		 * dahu_deferred_sepa_get_delay_days() accepts any value from 0 up,
+		 * ubac_sepa_get_delay_days() accepts any value from 0 up,
 		 * testing each source for being SET rather than for being non-zero.
 		 * Treating 0 as "clear" made the writer disagree with the reader: an
 		 * administrator who set zero days for a customer had it silently
@@ -339,9 +339,9 @@ function dahu_deferred_sepa_save_profile_section( $user_id ) {
 		 * is what the reader does with it anyway.
 		 */
 		if ( '' === $delay || ! is_numeric( $delay ) ) {
-			delete_user_meta( $user_id, DAHU_DEFERRED_SEPA_DELAY_META );
+			delete_user_meta( $user_id, UBAC_SEPA_DELAY_META );
 		} else {
-			update_user_meta( $user_id, DAHU_DEFERRED_SEPA_DELAY_META, max( 0, (int) $delay ) );
+			update_user_meta( $user_id, UBAC_SEPA_DELAY_META, max( 0, (int) $delay ) );
 		}
 	}
 }
@@ -366,7 +366,7 @@ function dahu_deferred_sepa_save_profile_section( $user_id ) {
 add_action(
 	'woocommerce_account_payment-methods_endpoint',
 	static function () {
-		dahu_deferred_sepa_check_default_iban( get_current_user_id() );
+		ubac_sepa_check_default_iban( get_current_user_id() );
 	},
 	1
 );
@@ -381,7 +381,7 @@ add_action(
 		$token = WC_Payment_Tokens::get( (int) $token_id );
 
 		if ( $token ) {
-			dahu_deferred_sepa_check_default_iban( $token->get_user_id() );
+			ubac_sepa_check_default_iban( $token->get_user_id() );
 		}
 	}
 );
@@ -390,7 +390,7 @@ add_action(
 	'woocommerce_payment_token_set_default',
 	static function ( $token_id, $token = null ) {
 		if ( $token && method_exists( $token, 'get_user_id' ) ) {
-			dahu_deferred_sepa_check_default_iban( $token->get_user_id() );
+			ubac_sepa_check_default_iban( $token->get_user_id() );
 		}
 	},
 	10,
@@ -406,18 +406,18 @@ add_action(
  * @param int $user_id WordPress user.
  * @return void
  */
-function dahu_deferred_sepa_check_default_iban( $user_id ) {
+function ubac_sepa_check_default_iban( $user_id ) {
 	if ( ! $user_id ) {
 		return;
 	}
 
-	$default = dahu_deferred_sepa_get_default_sepa_token( $user_id );
-	$known   = (int) get_user_meta( $user_id, DAHU_DEFERRED_SEPA_KNOWN_DEFAULT_META, true );
+	$default = ubac_sepa_get_default_sepa_token( $user_id );
+	$known   = (int) get_user_meta( $user_id, UBAC_SEPA_KNOWN_DEFAULT_META, true );
 
 	if ( ! $default ) {
 		// No default any more: forget it, so a later one is noticed again.
 		if ( $known ) {
-			update_user_meta( $user_id, DAHU_DEFERRED_SEPA_KNOWN_DEFAULT_META, 0 );
+			update_user_meta( $user_id, UBAC_SEPA_KNOWN_DEFAULT_META, 0 );
 		}
 
 		return;
@@ -427,15 +427,15 @@ function dahu_deferred_sepa_check_default_iban( $user_id ) {
 		return;
 	}
 
-	update_user_meta( $user_id, DAHU_DEFERRED_SEPA_KNOWN_DEFAULT_META, (int) $default->get_id() );
+	update_user_meta( $user_id, UBAC_SEPA_KNOWN_DEFAULT_META, (int) $default->get_id() );
 
-	$active = (int) get_user_meta( $user_id, DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META, true );
+	$active = (int) get_user_meta( $user_id, UBAC_SEPA_ACTIVE_TOKEN_META, true );
 
 	if ( (int) $default->get_id() === $active ) {
 		return;
 	}
 
-	dahu_deferred_sepa_notify_iban_submitted( $user_id, dahu_deferred_sepa_token_last4( $default ) );
+	ubac_sepa_notify_iban_submitted( $user_id, ubac_sepa_token_last4( $default ) );
 }
 
 /* ------------------------------------------------------------------
@@ -450,14 +450,14 @@ function dahu_deferred_sepa_check_default_iban( $user_id ) {
  * @param string $last4   Last four digits of the IBAN.
  * @return void
  */
-function dahu_deferred_sepa_notify_iban_submitted( $user_id, $last4 ) {
+function ubac_sepa_notify_iban_submitted( $user_id, $last4 ) {
 	$user = get_userdata( $user_id );
 
 	if ( ! $user ) {
 		return;
 	}
 
-	$to = dahu_deferred_sepa_notify_email();
+	$to = ubac_sepa_notify_email();
 
 	if ( $to ) {
 		$subject = __( 'A customer submitted a SEPA mandate for approval', 'ubac-sepa' );
@@ -470,8 +470,8 @@ function dahu_deferred_sepa_notify_iban_submitted( $user_id, $last4 ) {
 			$user->display_name,
 			$user->user_email,
 			$last4,
-			dahu_deferred_sepa_format_date( time() ),
-			admin_url( 'user-edit.php?user_id=' . (int) $user_id . '#dahu-deferred-sepa' )
+			ubac_sepa_format_date( time() ),
+			admin_url( 'user-edit.php?user_id=' . (int) $user_id . '#ubac-sepa' )
 		);
 
 		/**
@@ -486,7 +486,7 @@ function dahu_deferred_sepa_notify_iban_submitted( $user_id, $last4 ) {
 		// set of nulls.
 		$mail = wp_parse_args(
 			(array) apply_filters(
-				'dahu_deferred_sepa_mandate_submitted_admin_email',
+				'ubac_sepa_mandate_submitted_admin_email',
 				compact( 'to', 'subject', 'body' ),
 				$user_id,
 				$last4
@@ -518,7 +518,7 @@ function dahu_deferred_sepa_notify_iban_submitted( $user_id, $last4 ) {
 	 */
 	$mail = wp_parse_args(
 		(array) apply_filters(
-			'dahu_deferred_sepa_mandate_submitted_customer_email',
+			'ubac_sepa_mandate_submitted_customer_email',
 			compact( 'subject', 'body' ),
 			$user_id,
 			$last4
@@ -536,7 +536,7 @@ function dahu_deferred_sepa_notify_iban_submitted( $user_id, $last4 ) {
  * @param int $token_id Approved token.
  * @return void
  */
-function dahu_deferred_sepa_notify_iban_approved( $user_id, $token_id ) {
+function ubac_sepa_notify_iban_approved( $user_id, $token_id ) {
 	$user = get_userdata( $user_id );
 
 	if ( ! $user || ! class_exists( 'WC_Payment_Tokens' ) ) {
@@ -557,8 +557,8 @@ function dahu_deferred_sepa_notify_iban_approved( $user_id, $token_id ) {
 			'ubac-sepa'
 		),
 		$user->display_name,
-		dahu_deferred_sepa_token_last4( $token ),
-		dahu_deferred_sepa_get_delay_days( $user_id ),
+		ubac_sepa_token_last4( $token ),
+		ubac_sepa_get_delay_days( $user_id ),
 		get_bloginfo( 'name' )
 	);
 
@@ -571,7 +571,7 @@ function dahu_deferred_sepa_notify_iban_approved( $user_id, $token_id ) {
 	 */
 	$mail = wp_parse_args(
 		(array) apply_filters(
-			'dahu_deferred_sepa_mandate_approved_email',
+			'ubac_sepa_mandate_approved_email',
 			compact( 'subject', 'body' ),
 			$user_id,
 			$token_id
@@ -586,14 +586,14 @@ function dahu_deferred_sepa_notify_iban_approved( $user_id, $token_id ) {
  * My account → Payment methods
  * ------------------------------------------------------------------ */
 
-add_action( 'woocommerce_account_payment-methods_endpoint', 'dahu_deferred_sepa_account_payment_methods', 20 );
+add_action( 'woocommerce_account_payment-methods_endpoint', 'ubac_sepa_account_payment_methods', 20 );
 
 /**
  * Says where the customer stands, and loads the page touch-ups.
  *
  * @return void
  */
-function dahu_deferred_sepa_account_payment_methods() {
+function ubac_sepa_account_payment_methods() {
 	$user_id = get_current_user_id();
 
 	if ( ! $user_id ) {
@@ -601,32 +601,32 @@ function dahu_deferred_sepa_account_payment_methods() {
 	}
 
 	wp_enqueue_style(
-		'dahu-deferred-sepa-account',
-		DAHU_DEFERRED_SEPA_URL . 'assets/css/account.css',
+		'ubac-sepa-account',
+		UBAC_SEPA_URL . 'assets/css/account.css',
 		array(),
-		DAHU_DEFERRED_SEPA_VERSION
+		UBAC_SEPA_VERSION
 	);
 
-	$active  = (int) get_user_meta( $user_id, DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META, true );
-	$default = dahu_deferred_sepa_get_default_sepa_token( $user_id );
+	$active  = (int) get_user_meta( $user_id, UBAC_SEPA_ACTIVE_TOKEN_META, true );
+	$default = ubac_sepa_get_default_sepa_token( $user_id );
 	$last4   = '';
 
 	if ( $active ) {
 		$token = class_exists( 'WC_Payment_Tokens' ) ? WC_Payment_Tokens::get( $active ) : null;
-		$last4 = $token ? dahu_deferred_sepa_token_last4( $token ) : '';
+		$last4 = $token ? ubac_sepa_token_last4( $token ) : '';
 	}
 
 	wp_enqueue_script(
-		'dahu-deferred-sepa-account',
-		DAHU_DEFERRED_SEPA_URL . 'assets/js/account.js',
+		'ubac-sepa-account',
+		UBAC_SEPA_URL . 'assets/js/account.js',
 		array(),
-		DAHU_DEFERRED_SEPA_VERSION,
+		UBAC_SEPA_VERSION,
 		true
 	);
 
 	wp_localize_script(
-		'dahu-deferred-sepa-account',
-		'dahuDeferredSepaAccount',
+		'ubac-sepa-account',
+		'ubacDeferredSepaAccount',
 		array(
 			'last4'         => $last4,
 			'approvedLabel' => __( 'approved', 'ubac-sepa' ),
@@ -634,11 +634,11 @@ function dahu_deferred_sepa_account_payment_methods() {
 		)
 	);
 
-	if ( dahu_deferred_sepa_is_authorized( $user_id ) ) {
+	if ( ubac_sepa_is_authorized( $user_id ) ) {
 		$message = sprintf(
 			/* translators: %d: delay in days. */
 			__( 'Your approved mandate is charged %d days after your order ships. SEPA then settles in a few working days.', 'ubac-sepa' ),
-			dahu_deferred_sepa_get_delay_days( $user_id )
+			ubac_sepa_get_delay_days( $user_id )
 		);
 	} elseif ( $default && (int) $default->get_id() !== $active ) {
 		$message = __( 'Your IBAN has been submitted. We will email you once it has been approved.', 'ubac-sepa' );
@@ -646,7 +646,7 @@ function dahu_deferred_sepa_account_payment_methods() {
 		$message = __( 'To pay by SEPA Direct Debit, use "Add payment method" above to save your IBAN. We will email you once it has been approved.', 'ubac-sepa' );
 	}
 
-	$contact = dahu_deferred_sepa_contact_email();
+	$contact = ubac_sepa_contact_email();
 
 	if ( $contact ) {
 		$message .= ' ' . sprintf(
@@ -656,5 +656,5 @@ function dahu_deferred_sepa_account_payment_methods() {
 		);
 	}
 
-	echo '<p class="dahu-sepa-account-note">' . esc_html( $message ) . '</p>';
+	echo '<p class="ubac-sepa-account-note">' . esc_html( $message ) . '</p>';
 }

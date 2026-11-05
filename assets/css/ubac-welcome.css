@@ -16,7 +16,7 @@
  * Single source of truth: /Dev/dahu-public/UI-ADMIN-DAHU.md
  */
 
-.dahu-welcome {
+.ubac-welcome {
 	max-width: 880px;
 }
 
@@ -28,7 +28,7 @@
  * initials are legible at any size and never wrong.
  * ------------------------------------------------------------------------ */
 
-.dahu-welcome .dahu-welcome-hero {
+.ubac-welcome .ubac-welcome-hero {
 	margin: 8px 0 28px;
 	padding: 32px 34px;
 	border: 1px solid var( --dui-accent-edge );
@@ -43,7 +43,7 @@
 	overflow: hidden;
 }
 
-.dahu-welcome .dahu-welcome-hero__mark {
+.ubac-welcome .ubac-welcome-hero__mark {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -63,7 +63,7 @@
  * from the tile above, so the mark keeps working whatever a palette does to
  * the accent -- there is no second colour to keep in step.
  */
-.dahu-welcome .dahu-welcome-hero__glyph {
+.ubac-welcome .ubac-welcome-hero__glyph {
 	display: block;
 	width: 36px;
 	height: 36px;
@@ -74,7 +74,7 @@
  * anything to say. It is decoration, so it never takes a pointer and never
  * reaches a screen reader -- the words beside it already say the name.
  */
-.dahu-welcome .dahu-welcome-hero__wash {
+.ubac-welcome .ubac-welcome-hero__wash {
 	position: absolute;
 	right: -40px;
 	top: 50%;
@@ -88,12 +88,12 @@
 
 @media ( max-width: 782px ) {
 
-	.dahu-welcome .dahu-welcome-hero__wash {
+	.ubac-welcome .ubac-welcome-hero__wash {
 		display: none;
 	}
 }
 
-.dahu-welcome .dahu-welcome-hero__title {
+.ubac-welcome .ubac-welcome-hero__title {
 	margin: 0;
 	padding: 0;
 	font-size: 30px;
@@ -103,7 +103,7 @@
 	color: var( --dui-ink );
 }
 
-.dahu-welcome .dahu-welcome-hero__line {
+.ubac-welcome .ubac-welcome-hero__line {
 	margin: 10px 0 0;
 	font-size: 15px;
 	line-height: 1.55;
@@ -118,7 +118,7 @@
  * and anything that does not fit in three sentences is documentation.
  * ------------------------------------------------------------------------ */
 
-.dahu-welcome .dahu-welcome-points {
+.ubac-welcome .ubac-welcome-points {
 	display: grid;
 	grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
 	gap: 16px;
@@ -127,12 +127,12 @@
 
 @media screen and ( max-width: 860px ) {
 
-	.dahu-welcome .dahu-welcome-points {
+	.ubac-welcome .ubac-welcome-points {
 		grid-template-columns: minmax( 0, 1fr );
 	}
 }
 
-.dahu-welcome .dahu-welcome-point {
+.ubac-welcome .ubac-welcome-point {
 	padding: 20px;
 	border: 1px solid var( --dui-rule );
 	border-radius: var( --dui-radius-card );
@@ -140,7 +140,7 @@
 	box-sizing: border-box;
 }
 
-.dahu-welcome .dahu-welcome-point__n {
+.ubac-welcome .ubac-welcome-point__n {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -154,7 +154,7 @@
 	font-weight: 600;
 }
 
-.dahu-welcome .dahu-welcome-point__title {
+.ubac-welcome .ubac-welcome-point__title {
 	margin: 0 0 6px;
 	padding: 0;
 	font-size: 14.5px;
@@ -162,7 +162,7 @@
 	color: var( --dui-ink );
 }
 
-.dahu-welcome .dahu-welcome-point__text {
+.ubac-welcome .ubac-welcome-point__text {
 	margin: 0;
 	font-size: 13px;
 	line-height: 1.55;
@@ -173,7 +173,7 @@
  * The buttons. One does the obvious next thing; the rest are quiet.
  * ------------------------------------------------------------------------ */
 
-.dahu-welcome .dahu-welcome-actions {
+.ubac-welcome .ubac-welcome-actions {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px;

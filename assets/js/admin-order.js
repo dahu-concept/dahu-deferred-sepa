@@ -8,10 +8,10 @@
 ( function () {
 	'use strict';
 
-	var data = window.dahuDeferredSepaOrder || {};
+	var data = window.ubacDeferredSepaOrder || {};
 
 	document.addEventListener( 'click', function ( event ) {
-		var link = event.target.closest( '.js-dahu-sepa-charge-now' );
+		var link = event.target.closest( '.js-ubac-sepa-charge-now' );
 
 		if ( ! link ) {
 			return;

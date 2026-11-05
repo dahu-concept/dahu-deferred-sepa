@@ -14,7 +14,7 @@
  * every order the shop has ever taken and sorting them in PHP works until the
  * shop is big, and then stops working with no warning.
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,26 +22,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Rows per page on the history tab. */
-define( 'DAHU_DEFERRED_SEPA_PER_PAGE', 30 );
+define( 'UBAC_SEPA_PER_PAGE', 30 );
 
 /** Outcomes a charge can have. */
-define( 'DAHU_DEFERRED_SEPA_RESULTS', array( 'processing', 'succeeded', 'failed', 'disputed' ) );
+define( 'UBAC_SEPA_RESULTS', array( 'processing', 'succeeded', 'failed', 'disputed' ) );
 
-add_action( 'admin_menu', 'dahu_deferred_sepa_register_admin_page', 20 );
+add_action( 'admin_menu', 'ubac_sepa_register_admin_page', 20 );
 
 /**
  * Adds the screen under WooCommerce.
  *
  * @return void
  */
-function dahu_deferred_sepa_register_admin_page() {
+function ubac_sepa_register_admin_page() {
 	add_submenu_page(
 		'woocommerce',
 		__( 'SEPA charges', 'ubac-sepa' ),
 		__( 'SEPA charges', 'ubac-sepa' ),
 		'edit_shop_orders',
-		DAHU_DEFERRED_SEPA_CHARGES_PAGE,
-		'dahu_deferred_sepa_render_admin_page'
+		UBAC_SEPA_CHARGES_PAGE,
+		'ubac_sepa_render_admin_page'
 	);
 }
 
@@ -51,7 +51,7 @@ function dahu_deferred_sepa_register_admin_page() {
  * @param string $result Outcome.
  * @return string
  */
-function dahu_deferred_sepa_result_label( $result ) {
+function ubac_sepa_result_label( $result ) {
 	$labels = array(
 		'processing' => __( 'Under way', 'ubac-sepa' ),
 		'succeeded'  => __( 'Collected', 'ubac-sepa' ),
@@ -68,9 +68,9 @@ function dahu_deferred_sepa_result_label( $result ) {
  * @param string $result Outcome.
  * @return string HTML.
  */
-function dahu_deferred_sepa_result_badge( $result ) {
-	return '<span class="dahu-sepa-badge dahu-sepa-badge--' . esc_attr( $result ) . '">'
-		. esc_html( dahu_deferred_sepa_result_label( $result ) )
+function ubac_sepa_result_badge( $result ) {
+	return '<span class="ubac-sepa-badge ubac-sepa-badge--' . esc_attr( $result ) . '">'
+		. esc_html( ubac_sepa_result_label( $result ) )
 		. '</span>';
 }
 
@@ -81,7 +81,7 @@ function dahu_deferred_sepa_result_badge( $result ) {
  * @param int $days      Working days to add.
  * @return int
  */
-function dahu_deferred_sepa_add_business_days( $timestamp, $days ) {
+function ubac_sepa_add_business_days( $timestamp, $days ) {
 	while ( $days > 0 ) {
 		$timestamp += DAY_IN_SECONDS;
 
@@ -101,13 +101,13 @@ function dahu_deferred_sepa_add_business_days( $timestamp, $days ) {
  *
  * @return int
  */
-function dahu_deferred_sepa_settlement_days() {
+function ubac_sepa_settlement_days() {
 	/**
 	 * Filters the assumed SEPA settlement time, in working days.
 	 *
 	 * @param int $days Working days.
 	 */
-	return max( 0, (int) apply_filters( 'dahu_deferred_sepa_settlement_days', 3 ) );
+	return max( 0, (int) apply_filters( 'ubac_sepa_settlement_days', 3 ) );
 }
 
 /* ------------------------------------------------------------------
@@ -119,7 +119,7 @@ function dahu_deferred_sepa_settlement_days() {
  *
  * @return void
  */
-function dahu_deferred_sepa_render_admin_page() {
+function ubac_sepa_render_admin_page() {
 	if ( ! current_user_can( 'edit_shop_orders' ) ) {
 		wp_die( esc_html__( 'You are not allowed to view this page.', 'ubac-sepa' ), '', array( 'response' => 403 ) );
 	}
@@ -131,17 +131,17 @@ function dahu_deferred_sepa_render_admin_page() {
 	// first serves all of them, and a shop with six of these installed
 	// downloads one copy.
 	wp_enqueue_style(
-		'dahu-ui',
-		DAHU_DEFERRED_SEPA_URL . 'assets/css/dahu-ui.css',
+		'ubac-ui',
+		UBAC_SEPA_URL . 'assets/css/ubac-ui.css',
 		array(),
-		DAHU_DEFERRED_SEPA_VERSION
+		UBAC_SEPA_VERSION
 	);
 
 	wp_enqueue_style(
-		'dahu-deferred-sepa-admin',
-		DAHU_DEFERRED_SEPA_URL . 'assets/css/admin.css',
-		array( 'dahu-ui' ),
-		DAHU_DEFERRED_SEPA_VERSION
+		'ubac-sepa-admin',
+		UBAC_SEPA_URL . 'assets/css/admin.css',
+		array( 'ubac-ui' ),
+		UBAC_SEPA_VERSION
 	);
 
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- navigation between two read-only tabs.
@@ -152,10 +152,10 @@ function dahu_deferred_sepa_render_admin_page() {
 		'history'  => __( 'History', 'ubac-sepa' ),
 	);
 
-	echo '<div class="wrap dahu-ui">';
-	echo '<div class="dahu-ui-head">';
-	echo '<h1 class="dahu-ui-head__title">' . esc_html__( 'SEPA charges', 'ubac-sepa' ) . '</h1>';
-	echo '<p class="dahu-ui-head__sub">' . esc_html__( 'What is due, and what has been taken.', 'ubac-sepa' ) . '</p>';
+	echo '<div class="wrap ubac-ui">';
+	echo '<div class="ubac-ui-head">';
+	echo '<h1 class="ubac-ui-head__title">' . esc_html__( 'SEPA charges', 'ubac-sepa' ) . '</h1>';
+	echo '<p class="ubac-ui-head__sub">' . esc_html__( 'What is due, and what has been taken.', 'ubac-sepa' ) . '</p>';
 	echo '</div>';
 
 	echo '<hr class="wp-header-end">';
@@ -164,7 +164,7 @@ function dahu_deferred_sepa_render_admin_page() {
 	foreach ( $tabs as $slug => $label ) {
 		printf(
 			'<a href="%s" class="nav-tab%s">%s</a>',
-			esc_url( admin_url( 'admin.php?page=' . DAHU_DEFERRED_SEPA_CHARGES_PAGE . '&tab=' . $slug ) ),
+			esc_url( admin_url( 'admin.php?page=' . UBAC_SEPA_CHARGES_PAGE . '&tab=' . $slug ) ),
 			$slug === $current ? ' nav-tab-active' : '',
 			esc_html( $label )
 		);
@@ -173,9 +173,9 @@ function dahu_deferred_sepa_render_admin_page() {
 	echo '</h2>';
 
 	if ( 'upcoming' === $current ) {
-		dahu_deferred_sepa_render_upcoming_tab();
+		ubac_sepa_render_upcoming_tab();
 	} else {
-		dahu_deferred_sepa_render_history_tab();
+		ubac_sepa_render_history_tab();
 	}
 
 	echo '</div>';
@@ -212,13 +212,13 @@ function dahu_deferred_sepa_render_admin_page() {
  * @param WC_Order[] $late Overdue orders, keyed by id.
  * @return void
  */
-function dahu_deferred_sepa_render_overdue_block( array $late ) {
+function ubac_sepa_render_overdue_block( array $late ) {
 
 	if ( ! $late ) {
 		return;
 	}
 
-	echo '<div class="dahu-ui-band"><div><p class="dahu-ui-band__title">';
+	echo '<div class="ubac-ui-band"><div><p class="ubac-ui-band__title">';
 
 	printf(
 		esc_html(
@@ -233,13 +233,13 @@ function dahu_deferred_sepa_render_overdue_block( array $late ) {
 		count( $late )
 	);
 
-	echo '</p><p class="dahu-ui-band__text">';
+	echo '</p><p class="ubac-ui-band__text">';
 
 	esc_html_e( 'No money moved on these orders and nothing is retried automatically, because a charge that may already have been sent would be taken twice. Check each one, then reschedule it from the order.', 'ubac-sepa' );
 
 	echo '</p></div></div>';
 
-	echo '<table class="dahu-ui-table"><thead><tr>';
+	echo '<table class="ubac-ui-table"><thead><tr>';
 	echo '<th>' . esc_html__( 'Order', 'ubac-sepa' ) . '</th>';
 	echo '<th>' . esc_html__( 'Amount', 'ubac-sepa' ) . '</th>';
 	echo '<th>' . esc_html__( 'Was due', 'ubac-sepa' ) . '</th>';
@@ -248,13 +248,13 @@ function dahu_deferred_sepa_render_overdue_block( array $late ) {
 
 	foreach ( $late as $order ) {
 
-		$reason = dahu_deferred_sepa_blocking_reason( $order );
+		$reason = ubac_sepa_blocking_reason( $order );
 
 		echo '<tr>';
 		echo '<td><a href="' . esc_url( $order->get_edit_order_url() ) . '"><strong>#'
 			. esc_html( $order->get_order_number() ) . '</strong></a></td>';
 		echo '<td>' . wp_kses_post( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ) . '</td>';
-		echo '<td>' . esc_html( dahu_deferred_sepa_format_date( (int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' ) ) ) . '</td>';
+		echo '<td>' . esc_html( ubac_sepa_format_date( (int) $order->get_meta( '_ubac_sepa_scheduled_ts' ) ) ) . '</td>';
 		echo '<td>' . esc_html(
 			'' !== $reason
 				? $reason
@@ -269,7 +269,7 @@ function dahu_deferred_sepa_render_overdue_block( array $late ) {
 
 	echo '</tbody></table>';
 
-	$swept = dahu_deferred_sepa_last_sweep();
+	$swept = ubac_sepa_last_sweep();
 
 	echo '<p>';
 
@@ -277,7 +277,7 @@ function dahu_deferred_sepa_render_overdue_block( array $late ) {
 		printf(
 			/* translators: %s: date and time. */
 			esc_html__( 'The daily check last reported overdue charges on %s. Each order is reported once, by email, and then stays on this list until it is dealt with.', 'ubac-sepa' ),
-			esc_html( dahu_deferred_sepa_format_date( $swept ) )
+			esc_html( ubac_sepa_format_date( $swept ) )
 		);
 	} else {
 		// Said, and not left blank. A watchdog nobody has ever heard from is
@@ -289,7 +289,7 @@ function dahu_deferred_sepa_render_overdue_block( array $late ) {
 	echo '</p>';
 }
 
-function dahu_deferred_sepa_render_upcoming_tab() {
+function ubac_sepa_render_upcoming_tab() {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only display toggle.
 	$show_pending = ! empty( $_GET['show_pending'] );
 
@@ -298,7 +298,7 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 	$scheduled = wc_get_orders(
 		array(
 			'limit'        => -1,
-			'meta_key'     => '_dahu_deferred_sepa_scheduled_ts', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- wc_get_orders' own argument.
+			'meta_key'     => '_ubac_sepa_scheduled_ts', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- wc_get_orders' own argument.
 			'meta_compare' => 'EXISTS',
 		)
 	);
@@ -306,9 +306,9 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 	$late = array();
 
 	foreach ( $scheduled as $order ) {
-		$when = (int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' );
+		$when = (int) $order->get_meta( '_ubac_sepa_scheduled_ts' );
 
-		if ( ! $when || 'yes' === $order->get_meta( '_dahu_deferred_sepa_done' ) ) {
+		if ( ! $when || 'yes' === $order->get_meta( '_ubac_sepa_done' ) ) {
 			continue;
 		}
 
@@ -316,7 +316,7 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		// keeps its own record on the order and in the history, and showing
 		// it here would make the total at the top of this screen a figure the
 		// shop is waiting for twice.
-		if ( dahu_deferred_sepa_is_settled_offline( $order ) ) {
+		if ( ubac_sepa_is_settled_offline( $order ) ) {
 			continue;
 		}
 
@@ -326,7 +326,7 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		// way when nothing was ever sent, and it goes on telling it every
 		// day. Those orders are taken out of the list below and put in
 		// their own block at the top. See includes/alerts.php.
-		if ( dahu_deferred_sepa_is_overdue( $order ) ) {
+		if ( ubac_sepa_is_overdue( $order ) ) {
 			$late[ $order->get_id() ] = $order;
 
 			continue;
@@ -338,19 +338,19 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		);
 	}
 
-	dahu_deferred_sepa_render_overdue_block( $late );
+	ubac_sepa_render_overdue_block( $late );
 
 	if ( $show_pending ) {
 		$pending = wc_get_orders(
 			array(
 				'limit'          => -1,
 				'status'         => array( 'on-hold', 'processing' ),
-				'payment_method' => DAHU_DEFERRED_SEPA_GATEWAY_ID,
+				'payment_method' => UBAC_SEPA_GATEWAY_ID,
 			)
 		);
 
 		foreach ( $pending as $order ) {
-			if ( isset( $rows[ $order->get_id() ] ) || 'yes' === $order->get_meta( '_dahu_deferred_sepa_done' ) ) {
+			if ( isset( $rows[ $order->get_id() ] ) || 'yes' === $order->get_meta( '_ubac_sepa_done' ) ) {
 				continue;
 			}
 
@@ -399,8 +399,8 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		$amounts[] = wc_price( $amount, array( 'currency' => $currency ) );
 	}
 
-	echo '<div class="dahu-ui-card">';
-	echo '<div class="dahu-sepa-note">';
+	echo '<div class="ubac-ui-card">';
+	echo '<div class="ubac-sepa-note">';
 	printf(
 		/* translators: 1: one or more total amounts, already formatted; 2: number of orders. */
 		esc_html__( 'Expected: %1$s across %2$d orders.', 'ubac-sepa' ),
@@ -410,18 +410,18 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 	echo '</div>';
 
 	echo '<form method="get">';
-	echo '<input type="hidden" name="page" value="' . esc_attr( DAHU_DEFERRED_SEPA_CHARGES_PAGE ) . '">';
+	echo '<input type="hidden" name="page" value="' . esc_attr( UBAC_SEPA_CHARGES_PAGE ) . '">';
 	echo '<input type="hidden" name="tab" value="upcoming">';
 	echo '<p><label><input type="checkbox" name="show_pending" value="1" ' . checked( $show_pending, true, false ) . '> '
 		. esc_html__( 'Also show orders taken on this gateway that have not shipped yet', 'ubac-sepa' )
-		. '</label> <button class="dahu-ui-btn">' . esc_html__( 'Apply', 'ubac-sepa' ) . '</button></p>';
+		. '</label> <button class="ubac-ui-btn">' . esc_html__( 'Apply', 'ubac-sepa' ) . '</button></p>';
 	echo '</form>';
 
 	echo '<p class="description">';
 	printf(
 		/* translators: %d: assumed settlement time in working days. */
 		esc_html__( 'The settlement date is an estimate: it assumes %d working days after the charge is sent, which WooCommerce cannot verify.', 'ubac-sepa' ),
-		(int) dahu_deferred_sepa_settlement_days()
+		(int) ubac_sepa_settlement_days()
 	);
 
 	if ( $show_pending ) {
@@ -438,8 +438,8 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		// has simply not got a deferred order waiting, so the sentence says
 		// what will land here rather than leaving an empty card that reads
 		// like a screen that failed to load.
-		echo '<div class="dahu-ui-card">';
-		echo '<p class="dahu-ui-hint">'
+		echo '<div class="ubac-ui-card">';
+		echo '<p class="ubac-ui-hint">'
 			. esc_html__( 'Nothing is due: an order paid with this gateway appears here as soon as it is marked Completed.', 'ubac-sepa' )
 			. '</p>';
 		echo '</div>';
@@ -447,8 +447,8 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		return;
 	}
 
-	echo '<div class="dahu-ui-card">';
-	echo '<table class="widefat striped dahu-sepa-charges__table"><thead><tr>';
+	echo '<div class="ubac-ui-card">';
+	echo '<table class="widefat striped ubac-sepa-charges__table"><thead><tr>';
 	echo '<th>' . esc_html__( 'Order', 'ubac-sepa' ) . '</th>';
 	echo '<th>' . esc_html__( 'Ordered', 'ubac-sepa' ) . '</th>';
 	echo '<th>' . esc_html__( 'Amount', 'ubac-sepa' ) . '</th>';
@@ -459,7 +459,7 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 
 	foreach ( $rows as $row ) {
 		$order   = $row['order'];
-		$delay   = dahu_deferred_sepa_get_delay_days( $order->get_user_id() );
+		$delay   = ubac_sepa_get_delay_days( $order->get_user_id() );
 		$created = $order->get_date_created();
 
 		echo '<tr>';
@@ -471,10 +471,10 @@ function dahu_deferred_sepa_render_upcoming_tab() {
 		echo '<td>' . esc_html( sprintf( /* translators: %d: days. */ _n( '%d day', '%d days', $delay, 'ubac-sepa' ), $delay ) ) . '</td>';
 
 		if ( $row['when'] ) {
-			$settled = dahu_deferred_sepa_add_business_days( $row['when'], dahu_deferred_sepa_settlement_days() );
+			$settled = ubac_sepa_add_business_days( $row['when'], ubac_sepa_settlement_days() );
 
-			echo '<td>' . esc_html( dahu_deferred_sepa_format_date( $row['when'] ) ) . '</td>';
-			echo '<td><strong>' . esc_html( dahu_deferred_sepa_format_day( $settled ) ) . '</strong></td>';
+			echo '<td>' . esc_html( ubac_sepa_format_date( $row['when'] ) ) . '</td>';
+			echo '<td><strong>' . esc_html( ubac_sepa_format_day( $settled ) ) . '</strong></td>';
 		} else {
 			echo '<td><em>' . esc_html__( 'when the order is completed', 'ubac-sepa' ) . '</em></td>';
 			echo '<td><em>—</em></td>';
@@ -497,17 +497,17 @@ function dahu_deferred_sepa_render_upcoming_tab() {
  *
  * @return array{from:string,to:string,result:string,orderby:string,order:string}
  */
-function dahu_deferred_sepa_history_request_args() {
+function ubac_sepa_history_request_args() {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only filters.
 	$orderby = isset( $_REQUEST['orderby'] ) ? sanitize_key( wp_unslash( $_REQUEST['orderby'] ) ) : 'executed';
 	$order   = isset( $_REQUEST['order'] ) && 'asc' === strtolower( sanitize_key( wp_unslash( $_REQUEST['order'] ) ) ) ? 'asc' : 'desc';
-	$result  = isset( $_REQUEST['dahu_result'] ) ? sanitize_key( wp_unslash( $_REQUEST['dahu_result'] ) ) : '';
+	$result  = isset( $_REQUEST['ubac_result'] ) ? sanitize_key( wp_unslash( $_REQUEST['ubac_result'] ) ) : '';
 
 	$args = array(
-		'from'    => isset( $_REQUEST['dahu_from'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['dahu_from'] ) ) : '',
-		'to'      => isset( $_REQUEST['dahu_to'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['dahu_to'] ) ) : '',
-		'result'  => in_array( $result, DAHU_DEFERRED_SEPA_RESULTS, true ) ? $result : '',
-		// 'total' is not offered: see the note above dahu_deferred_sepa_history_query().
+		'from'    => isset( $_REQUEST['ubac_from'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['ubac_from'] ) ) : '',
+		'to'      => isset( $_REQUEST['ubac_to'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['ubac_to'] ) ) : '',
+		'result'  => in_array( $result, UBAC_SEPA_RESULTS, true ) ? $result : '',
+		// 'total' is not offered: see the note above ubac_sepa_history_query().
 		'orderby' => in_array( $orderby, array( 'executed', 'number' ), true ) ? $orderby : 'executed',
 		'order'   => $order,
 	);
@@ -515,7 +515,7 @@ function dahu_deferred_sepa_history_request_args() {
 
 	// A date that is not a date is dropped rather than passed to the query.
 	foreach ( array( 'from', 'to' ) as $key ) {
-		if ( '' !== $args[ $key ] && ! dahu_deferred_sepa_is_ymd( $args[ $key ] ) ) {
+		if ( '' !== $args[ $key ] && ! ubac_sepa_is_ymd( $args[ $key ] ) ) {
 			$args[ $key ] = '';
 		}
 	}
@@ -529,7 +529,7 @@ function dahu_deferred_sepa_history_request_args() {
  * @param string $value Value.
  * @return bool
  */
-function dahu_deferred_sepa_is_ymd( $value ) {
+function ubac_sepa_is_ymd( $value ) {
 	$date = DateTime::createFromFormat( 'Y-m-d', $value );
 
 	return $date && $date->format( 'Y-m-d' ) === $value;
@@ -576,16 +576,16 @@ function dahu_deferred_sepa_is_ymd( $value ) {
  * @param int   $per_page Rows per page.
  * @return array wc_get_orders() arguments.
  */
-function dahu_deferred_sepa_history_query( $args, $page = 1, $per_page = DAHU_DEFERRED_SEPA_PER_PAGE ) {
+function ubac_sepa_history_query( $args, $page = 1, $per_page = UBAC_SEPA_PER_PAGE ) {
 	// Bounded on there having BEEN a charge, not on the gateway id. This
 	// plugin also charges orders taken on the official Stripe SEPA gateways
-	// (DAHU_DEFERRED_SEPA_GATEWAYS), and restricting to its own id left those
+	// (UBAC_SEPA_GATEWAYS), and restricting to its own id left those
 	// charges out of the history and out of the CSV while the Upcoming tab
 	// still listed them — the two tabs disagreeing about the same order.
-	// `_dahu_deferred_sepa_executed_ts` is written by nothing else.
+	// `_ubac_sepa_executed_ts` is written by nothing else.
 	$query = array(
 		'status'       => array_keys( wc_get_order_statuses() ),
-		'meta_key'     => '_dahu_deferred_sepa_executed_ts', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- wc_get_orders' own argument; the key is this plugin's.
+		'meta_key'     => '_ubac_sepa_executed_ts', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- wc_get_orders' own argument; the key is this plugin's.
 		'meta_compare' => 'EXISTS',
 		'order'        => 'asc' === $args['order'] ? 'ASC' : 'DESC',
 		'orderby'      => 'number' === $args['orderby'] ? 'ID' : 'meta_value_num',
@@ -607,7 +607,7 @@ function dahu_deferred_sepa_history_query( $args, $page = 1, $per_page = DAHU_DE
  * @param array $args Filters.
  * @return bool
  */
-function dahu_deferred_sepa_history_is_filtered( $args ) {
+function ubac_sepa_history_is_filtered( $args ) {
 	return '' !== $args['result'] || '' !== $args['from'] || '' !== $args['to'];
 }
 
@@ -625,7 +625,7 @@ function dahu_deferred_sepa_history_is_filtered( $args ) {
  * @param string $which 'start' or 'end'.
  * @return int
  */
-function dahu_deferred_sepa_day_bound( $ymd, $which ) {
+function ubac_sepa_day_bound( $ymd, $which ) {
 	$time = 'end' === $which ? '23:59:59' : '00:00:00';
 	$when = DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $ymd . ' ' . $time, wp_timezone() );
 
@@ -641,7 +641,7 @@ function dahu_deferred_sepa_day_bound( $ymd, $which ) {
  * @param string $type    Meta type, for a numeric comparison.
  * @return int[]|null
  */
-function dahu_deferred_sepa_ids_where( $key, $value, $compare = '=', $type = '' ) {
+function ubac_sepa_ids_where( $key, $value, $compare = '=', $type = '' ) {
 	$query = array(
 		'limit'        => -1,
 		'return'       => 'ids',
@@ -671,27 +671,27 @@ function dahu_deferred_sepa_ids_where( $key, $value, $compare = '=', $type = '' 
  * The answer is kept for the CURRENT REQUEST ONLY, keyed on the filters: a
  * different set of filters is a different question and is asked again. Nothing
  * on this screen writes a charge -- it is a read-only report, and
- * `_dahu_deferred_sepa_executed_ts` is written by the charge paths, in other
+ * `_ubac_sepa_executed_ts` is written by the charge paths, in other
  * requests. Within one request the second ask could therefore only ever get
  * the same answer back. A caller that is not sure of that calls
- * `dahu_deferred_sepa_forget_history_ids()` first.
+ * `ubac_sepa_forget_history_ids()` first.
  *
  * @param array $args Filters.
  * @return int[]
  */
-function dahu_deferred_sepa_history_ids( $args ) {
+function ubac_sepa_history_ids( $args ) {
 
-	if ( ! isset( $GLOBALS['dahu_deferred_sepa_history_ids'] ) || ! is_array( $GLOBALS['dahu_deferred_sepa_history_ids'] ) ) {
-		$GLOBALS['dahu_deferred_sepa_history_ids'] = array();
+	if ( ! isset( $GLOBALS['ubac_sepa_history_ids'] ) || ! is_array( $GLOBALS['ubac_sepa_history_ids'] ) ) {
+		$GLOBALS['ubac_sepa_history_ids'] = array();
 	}
 
 	$signature = md5( (string) wp_json_encode( $args ) );
 
-	if ( ! isset( $GLOBALS['dahu_deferred_sepa_history_ids'][ $signature ] ) ) {
-		$GLOBALS['dahu_deferred_sepa_history_ids'][ $signature ] = dahu_deferred_sepa_read_history_ids( $args );
+	if ( ! isset( $GLOBALS['ubac_sepa_history_ids'][ $signature ] ) ) {
+		$GLOBALS['ubac_sepa_history_ids'][ $signature ] = ubac_sepa_read_history_ids( $args );
 	}
 
-	return $GLOBALS['dahu_deferred_sepa_history_ids'][ $signature ];
+	return $GLOBALS['ubac_sepa_history_ids'][ $signature ];
 }
 
 /**
@@ -702,8 +702,8 @@ function dahu_deferred_sepa_history_ids( $args ) {
  *
  * @return void
  */
-function dahu_deferred_sepa_forget_history_ids() {
-	$GLOBALS['dahu_deferred_sepa_history_ids'] = array();
+function ubac_sepa_forget_history_ids() {
+	$GLOBALS['ubac_sepa_history_ids'] = array();
 }
 
 /**
@@ -715,32 +715,32 @@ function dahu_deferred_sepa_forget_history_ids() {
  * @param array $args Filters.
  * @return int[]
  */
-function dahu_deferred_sepa_read_history_ids( $args ) {
-	$ordered = array_map( 'intval', (array) wc_get_orders( dahu_deferred_sepa_history_query( $args, 0 ) + array( 'return' => 'ids' ) ) );
+function ubac_sepa_read_history_ids( $args ) {
+	$ordered = array_map( 'intval', (array) wc_get_orders( ubac_sepa_history_query( $args, 0 ) + array( 'return' => 'ids' ) ) );
 
-	if ( ! dahu_deferred_sepa_history_is_filtered( $args ) ) {
+	if ( ! ubac_sepa_history_is_filtered( $args ) ) {
 		return $ordered;
 	}
 
 	$sets = array();
 
 	if ( '' !== $args['result'] ) {
-		$sets[] = dahu_deferred_sepa_ids_where( '_dahu_deferred_sepa_result', $args['result'] );
+		$sets[] = ubac_sepa_ids_where( '_ubac_sepa_result', $args['result'] );
 	}
 
 	if ( '' !== $args['from'] ) {
-		$sets[] = dahu_deferred_sepa_ids_where(
-			'_dahu_deferred_sepa_executed_ts',
-			dahu_deferred_sepa_day_bound( $args['from'], 'start' ),
+		$sets[] = ubac_sepa_ids_where(
+			'_ubac_sepa_executed_ts',
+			ubac_sepa_day_bound( $args['from'], 'start' ),
 			'>=',
 			'NUMERIC'
 		);
 	}
 
 	if ( '' !== $args['to'] ) {
-		$sets[] = dahu_deferred_sepa_ids_where(
-			'_dahu_deferred_sepa_executed_ts',
-			dahu_deferred_sepa_day_bound( $args['to'], 'end' ),
+		$sets[] = ubac_sepa_ids_where(
+			'_ubac_sepa_executed_ts',
+			ubac_sepa_day_bound( $args['to'], 'end' ),
 			'<=',
 			'NUMERIC'
 		);
@@ -763,8 +763,8 @@ function dahu_deferred_sepa_read_history_ids( $args ) {
  * @param array $args Filters.
  * @return int
  */
-function dahu_deferred_sepa_history_count( $args ) {
-	return count( dahu_deferred_sepa_history_ids( $args ) );
+function ubac_sepa_history_count( $args ) {
+	return count( ubac_sepa_history_ids( $args ) );
 }
 
 /**
@@ -773,7 +773,7 @@ function dahu_deferred_sepa_history_count( $args ) {
  * @param WC_Order $order Order.
  * @return array
  */
-function dahu_deferred_sepa_history_row( WC_Order $order ) {
+function ubac_sepa_history_row( WC_Order $order ) {
 	return array(
 		'order'      => $order,
 		'number'     => $order->get_order_number(),
@@ -781,11 +781,11 @@ function dahu_deferred_sepa_history_row( WC_Order $order ) {
 		'email'      => $order->get_billing_email(),
 		'total'      => (float) $order->get_total(),
 		'currency'   => $order->get_currency(),
-		'first_ts'   => (int) $order->get_meta( '_dahu_deferred_sepa_first_scheduled_ts' ),
-		'final_ts'   => (int) $order->get_meta( '_dahu_deferred_sepa_final_scheduled_ts' ),
-		'reschedule' => (int) $order->get_meta( '_dahu_deferred_sepa_reschedule_count' ),
-		'executed'   => (int) $order->get_meta( '_dahu_deferred_sepa_executed_ts' ),
-		'result'     => (string) $order->get_meta( '_dahu_deferred_sepa_result' ),
+		'first_ts'   => (int) $order->get_meta( '_ubac_sepa_first_scheduled_ts' ),
+		'final_ts'   => (int) $order->get_meta( '_ubac_sepa_final_scheduled_ts' ),
+		'reschedule' => (int) $order->get_meta( '_ubac_sepa_reschedule_count' ),
+		'executed'   => (int) $order->get_meta( '_ubac_sepa_executed_ts' ),
+		'result'     => (string) $order->get_meta( '_ubac_sepa_result' ),
 		'intent'     => (string) $order->get_meta( '_stripe_intent_id' ),
 	);
 }
@@ -802,15 +802,15 @@ function dahu_deferred_sepa_history_row( WC_Order $order ) {
  * @param int   $per_page Rows per page.
  * @return array[]
  */
-function dahu_deferred_sepa_get_history_rows( $args, $page = 1, $per_page = DAHU_DEFERRED_SEPA_PER_PAGE ) {
+function ubac_sepa_get_history_rows( $args, $page = 1, $per_page = UBAC_SEPA_PER_PAGE ) {
 	// Paged from the ordered id list rather than by the database, even with no
-	// filter applied. `_dahu_deferred_sepa_executed_ts` has second resolution
+	// filter applied. `_ubac_sepa_executed_ts` has second resolution
 	// and Action Scheduler sends a batch of due charges within the same second,
 	// so ties are routine — and an ORDER BY with no tie-breaker lets the page-1
 	// and page-2 queries disagree, showing one row twice and never showing
 	// another. wc_get_orders() offers no secondary sort, so the ordering is
 	// settled once here and then sliced.
-	$ids = dahu_deferred_sepa_history_ids( $args );
+	$ids = ubac_sepa_history_ids( $args );
 
 	if ( $page > 0 ) {
 		$ids = array_slice( $ids, ( $page - 1 ) * $per_page, $per_page );
@@ -829,7 +829,7 @@ function dahu_deferred_sepa_get_history_rows( $args, $page = 1, $per_page = DAHU
 	$rows = array();
 
 	foreach ( $orders as $order ) {
-		$rows[] = dahu_deferred_sepa_history_row( $order );
+		$rows[] = ubac_sepa_history_row( $order );
 	}
 
 	return $rows;
@@ -841,17 +841,17 @@ function dahu_deferred_sepa_get_history_rows( $args, $page = 1, $per_page = DAHU
  *
  * @return WP_List_Table
  */
-function dahu_deferred_sepa_history_table() {
+function ubac_sepa_history_table() {
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
 
-	if ( ! class_exists( 'Dahu_Deferred_SEPA_History_Table' ) ) {
+	if ( ! class_exists( 'Ubac_Deferred_SEPA_History_Table' ) ) {
 
 		/**
 		 * Charges already sent.
 		 */
-		class Dahu_Deferred_SEPA_History_Table extends WP_List_Table {
+		class Ubac_Deferred_SEPA_History_Table extends WP_List_Table {
 
 			/**
 			 * Sets the table up.
@@ -904,9 +904,9 @@ function dahu_deferred_sepa_history_table() {
 			 * @return void
 			 */
 			public function prepare_items() {
-				$args     = dahu_deferred_sepa_history_request_args();
-				$per_page = DAHU_DEFERRED_SEPA_PER_PAGE;
-				$total    = dahu_deferred_sepa_history_count( $args );
+				$args     = ubac_sepa_history_request_args();
+				$per_page = UBAC_SEPA_PER_PAGE;
+				$total    = ubac_sepa_history_count( $args );
 				$pages    = max( 1, (int) ceil( $total / $per_page ) );
 
 				$this->set_pagination_args(
@@ -923,7 +923,7 @@ function dahu_deferred_sepa_history_table() {
 				$page = min( $this->get_pagenum(), $pages );
 
 				$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
-				$this->items           = dahu_deferred_sepa_get_history_rows( $args, $page, $per_page );
+				$this->items           = ubac_sepa_get_history_rows( $args, $page, $per_page );
 			}
 
 			/**
@@ -934,11 +934,11 @@ function dahu_deferred_sepa_history_table() {
 			public function no_items() {
 				// A fresh install has no history and no filters either, and
 				// blaming filters nobody set is what makes a new screen look
-				// broken. dahu_deferred_sepa_history_is_filtered() is the
+				// broken. ubac_sepa_history_is_filtered() is the
 				// same predicate the query uses to decide whether to
 				// intersect id sets, so the message and the query can never
 				// disagree about what counts as a filter.
-				if ( dahu_deferred_sepa_history_is_filtered( dahu_deferred_sepa_history_request_args() ) ) {
+				if ( ubac_sepa_history_is_filtered( ubac_sepa_history_request_args() ) ) {
 					esc_html_e( 'No charges match these filters.', 'ubac-sepa' );
 
 					return;
@@ -984,14 +984,14 @@ function dahu_deferred_sepa_history_table() {
 						return wp_kses_post( wc_price( $item['total'], array( 'currency' => $item['currency'] ) ) );
 
 					case 'first':
-						return $item['first_ts'] ? esc_html( dahu_deferred_sepa_format_date( $item['first_ts'] ) ) : '—';
+						return $item['first_ts'] ? esc_html( ubac_sepa_format_date( $item['first_ts'] ) ) : '—';
 
 					case 'final':
 						if ( ! $item['final_ts'] ) {
 							return '—';
 						}
 
-						$out = esc_html( dahu_deferred_sepa_format_date( $item['final_ts'] ) );
+						$out = esc_html( ubac_sepa_format_date( $item['final_ts'] ) );
 
 						if ( $item['reschedule'] ) {
 							$out .= '<br><span class="description">' . esc_html(
@@ -1006,10 +1006,10 @@ function dahu_deferred_sepa_history_table() {
 						return $out;
 
 					case 'executed':
-						return $item['executed'] ? esc_html( dahu_deferred_sepa_format_date( $item['executed'] ) ) : '—';
+						return $item['executed'] ? esc_html( ubac_sepa_format_date( $item['executed'] ) ) : '—';
 
 					case 'result':
-						return $item['result'] ? dahu_deferred_sepa_result_badge( $item['result'] ) : '—';
+						return $item['result'] ? ubac_sepa_result_badge( $item['result'] ) : '—';
 
 					case 'intent':
 						return $item['intent'] ? '<code>' . esc_html( $item['intent'] ) . '</code>' : '—';
@@ -1020,7 +1020,7 @@ function dahu_deferred_sepa_history_table() {
 		}
 	}
 
-	return new Dahu_Deferred_SEPA_History_Table();
+	return new Ubac_Deferred_SEPA_History_Table();
 }
 
 /**
@@ -1028,64 +1028,64 @@ function dahu_deferred_sepa_history_table() {
  *
  * @return void
  */
-function dahu_deferred_sepa_render_history_tab() {
-	$args  = dahu_deferred_sepa_history_request_args();
-	$table = dahu_deferred_sepa_history_table();
+function ubac_sepa_render_history_tab() {
+	$args  = ubac_sepa_history_request_args();
+	$table = ubac_sepa_history_table();
 
 	$table->prepare_items();
 
 	$export_url = wp_nonce_url(
 		add_query_arg(
 			array(
-				'action'      => 'dahu_deferred_sepa_export_history',
-				'dahu_from'   => $args['from'],
-				'dahu_to'     => $args['to'],
-				'dahu_result' => $args['result'],
+				'action'      => 'ubac_sepa_export_history',
+				'ubac_from'   => $args['from'],
+				'ubac_to'     => $args['to'],
+				'ubac_result' => $args['result'],
 				'orderby'     => $args['orderby'],
 				'order'       => $args['order'],
 			),
 			admin_url( 'admin-post.php' )
 		),
-		'dahu_deferred_sepa_export_history'
+		'ubac_sepa_export_history'
 	);
 
-	echo '<div class="dahu-ui-card">';
+	echo '<div class="ubac-ui-card">';
 	echo '<p class="description">'
 		. esc_html__( 'Charges sent by this gateway. Stripe\'s own immediate SEPA option is not listed here.', 'ubac-sepa' )
 		. '</p>';
 
-	echo '<form method="get" class="dahu-sepa-charges__filters">';
-	echo '<input type="hidden" name="page" value="' . esc_attr( DAHU_DEFERRED_SEPA_CHARGES_PAGE ) . '">';
+	echo '<form method="get" class="ubac-sepa-charges__filters">';
+	echo '<input type="hidden" name="page" value="' . esc_attr( UBAC_SEPA_CHARGES_PAGE ) . '">';
 	echo '<input type="hidden" name="tab" value="history">';
 
 	echo '<label>' . esc_html__( 'From', 'ubac-sepa' )
-		. '<br><input type="date" name="dahu_from" value="' . esc_attr( $args['from'] ) . '"></label>';
+		. '<br><input type="date" name="ubac_from" value="' . esc_attr( $args['from'] ) . '"></label>';
 	echo '<label>' . esc_html__( 'To', 'ubac-sepa' )
-		. '<br><input type="date" name="dahu_to" value="' . esc_attr( $args['to'] ) . '"></label>';
+		. '<br><input type="date" name="ubac_to" value="' . esc_attr( $args['to'] ) . '"></label>';
 
-	echo '<label>' . esc_html__( 'Outcome', 'ubac-sepa' ) . '<br><select name="dahu_result">';
+	echo '<label>' . esc_html__( 'Outcome', 'ubac-sepa' ) . '<br><select name="ubac_result">';
 	echo '<option value="">' . esc_html__( 'Any', 'ubac-sepa' ) . '</option>';
 
-	foreach ( DAHU_DEFERRED_SEPA_RESULTS as $value ) {
+	foreach ( UBAC_SEPA_RESULTS as $value ) {
 		printf(
 			'<option value="%s"%s>%s</option>',
 			esc_attr( $value ),
 			selected( $args['result'], $value, false ),
-			esc_html( dahu_deferred_sepa_result_label( $value ) )
+			esc_html( ubac_sepa_result_label( $value ) )
 		);
 	}
 
 	echo '</select></label>';
-	echo '<button class="dahu-ui-btn">' . esc_html__( 'Filter', 'ubac-sepa' ) . '</button>';
-	echo '<a class="dahu-ui-btn" href="'
-		. esc_url( admin_url( 'admin.php?page=' . DAHU_DEFERRED_SEPA_CHARGES_PAGE . '&tab=history' ) ) . '">'
+	echo '<button class="ubac-ui-btn">' . esc_html__( 'Filter', 'ubac-sepa' ) . '</button>';
+	echo '<a class="ubac-ui-btn" href="'
+		. esc_url( admin_url( 'admin.php?page=' . UBAC_SEPA_CHARGES_PAGE . '&tab=history' ) ) . '">'
 		. esc_html__( 'Reset', 'ubac-sepa' ) . '</a>';
-	echo '<a class="dahu-ui-btn dahu-ui-btn--go" href="' . esc_url( $export_url ) . '">'
+	echo '<a class="ubac-ui-btn ubac-ui-btn--go" href="' . esc_url( $export_url ) . '">'
 		. esc_html__( 'Export CSV', 'ubac-sepa' ) . '</a>';
 	echo '</form>';
 	echo '</div>';
 
-	echo '<div class="dahu-ui-card">';
+	echo '<div class="ubac-ui-card">';
 	$table->display();
 	echo '</div>';
 }
@@ -1107,7 +1107,7 @@ function dahu_deferred_sepa_render_history_tab() {
  * @param mixed $value Cell value.
  * @return string
  */
-function dahu_deferred_sepa_csv_cell( $value ) {
+function ubac_sepa_csv_cell( $value ) {
 	$value = (string) $value;
 
 	if ( '' === $value ) {
@@ -1117,7 +1117,7 @@ function dahu_deferred_sepa_csv_cell( $value ) {
 	return in_array( $value[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ? "'" . $value : $value;
 }
 
-add_action( 'admin_post_dahu_deferred_sepa_export_history', 'dahu_deferred_sepa_export_history_csv' );
+add_action( 'admin_post_ubac_sepa_export_history', 'ubac_sepa_export_history_csv' );
 
 /**
  * Exports the filtered history.
@@ -1127,15 +1127,15 @@ add_action( 'admin_post_dahu_deferred_sepa_export_history', 'dahu_deferred_sepa_
  *
  * @return void
  */
-function dahu_deferred_sepa_export_history_csv() {
+function ubac_sepa_export_history_csv() {
 	if ( ! current_user_can( 'edit_shop_orders' )
 		|| ! isset( $_GET['_wpnonce'] )
-		|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'dahu_deferred_sepa_export_history' )
+		|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'ubac_sepa_export_history' )
 	) {
 		wp_die( esc_html__( 'You are not allowed to do that.', 'ubac-sepa' ), '', array( 'response' => 403 ) );
 	}
 
-	$args = dahu_deferred_sepa_history_request_args();
+	$args = ubac_sepa_history_request_args();
 
 	/**
 	 * Filters the CSV delimiter.
@@ -1145,7 +1145,7 @@ function dahu_deferred_sepa_export_history_csv() {
 	 *
 	 * @param string $delimiter One character.
 	 */
-	$delimiter = (string) apply_filters( 'dahu_deferred_sepa_csv_delimiter', ',' );
+	$delimiter = (string) apply_filters( 'ubac_sepa_csv_delimiter', ',' );
 	$delimiter = '' !== $delimiter ? substr( $delimiter, 0, 1 ) : ',';
 
 	nocache_headers();
@@ -1185,27 +1185,27 @@ function dahu_deferred_sepa_export_history_csv() {
 	 * matching ids is what says when to stop.
 	 */
 	$per_page = 200;
-	$total    = dahu_deferred_sepa_history_count( $args );
+	$total    = ubac_sepa_history_count( $args );
 	$pages    = (int) ceil( $total / $per_page );
 
 	for ( $page = 1; $page <= $pages; $page++ ) {
-		foreach ( dahu_deferred_sepa_get_history_rows( $args, $page, $per_page ) as $row ) {
+		foreach ( ubac_sepa_get_history_rows( $args, $page, $per_page ) as $row ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fputcsv -- as above.
 			fputcsv(
 				$handle,
 				array(
-					dahu_deferred_sepa_csv_cell( $row['number'] ),
-					dahu_deferred_sepa_csv_cell( $row['customer'] ),
-					dahu_deferred_sepa_csv_cell( $row['email'] ),
+					ubac_sepa_csv_cell( $row['number'] ),
+					ubac_sepa_csv_cell( $row['customer'] ),
+					ubac_sepa_csv_cell( $row['email'] ),
 					// A plain decimal point: this column is read by machines.
 					number_format( $row['total'], 2, '.', '' ),
 					$row['currency'],
-					$row['first_ts'] ? dahu_deferred_sepa_format_date( $row['first_ts'] ) : '',
-					$row['final_ts'] ? dahu_deferred_sepa_format_date( $row['final_ts'] ) : '',
+					$row['first_ts'] ? ubac_sepa_format_date( $row['first_ts'] ) : '',
+					$row['final_ts'] ? ubac_sepa_format_date( $row['final_ts'] ) : '',
 					$row['reschedule'],
-					$row['executed'] ? dahu_deferred_sepa_format_date( $row['executed'] ) : '',
-					dahu_deferred_sepa_result_label( $row['result'] ),
-					dahu_deferred_sepa_csv_cell( $row['intent'] ),
+					$row['executed'] ? ubac_sepa_format_date( $row['executed'] ) : '',
+					ubac_sepa_result_label( $row['result'] ),
+					ubac_sepa_csv_cell( $row['intent'] ),
 				),
 				$delimiter
 			);

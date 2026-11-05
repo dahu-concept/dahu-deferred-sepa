@@ -13,7 +13,7 @@
  * the "Hide it at checkout" setting, off by default: a shop that wants both
  * options offered should get both.
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,8 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return bool
  */
-function dahu_deferred_sepa_hides_native() {
-	return 'yes' === dahu_deferred_sepa_setting( 'hide_native', 'no' );
+function ubac_sepa_hides_native() {
+	return 'yes' === ubac_sepa_setting( 'hide_native', 'no' );
 }
 
 /**
@@ -37,7 +37,7 @@ function dahu_deferred_sepa_hides_native() {
  *
  * @return bool
  */
-function dahu_deferred_sepa_is_checkout_only() {
+function ubac_sepa_is_checkout_only() {
 	if ( is_admin() ) {
 		return false;
 	}
@@ -49,7 +49,7 @@ function dahu_deferred_sepa_is_checkout_only() {
 	return function_exists( 'is_checkout' ) && is_checkout();
 }
 
-add_filter( 'woocommerce_available_payment_gateways', 'dahu_deferred_sepa_hide_native_sepa_gateway' );
+add_filter( 'woocommerce_available_payment_gateways', 'ubac_sepa_hide_native_sepa_gateway' );
 
 /**
  * Removes Stripe's SEPA gateways from the checkout.
@@ -61,19 +61,19 @@ add_filter( 'woocommerce_available_payment_gateways', 'dahu_deferred_sepa_hide_n
  * @param array<string,WC_Payment_Gateway> $gateways Available gateways.
  * @return array<string,WC_Payment_Gateway>
  */
-function dahu_deferred_sepa_hide_native_sepa_gateway( $gateways ) {
-	if ( ! dahu_deferred_sepa_hides_native() || ! dahu_deferred_sepa_is_checkout_only() ) {
+function ubac_sepa_hide_native_sepa_gateway( $gateways ) {
+	if ( ! ubac_sepa_hides_native() || ! ubac_sepa_is_checkout_only() ) {
 		return $gateways;
 	}
 
-	foreach ( DAHU_DEFERRED_SEPA_NATIVE_GATEWAYS as $native_id ) {
+	foreach ( UBAC_SEPA_NATIVE_GATEWAYS as $native_id ) {
 		unset( $gateways[ $native_id ] );
 	}
 
 	return $gateways;
 }
 
-add_filter( 'wc_stripe_upe_params', 'dahu_deferred_sepa_hide_sepa_from_upe_params' );
+add_filter( 'wc_stripe_upe_params', 'ubac_sepa_hide_sepa_from_upe_params' );
 
 /**
  * Removes SEPA from the parameters Stripe's payment element is built from.
@@ -89,8 +89,8 @@ add_filter( 'wc_stripe_upe_params', 'dahu_deferred_sepa_hide_sepa_from_upe_param
  * @param array $params Parameters passed to Stripe's JavaScript.
  * @return array
  */
-function dahu_deferred_sepa_hide_sepa_from_upe_params( $params ) {
-	if ( ! is_array( $params ) || ! dahu_deferred_sepa_hides_native() || ! dahu_deferred_sepa_is_checkout_only() ) {
+function ubac_sepa_hide_sepa_from_upe_params( $params ) {
+	if ( ! is_array( $params ) || ! ubac_sepa_hides_native() || ! ubac_sepa_is_checkout_only() ) {
 		return $params;
 	}
 
@@ -118,7 +118,7 @@ function dahu_deferred_sepa_hide_sepa_from_upe_params( $params ) {
  * The admin order screen's payment-method select
  * ------------------------------------------------------------------ */
 
-add_action( 'admin_enqueue_scripts', 'dahu_deferred_sepa_enqueue_payment_method_script' );
+add_action( 'admin_enqueue_scripts', 'ubac_sepa_enqueue_payment_method_script' );
 
 /**
  * Loads the script that takes Stripe's SEPA option out of the order screen's
@@ -127,10 +127,10 @@ add_action( 'admin_enqueue_scripts', 'dahu_deferred_sepa_enqueue_payment_method_
  * @param string $hook Current admin page.
  * @return void
  */
-function dahu_deferred_sepa_enqueue_payment_method_script( $hook ) {
+function ubac_sepa_enqueue_payment_method_script( $hook ) {
 	unset( $hook );
 
-	if ( ! dahu_deferred_sepa_hides_native() ) {
+	if ( ! ubac_sepa_hides_native() ) {
 		return;
 	}
 
@@ -141,23 +141,23 @@ function dahu_deferred_sepa_enqueue_payment_method_script( $hook ) {
 	}
 
 	wp_enqueue_script(
-		'dahu-deferred-sepa-payment-method',
-		DAHU_DEFERRED_SEPA_URL . 'assets/js/admin-payment-method.js',
+		'ubac-sepa-payment-method',
+		UBAC_SEPA_URL . 'assets/js/admin-payment-method.js',
 		array( 'jquery' ),
-		DAHU_DEFERRED_SEPA_VERSION,
+		UBAC_SEPA_VERSION,
 		true
 	);
 
 	wp_localize_script(
-		'dahu-deferred-sepa-payment-method',
-		'dahuDeferredSepaPaymentMethod',
-		array( 'nativeIds' => array_values( DAHU_DEFERRED_SEPA_NATIVE_GATEWAYS ) )
+		'ubac-sepa-payment-method',
+		'ubacDeferredSepaPaymentMethod',
+		array( 'nativeIds' => array_values( UBAC_SEPA_NATIVE_GATEWAYS ) )
 	);
 }
 
 // Priority 5, ahead of WC_Meta_Box_Order_Data::save() at 40, which is what
 // reads $_POST['_payment_method'].
-add_action( 'woocommerce_process_shop_order_meta', 'dahu_deferred_sepa_block_native_sepa_selection', 5, 2 );
+add_action( 'woocommerce_process_shop_order_meta', 'ubac_sepa_block_native_sepa_selection', 5, 2 );
 
 /**
  * Refuses a switch to Stripe's immediate SEPA gateway on an order.
@@ -170,8 +170,8 @@ add_action( 'woocommerce_process_shop_order_meta', 'dahu_deferred_sepa_block_nat
  * @param WC_Order|null $order    Order, when WooCommerce passed one.
  * @return void
  */
-function dahu_deferred_sepa_block_native_sepa_selection( $order_id, $order = null ) {
-	if ( ! dahu_deferred_sepa_hides_native() ) {
+function ubac_sepa_block_native_sepa_selection( $order_id, $order = null ) {
+	if ( ! ubac_sepa_hides_native() ) {
 		return;
 	}
 
@@ -183,7 +183,7 @@ function dahu_deferred_sepa_block_native_sepa_selection( $order_id, $order = nul
 	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- as above.
 	$requested = wc_clean( wp_unslash( $_POST['_payment_method'] ) );
 
-	if ( ! in_array( $requested, DAHU_DEFERRED_SEPA_NATIVE_GATEWAYS, true ) ) {
+	if ( ! in_array( $requested, UBAC_SEPA_NATIVE_GATEWAYS, true ) ) {
 		return;
 	}
 

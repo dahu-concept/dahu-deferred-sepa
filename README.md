@@ -1,4 +1,4 @@
-# Dahu Deferred SEPA
+# Ubac Deferred SEPA
 
 Charge a WooCommerce customer's saved Stripe SEPA mandate a set number of days
 after their order ships, instead of at checkout.
@@ -69,14 +69,14 @@ Enable the gateway under **WooCommerce → Settings → Payments → Deferred SE
 Direct Debit**, then create the webhook endpoint in your Stripe dashboard:
 
 ```
-https://yoursite.example/wp-json/dahu-deferred-sepa/v1/webhook
+https://yoursite.example/wp-json/ubac-sepa/v1/webhook
 ```
 
 listening for `payment_intent.succeeded`, `payment_intent.payment_failed` and
 `charge.dispute.created`. Put its signing secret in `wp-config.php`:
 
 ```php
-define( 'DAHU_DEFERRED_SEPA_WEBHOOK_SECRET', 'whsec_...' );
+define( 'UBAC_SEPA_WEBHOOK_SECRET', 'whsec_...' );
 ```
 
 Never in a plugin file. While the constant is empty the webhook accepts
@@ -102,20 +102,20 @@ is refused with an order note rather than charged in the wrong unit.
 
 | Filter | Purpose |
 |---|---|
-| `dahu_deferred_sepa_delay_days` | The resolved charge delay, per customer. |
-| `dahu_deferred_sepa_excluded_roles` | Roles never offered the gateway. Empty by default. |
-| `dahu_deferred_sepa_secret_key` | The Stripe secret key, for a shop that keeps keys outside the database. |
-| `dahu_deferred_sepa_payment_intent_body` | The PaymentIntent body before it is sent. |
-| `dahu_deferred_sepa_charge_hour` | Hour of day a rescheduled charge is sent. Default 9. |
-| `dahu_deferred_sepa_settlement_days` | Assumed SEPA settlement time, in working days. Default 3. |
-| `dahu_deferred_sepa_webhook_tolerance` | How far out of date a webhook may be. Default 5 minutes. |
-| `dahu_deferred_sepa_csv_delimiter` | CSV delimiter for the export. Default a comma. |
-| `dahu_deferred_sepa_mandate_submitted_admin_email` | The shop's "mandate submitted" email. |
-| `dahu_deferred_sepa_mandate_submitted_customer_email` | The customer's "we received your IBAN" email. |
-| `dahu_deferred_sepa_mandate_approved_email` | The customer's "approved" email. |
-| `dahu_deferred_sepa_overdue_grace` | How late a charge may be before it is reported. Default one day; it is never allowed to be zero. |
-| `dahu_deferred_sepa_charge_refused_email` | The shop's "charge refused" alert. |
-| `dahu_deferred_sepa_overdue_email` | The daily "charges never ran" alert. |
+| `ubac_sepa_delay_days` | The resolved charge delay, per customer. |
+| `ubac_sepa_excluded_roles` | Roles never offered the gateway. Empty by default. |
+| `ubac_sepa_secret_key` | The Stripe secret key, for a shop that keeps keys outside the database. |
+| `ubac_sepa_payment_intent_body` | The PaymentIntent body before it is sent. |
+| `ubac_sepa_charge_hour` | Hour of day a rescheduled charge is sent. Default 9. |
+| `ubac_sepa_settlement_days` | Assumed SEPA settlement time, in working days. Default 3. |
+| `ubac_sepa_webhook_tolerance` | How far out of date a webhook may be. Default 5 minutes. |
+| `ubac_sepa_csv_delimiter` | CSV delimiter for the export. Default a comma. |
+| `ubac_sepa_mandate_submitted_admin_email` | The shop's "mandate submitted" email. |
+| `ubac_sepa_mandate_submitted_customer_email` | The customer's "we received your IBAN" email. |
+| `ubac_sepa_mandate_approved_email` | The customer's "approved" email. |
+| `ubac_sepa_overdue_grace` | How late a charge may be before it is reported. Default one day; it is never allowed to be zero. |
+| `ubac_sepa_charge_refused_email` | The shop's "charge refused" alert. |
+| `ubac_sepa_overdue_email` | The daily "charges never ran" alert. |
 
 ### Constants
 
@@ -123,9 +123,9 @@ All overridable from `wp-config.php`.
 
 | Constant | Default | Purpose |
 |---|---|---|
-| `DAHU_DEFERRED_SEPA_WEBHOOK_SECRET` | *(empty)* | Webhook signing secret. Define this in `wp-config.php`. |
-| `DAHU_DEFERRED_SEPA_DELAY_DAYS` | `8` | Last-resort delay, used when neither the customer's nor the gateway's setting is set. |
-| `DAHU_DEFERRED_SEPA_DEBUG` | `false` | Forces the diagnostics on, for a site whose settings screen is unreachable. |
+| `UBAC_SEPA_WEBHOOK_SECRET` | *(empty)* | Webhook signing secret. Define this in `wp-config.php`. |
+| `UBAC_SEPA_DELAY_DAYS` | `8` | Last-resort delay, used when neither the customer's nor the gateway's setting is set. |
+| `UBAC_SEPA_DEBUG` | `false` | Forces the diagnostics on, for a site whose settings screen is unreachable. |
 
 ## Not affiliated
 

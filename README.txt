@@ -1,5 +1,5 @@
 === Ubac Deferred SEPA ===
-Contributors: dahuconcept
+Contributors: ubacconcept
 Tags: payment terms, mandate, deferred payment, direct debit, sepa
 Requires at least: 6.0
 Tested up to: 7.1
@@ -93,11 +93,11 @@ This plugin is not affiliated with or endorsed by Stripe.
 3. Go to WooCommerce → Settings → Payments → Deferred SEPA Direct Debit and
    enable it. Set the default delay.
 4. Create a webhook endpoint in your Stripe dashboard pointing at
-   `https://yoursite.example/wp-json/dahu-deferred-sepa/v1/webhook`, listening
+   `https://yoursite.example/wp-json/ubac-sepa/v1/webhook`, listening
    for `payment_intent.succeeded`, `payment_intent.payment_failed` and
    `charge.dispute.created`. Copy its signing secret into `wp-config.php`:
 
-   `define( 'DAHU_DEFERRED_SEPA_WEBHOOK_SECRET', 'whsec_...' );`
+   `define( 'UBAC_SEPA_WEBHOOK_SECRET', 'whsec_...' );`
 
 5. Have a test customer save an IBAN under My account → Payment methods, then
    approve it on their user profile under Deferred SEPA Direct Debit.

@@ -1,4 +1,4 @@
-# Dahu Deferred SEPA
+# Ubac Deferred SEPA
 
 Prélève le mandat SEPA Stripe enregistré d'un client WooCommerce un nombre de
 jours défini après l'expédition de sa commande, au lieu de le prélever à la
@@ -75,14 +75,14 @@ SEPA différé**, puis créez le point d'accès du webhook dans votre tableau de
 bord Stripe :
 
 ```
-https://votresite.example/wp-json/dahu-deferred-sepa/v1/webhook
+https://votresite.example/wp-json/ubac-sepa/v1/webhook
 ```
 
 à l'écoute de `payment_intent.succeeded`, `payment_intent.payment_failed` et
 `charge.dispute.created`. Mettez son secret de signature dans `wp-config.php` :
 
 ```php
-define( 'DAHU_DEFERRED_SEPA_WEBHOOK_SECRET', 'whsec_...' );
+define( 'UBAC_SEPA_WEBHOOK_SECRET', 'whsec_...' );
 ```
 
 Jamais dans un fichier d'extension. Tant que la constante est vide, le webhook
@@ -110,20 +110,20 @@ mauvaise unité.
 
 | Filtre | Rôle |
 |---|---|
-| `dahu_deferred_sepa_delay_days` | Le délai de prélèvement résolu, par client. |
-| `dahu_deferred_sepa_excluded_roles` | Rôles à qui la passerelle n'est jamais proposée. Vide par défaut. |
-| `dahu_deferred_sepa_secret_key` | La clé secrète Stripe, pour une boutique qui garde ses clés hors de la base. |
-| `dahu_deferred_sepa_payment_intent_body` | Le corps du PaymentIntent avant envoi. |
-| `dahu_deferred_sepa_charge_hour` | Heure de la journée à laquelle part un prélèvement replanifié. 9 par défaut. |
-| `dahu_deferred_sepa_settlement_days` | Délai d'encaissement SEPA supposé, en jours ouvrés. 3 par défaut. |
-| `dahu_deferred_sepa_webhook_tolerance` | Ancienneté maximale d'un webhook. 5 minutes par défaut. |
-| `dahu_deferred_sepa_csv_delimiter` | Séparateur CSV de l'export. Virgule par défaut. |
-| `dahu_deferred_sepa_mandate_submitted_admin_email` | Le courriel « mandat soumis » de la boutique. |
-| `dahu_deferred_sepa_mandate_submitted_customer_email` | Le courriel « nous avons reçu votre IBAN » du client. |
-| `dahu_deferred_sepa_mandate_approved_email` | Le courriel « approuvé » du client. |
-| `dahu_deferred_sepa_overdue_grace` | Le retard toléré avant de signaler un prélèvement. Un jour par défaut ; jamais zéro. |
-| `dahu_deferred_sepa_charge_refused_email` | L'alerte « prélèvement refusé » de la boutique. |
-| `dahu_deferred_sepa_overdue_email` | L'alerte quotidienne « prélèvements jamais exécutés ». |
+| `ubac_sepa_delay_days` | Le délai de prélèvement résolu, par client. |
+| `ubac_sepa_excluded_roles` | Rôles à qui la passerelle n'est jamais proposée. Vide par défaut. |
+| `ubac_sepa_secret_key` | La clé secrète Stripe, pour une boutique qui garde ses clés hors de la base. |
+| `ubac_sepa_payment_intent_body` | Le corps du PaymentIntent avant envoi. |
+| `ubac_sepa_charge_hour` | Heure de la journée à laquelle part un prélèvement replanifié. 9 par défaut. |
+| `ubac_sepa_settlement_days` | Délai d'encaissement SEPA supposé, en jours ouvrés. 3 par défaut. |
+| `ubac_sepa_webhook_tolerance` | Ancienneté maximale d'un webhook. 5 minutes par défaut. |
+| `ubac_sepa_csv_delimiter` | Séparateur CSV de l'export. Virgule par défaut. |
+| `ubac_sepa_mandate_submitted_admin_email` | Le courriel « mandat soumis » de la boutique. |
+| `ubac_sepa_mandate_submitted_customer_email` | Le courriel « nous avons reçu votre IBAN » du client. |
+| `ubac_sepa_mandate_approved_email` | Le courriel « approuvé » du client. |
+| `ubac_sepa_overdue_grace` | Le retard toléré avant de signaler un prélèvement. Un jour par défaut ; jamais zéro. |
+| `ubac_sepa_charge_refused_email` | L'alerte « prélèvement refusé » de la boutique. |
+| `ubac_sepa_overdue_email` | L'alerte quotidienne « prélèvements jamais exécutés ». |
 
 ### Constantes
 
@@ -131,9 +131,9 @@ Toutes redéfinissables depuis `wp-config.php`.
 
 | Constante | Défaut | Rôle |
 |---|---|---|
-| `DAHU_DEFERRED_SEPA_WEBHOOK_SECRET` | *(vide)* | Secret de signature du webhook. À définir dans `wp-config.php`. |
-| `DAHU_DEFERRED_SEPA_DELAY_DAYS` | `8` | Délai de dernier recours, employé quand ni le réglage du client ni celui de la passerelle n'est posé. |
-| `DAHU_DEFERRED_SEPA_DEBUG` | `false` | Force l'affichage des diagnostics, pour un site dont l'écran de réglages est inaccessible. |
+| `UBAC_SEPA_WEBHOOK_SECRET` | *(vide)* | Secret de signature du webhook. À définir dans `wp-config.php`. |
+| `UBAC_SEPA_DELAY_DAYS` | `8` | Délai de dernier recours, employé quand ni le réglage du client ni celui de la passerelle n'est posé. |
+| `UBAC_SEPA_DEBUG` | `false` | Force l'affichage des diagnostics, pour un site dont l'écran de réglages est inaccessible. |
 
 ## Sans affiliation
 

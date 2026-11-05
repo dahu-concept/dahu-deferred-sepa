@@ -9,14 +9,14 @@
  * It offers itself only to a customer who has an approved mandate, so most
  * shoppers never see it at all.
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_filter( 'woocommerce_payment_gateways', 'dahu_deferred_sepa_register_gateway' );
+add_filter( 'woocommerce_payment_gateways', 'ubac_sepa_register_gateway' );
 
 /**
  * Registers the gateway with WooCommerce.
@@ -24,34 +24,34 @@ add_filter( 'woocommerce_payment_gateways', 'dahu_deferred_sepa_register_gateway
  * @param string[] $methods Gateway class names.
  * @return string[]
  */
-function dahu_deferred_sepa_register_gateway( $methods ) {
-	$methods[] = 'Dahu_Deferred_SEPA_Gateway';
+function ubac_sepa_register_gateway( $methods ) {
+	$methods[] = 'Ubac_Deferred_SEPA_Gateway';
 
 	return $methods;
 }
 
-add_action( 'plugins_loaded', 'dahu_deferred_sepa_load_gateway_class', 11 );
+add_action( 'plugins_loaded', 'ubac_sepa_load_gateway_class', 11 );
 
 /**
  * Declares the gateway class, once WC_Payment_Gateway exists to extend.
  *
  * @return void
  */
-function dahu_deferred_sepa_load_gateway_class() {
-	if ( ! class_exists( 'WC_Payment_Gateway' ) || class_exists( 'Dahu_Deferred_SEPA_Gateway' ) ) {
+function ubac_sepa_load_gateway_class() {
+	if ( ! class_exists( 'WC_Payment_Gateway' ) || class_exists( 'Ubac_Deferred_SEPA_Gateway' ) ) {
 		return;
 	}
 
 	/**
 	 * Deferred SEPA Direct Debit.
 	 */
-	class Dahu_Deferred_SEPA_Gateway extends WC_Payment_Gateway {
+	class Ubac_Deferred_SEPA_Gateway extends WC_Payment_Gateway {
 
 		/**
 		 * Sets the gateway up.
 		 */
 		public function __construct() {
-			$this->id                 = DAHU_DEFERRED_SEPA_GATEWAY_ID;
+			$this->id                 = UBAC_SEPA_GATEWAY_ID;
 			$this->method_title       = __( 'Deferred SEPA Direct Debit', 'ubac-sepa' );
 			$this->method_description = __(
 				'Reuses the SEPA mandate the customer already has saved at Stripe. Nothing is charged at checkout: the charge is sent automatically a configurable number of days after the order is marked Completed. The delay is set below and can be overridden per customer on their user profile.',
@@ -103,7 +103,7 @@ function dahu_deferred_sepa_load_gateway_class() {
 					'title'             => __( 'Default charge delay (days)', 'ubac-sepa' ),
 					'type'              => 'number',
 					'description'       => __( 'Days between the order being marked Completed and the charge being sent. Can be overridden per customer, under Users → the customer → Deferred SEPA Direct Debit.', 'ubac-sepa' ),
-					'default'           => DAHU_DEFERRED_SEPA_DELAY_DAYS,
+					'default'           => UBAC_SEPA_DELAY_DAYS,
 					'custom_attributes' => array(
 						'min'  => 0,
 						'step' => 1,
@@ -179,11 +179,11 @@ function dahu_deferred_sepa_load_gateway_class() {
 
 			$user_id = get_current_user_id();
 
-			if ( ! $user_id || ! dahu_deferred_sepa_is_authorized( $user_id ) ) {
+			if ( ! $user_id || ! ubac_sepa_is_authorized( $user_id ) ) {
 				return false;
 			}
 
-			return (bool) dahu_deferred_sepa_find_saved_mandate( $user_id );
+			return (bool) ubac_sepa_find_saved_mandate( $user_id );
 		}
 
 		/**
@@ -197,13 +197,13 @@ function dahu_deferred_sepa_load_gateway_class() {
 
 			// Checked again here, server-side: the gateway being offered is a
 			// display decision, and this is the one that matters.
-			if ( ! $order || ! dahu_deferred_sepa_is_authorized( $order->get_user_id() ) ) {
+			if ( ! $order || ! ubac_sepa_is_authorized( $order->get_user_id() ) ) {
 				wc_add_notice( __( 'This payment method is not available for your account.', 'ubac-sepa' ), 'error' );
 
 				return array( 'result' => 'failure' );
 			}
 
-			$currency_error = dahu_deferred_sepa_currency_error( $order );
+			$currency_error = ubac_sepa_currency_error( $order );
 
 			if ( $currency_error ) {
 				wc_add_notice( __( 'This payment method is not available for this currency.', 'ubac-sepa' ), 'error' );
@@ -211,7 +211,7 @@ function dahu_deferred_sepa_load_gateway_class() {
 				return array( 'result' => 'failure' );
 			}
 
-			$mandate = dahu_deferred_sepa_find_saved_mandate( $order->get_user_id() );
+			$mandate = ubac_sepa_find_saved_mandate( $order->get_user_id() );
 
 			if ( ! $mandate ) {
 				wc_add_notice(
@@ -234,7 +234,7 @@ function dahu_deferred_sepa_load_gateway_class() {
 			// find no key, mint two different ones, and Stripe would charge
 			// twice. Minting it here means the key exists before any attempt
 			// can, so every attempt carries the same one.
-			dahu_deferred_sepa_get_idempotency_key( $order );
+			ubac_sepa_get_idempotency_key( $order );
 
 			// On hold, not processing: the order is to be prepared and shipped,
 			// but it is not paid, and saying otherwise would be a lie in every
@@ -244,7 +244,7 @@ function dahu_deferred_sepa_load_gateway_class() {
 				sprintf(
 					/* translators: %d: delay in days. */
 					__( 'Deferred SEPA: the customer\'s saved mandate will be used. Nothing charged at checkout — the charge is scheduled when the order is marked Completed, %d days out.', 'ubac-sepa' ),
-					dahu_deferred_sepa_get_delay_days( $order->get_user_id() )
+					ubac_sepa_get_delay_days( $order->get_user_id() )
 				)
 			);
 			$order->save();
@@ -274,7 +274,7 @@ function dahu_deferred_sepa_load_gateway_class() {
  * @param int $user_id WordPress user.
  * @return bool
  */
-function dahu_deferred_sepa_is_authorized( $user_id ) {
+function ubac_sepa_is_authorized( $user_id ) {
 	if ( ! $user_id ) {
 		return false;
 	}
@@ -285,14 +285,14 @@ function dahu_deferred_sepa_is_authorized( $user_id ) {
 		return false;
 	}
 
-	if ( array_intersect( dahu_deferred_sepa_excluded_roles(), (array) $user->roles ) ) {
+	if ( array_intersect( ubac_sepa_excluded_roles(), (array) $user->roles ) ) {
 		return false;
 	}
 
-	return (bool) dahu_deferred_sepa_find_saved_mandate( $user_id );
+	return (bool) ubac_sepa_find_saved_mandate( $user_id );
 }
 
-add_filter( 'woocommerce_gateway_description', 'dahu_deferred_sepa_gateway_description', 10, 2 );
+add_filter( 'woocommerce_gateway_description', 'ubac_sepa_gateway_description', 10, 2 );
 
 /**
  * Replaces {days} in the checkout description with the delay that applies to
@@ -302,12 +302,12 @@ add_filter( 'woocommerce_gateway_description', 'dahu_deferred_sepa_gateway_descr
  * @param string $gateway_id  Gateway id.
  * @return string
  */
-function dahu_deferred_sepa_gateway_description( $description, $gateway_id ) {
-	if ( DAHU_DEFERRED_SEPA_GATEWAY_ID !== $gateway_id || is_admin() ) {
+function ubac_sepa_gateway_description( $description, $gateway_id ) {
+	if ( UBAC_SEPA_GATEWAY_ID !== $gateway_id || is_admin() ) {
 		return $description;
 	}
 
-	$days = dahu_deferred_sepa_get_delay_days( get_current_user_id() ) + 2;
+	$days = ubac_sepa_get_delay_days( get_current_user_id() ) + 2;
 
 	return str_replace( '{days}', (string) $days, $description );
 }

@@ -15,7 +15,7 @@
 ( function ( $ ) {
 	'use strict';
 
-	var data = window.dahuDeferredSepaPaymentMethod || {};
+	var data = window.ubacDeferredSepaPaymentMethod || {};
 
 	$( function () {
 		var ids = data.nativeIds || [];

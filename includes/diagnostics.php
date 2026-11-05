@@ -12,7 +12,7 @@
  * each condition and its answer. Everything here is read-only and visible only
  * to a shop manager, behind the "Diagnostics" setting.
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,8 +24,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return bool
  */
-function dahu_deferred_sepa_may_see_diagnostics() {
-	return dahu_deferred_sepa_diagnostics_enabled() && current_user_can( 'manage_woocommerce' );
+function ubac_sepa_may_see_diagnostics() {
+	return ubac_sepa_diagnostics_enabled() && current_user_can( 'manage_woocommerce' );
 }
 
 /**
@@ -36,13 +36,13 @@ function dahu_deferred_sepa_may_see_diagnostics() {
  * @param string      $detail Value or explanation.
  * @return string HTML.
  */
-function dahu_deferred_sepa_diag_row( $label, $ok, $detail = '' ) {
+function ubac_sepa_diag_row( $label, $ok, $detail = '' ) {
 	if ( null === $ok ) {
 		$verdict = '';
 	} else {
 		$verdict = $ok
-			? '<span class="dahu-sepa-diag__yes">' . esc_html__( 'yes', 'ubac-sepa' ) . '</span>'
-			: '<span class="dahu-sepa-diag__no">' . esc_html__( 'no', 'ubac-sepa' ) . '</span>';
+			? '<span class="ubac-sepa-diag__yes">' . esc_html__( 'yes', 'ubac-sepa' ) . '</span>'
+			: '<span class="ubac-sepa-diag__no">' . esc_html__( 'no', 'ubac-sepa' ) . '</span>';
 	}
 
 	if ( '' !== $detail ) {
@@ -59,10 +59,10 @@ function dahu_deferred_sepa_diag_row( $label, $ok, $detail = '' ) {
  * @param string $rows  Rows, already escaped.
  * @return void
  */
-function dahu_deferred_sepa_diag_panel( $title, $rows ) {
-	echo '<div class="dahu-sepa-diag">';
-	echo '<p class="dahu-sepa-diag__title">' . esc_html( $title ) . '</p>';
-	echo '<dl class="dahu-sepa-diag__list">' . $rows . '</dl>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- rows are escaped as they are built.
+function ubac_sepa_diag_panel( $title, $rows ) {
+	echo '<div class="ubac-sepa-diag">';
+	echo '<p class="ubac-sepa-diag__title">' . esc_html( $title ) . '</p>';
+	echo '<dl class="ubac-sepa-diag__list">' . $rows . '</dl>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- rows are escaped as they are built.
 	echo '</div>';
 }
 
@@ -72,41 +72,41 @@ function dahu_deferred_sepa_diag_panel( $title, $rows ) {
  * @param WP_User $user User being edited.
  * @return void
  */
-function dahu_deferred_sepa_render_user_diagnostics( $user ) {
-	if ( ! dahu_deferred_sepa_may_see_diagnostics() ) {
+function ubac_sepa_render_user_diagnostics( $user ) {
+	if ( ! ubac_sepa_may_see_diagnostics() ) {
 		return;
 	}
 
-	$rows = dahu_deferred_sepa_diag_row(
+	$rows = ubac_sepa_diag_row(
 		__( 'Gateway enabled', 'ubac-sepa' ),
-		'yes' === dahu_deferred_sepa_setting( 'enabled', 'no' )
+		'yes' === ubac_sepa_setting( 'enabled', 'no' )
 	);
 
-	$rows .= dahu_deferred_sepa_diag_row(
+	$rows .= ubac_sepa_diag_row(
 		__( 'Role allowed', 'ubac-sepa' ),
-		! array_intersect( dahu_deferred_sepa_excluded_roles(), (array) $user->roles ),
+		! array_intersect( ubac_sepa_excluded_roles(), (array) $user->roles ),
 		implode( ', ', (array) $user->roles )
 	);
 
-	$active_id = (int) get_user_meta( $user->ID, DAHU_DEFERRED_SEPA_ACTIVE_TOKEN_META, true );
+	$active_id = (int) get_user_meta( $user->ID, UBAC_SEPA_ACTIVE_TOKEN_META, true );
 
-	$rows .= dahu_deferred_sepa_diag_row( __( 'A mandate is named active', 'ubac-sepa' ), (bool) $active_id );
+	$rows .= ubac_sepa_diag_row( __( 'A mandate is named active', 'ubac-sepa' ), (bool) $active_id );
 
 	if ( $active_id && class_exists( 'WC_Payment_Tokens' ) ) {
 		$token = WC_Payment_Tokens::get( $active_id );
 
-		$rows .= dahu_deferred_sepa_diag_row( __( 'That mandate still exists', 'ubac-sepa' ), (bool) $token );
+		$rows .= ubac_sepa_diag_row( __( 'That mandate still exists', 'ubac-sepa' ), (bool) $token );
 
 		if ( $token ) {
-			$rows .= dahu_deferred_sepa_diag_row(
+			$rows .= ubac_sepa_diag_row(
 				__( 'It belongs to this customer', 'ubac-sepa' ),
 				(int) $token->get_user_id() === (int) $user->ID
 			);
-			$rows .= dahu_deferred_sepa_diag_row(
+			$rows .= ubac_sepa_diag_row(
 				__( 'The customer has it as their own default', 'ubac-sepa' ),
 				$token->is_default()
 			);
-			$rows .= dahu_deferred_sepa_diag_row(
+			$rows .= ubac_sepa_diag_row(
 				__( 'It is a Stripe payment method', 'ubac-sepa' ),
 				0 === strpos( (string) $token->get_token(), 'pm_' ),
 				(string) $token->get_token()
@@ -114,30 +114,30 @@ function dahu_deferred_sepa_render_user_diagnostics( $user ) {
 		}
 	}
 
-	$rows .= dahu_deferred_sepa_diag_row(
+	$rows .= ubac_sepa_diag_row(
 		__( 'A Stripe secret key is configured', 'ubac-sepa' ),
-		(bool) dahu_deferred_sepa_get_secret_key(),
-		dahu_deferred_sepa_get_secret_key()
-			? ( dahu_deferred_sepa_is_test_mode()
+		(bool) ubac_sepa_get_secret_key(),
+		ubac_sepa_get_secret_key()
+			? ( ubac_sepa_is_test_mode()
 				? __( 'test mode', 'ubac-sepa' )
 				: __( 'live mode', 'ubac-sepa' ) )
 			: ''
 	);
 
-	$mandate = dahu_deferred_sepa_find_saved_mandate( $user->ID );
+	$mandate = ubac_sepa_find_saved_mandate( $user->ID );
 
-	$rows .= dahu_deferred_sepa_diag_row(
+	$rows .= ubac_sepa_diag_row(
 		__( 'Stripe customer resolved', 'ubac-sepa' ),
 		$mandate && ! empty( $mandate['customer'] ),
 		$mandate ? (string) $mandate['customer'] : ''
 	);
 
-	$rows .= dahu_deferred_sepa_diag_row(
+	$rows .= ubac_sepa_diag_row(
 		__( 'Result: the gateway is offered to this customer', 'ubac-sepa' ),
 		(bool) $mandate
 	);
 
-	dahu_deferred_sepa_diag_panel( __( 'Availability for this customer', 'ubac-sepa' ), $rows );
+	ubac_sepa_diag_panel( __( 'Availability for this customer', 'ubac-sepa' ), $rows );
 }
 
 /**
@@ -146,30 +146,30 @@ function dahu_deferred_sepa_render_user_diagnostics( $user ) {
  * @param WC_Order $order Order.
  * @return void
  */
-function dahu_deferred_sepa_render_order_diagnostics( WC_Order $order ) {
-	if ( ! dahu_deferred_sepa_may_see_diagnostics() ) {
+function ubac_sepa_render_order_diagnostics( WC_Order $order ) {
+	if ( ! ubac_sepa_may_see_diagnostics() ) {
 		return;
 	}
 
-	$rows = dahu_deferred_sepa_diag_row( __( 'Payment method', 'ubac-sepa' ), null, $order->get_payment_method() );
-	$rows .= dahu_deferred_sepa_diag_row( __( 'Currency', 'ubac-sepa' ), null, $order->get_currency() );
+	$rows = ubac_sepa_diag_row( __( 'Payment method', 'ubac-sepa' ), null, $order->get_payment_method() );
+	$rows .= ubac_sepa_diag_row( __( 'Currency', 'ubac-sepa' ), null, $order->get_currency() );
 
 	foreach ( array( '_stripe_intent_id', '_stripe_customer_id', '_stripe_source_id', '_stripe_charge_id' ) as $key ) {
 		$value = (string) $order->get_meta( $key );
 
-		$rows .= dahu_deferred_sepa_diag_row( $key, null, '' !== $value ? $value : '—' );
+		$rows .= ubac_sepa_diag_row( $key, null, '' !== $value ? $value : '—' );
 	}
 
-	$count = (int) $order->get_meta( '_dahu_deferred_sepa_reschedule_count' );
+	$count = (int) $order->get_meta( '_ubac_sepa_reschedule_count' );
 
 	if ( $count ) {
-		$rows .= dahu_deferred_sepa_diag_row( __( 'Times the charge was moved', 'ubac-sepa' ), null, (string) $count );
+		$rows .= ubac_sepa_diag_row( __( 'Times the charge was moved', 'ubac-sepa' ), null, (string) $count );
 	}
 
-	dahu_deferred_sepa_diag_panel( __( 'Stripe identifiers on this order', 'ubac-sepa' ), $rows );
+	ubac_sepa_diag_panel( __( 'Stripe identifiers on this order', 'ubac-sepa' ), $rows );
 }
 
-add_action( 'woocommerce_before_checkout_form', 'dahu_deferred_sepa_render_checkout_diagnostics' );
+add_action( 'woocommerce_before_checkout_form', 'ubac_sepa_render_checkout_diagnostics' );
 
 /**
  * The checkout panel, for an administrator looking at the checkout.
@@ -181,8 +181,8 @@ add_action( 'woocommerce_before_checkout_form', 'dahu_deferred_sepa_render_check
  *
  * @return void
  */
-function dahu_deferred_sepa_render_checkout_diagnostics() {
-	if ( ! dahu_deferred_sepa_may_see_diagnostics() ) {
+function ubac_sepa_render_checkout_diagnostics() {
+	if ( ! ubac_sepa_may_see_diagnostics() ) {
 		return;
 	}
 
@@ -193,26 +193,26 @@ function dahu_deferred_sepa_render_checkout_diagnostics() {
 	// first serves all of them, and a shop with six of these installed
 	// downloads one copy.
 	wp_enqueue_style(
-		'dahu-ui',
-		DAHU_DEFERRED_SEPA_URL . 'assets/css/dahu-ui.css',
+		'ubac-ui',
+		UBAC_SEPA_URL . 'assets/css/ubac-ui.css',
 		array(),
-		DAHU_DEFERRED_SEPA_VERSION
+		UBAC_SEPA_VERSION
 	);
 
 	wp_enqueue_style(
-		'dahu-deferred-sepa-admin',
-		DAHU_DEFERRED_SEPA_URL . 'assets/css/admin.css',
-		array( 'dahu-ui' ),
-		DAHU_DEFERRED_SEPA_VERSION
+		'ubac-sepa-admin',
+		UBAC_SEPA_URL . 'assets/css/admin.css',
+		array( 'ubac-ui' ),
+		UBAC_SEPA_VERSION
 	);
 
 	$user_id = get_current_user_id();
-	$mandate = $user_id ? dahu_deferred_sepa_find_saved_mandate( $user_id ) : false;
+	$mandate = $user_id ? ubac_sepa_find_saved_mandate( $user_id ) : false;
 
-	$rows = dahu_deferred_sepa_diag_row( __( 'Signed in as', 'ubac-sepa' ), null, (string) $user_id );
-	$rows .= dahu_deferred_sepa_diag_row( __( 'Allowed to use deferred payment', 'ubac-sepa' ), dahu_deferred_sepa_is_authorized( $user_id ) );
-	$rows .= dahu_deferred_sepa_diag_row( __( 'Gateway enabled', 'ubac-sepa' ), 'yes' === dahu_deferred_sepa_setting( 'enabled', 'no' ) );
-	$rows .= dahu_deferred_sepa_diag_row(
+	$rows = ubac_sepa_diag_row( __( 'Signed in as', 'ubac-sepa' ), null, (string) $user_id );
+	$rows .= ubac_sepa_diag_row( __( 'Allowed to use deferred payment', 'ubac-sepa' ), ubac_sepa_is_authorized( $user_id ) );
+	$rows .= ubac_sepa_diag_row( __( 'Gateway enabled', 'ubac-sepa' ), 'yes' === ubac_sepa_setting( 'enabled', 'no' ) );
+	$rows .= ubac_sepa_diag_row(
 		__( 'Mandate found', 'ubac-sepa' ),
 		(bool) $mandate,
 		$mandate ? (string) $mandate['payment_method'] : ''
@@ -225,24 +225,24 @@ function dahu_deferred_sepa_render_checkout_diagnostics() {
 	if ( isset( $wp_filter['woocommerce_available_payment_gateways'] ) ) {
 		foreach ( $wp_filter['woocommerce_available_payment_gateways']->callbacks as $priority => $callbacks ) {
 			foreach ( $callbacks as $callback ) {
-				$hooked[] = '[' . $priority . '] ' . dahu_deferred_sepa_describe_callback( $callback['function'] );
+				$hooked[] = '[' . $priority . '] ' . ubac_sepa_describe_callback( $callback['function'] );
 			}
 		}
 	}
 
 	if ( $hooked ) {
 		foreach ( $hooked as $index => $line ) {
-			$rows .= dahu_deferred_sepa_diag_row(
+			$rows .= ubac_sepa_diag_row(
 				0 === $index ? __( 'Filtering the gateway list', 'ubac-sepa' ) : ' ',
 				null,
 				$line
 			);
 		}
 	} else {
-		$rows .= dahu_deferred_sepa_diag_row( __( 'Filtering the gateway list', 'ubac-sepa' ), null, __( 'nothing', 'ubac-sepa' ) );
+		$rows .= ubac_sepa_diag_row( __( 'Filtering the gateway list', 'ubac-sepa' ), null, __( 'nothing', 'ubac-sepa' ) );
 	}
 
-	dahu_deferred_sepa_diag_panel( __( 'Deferred SEPA — why this checkout shows what it shows', 'ubac-sepa' ), $rows );
+	ubac_sepa_diag_panel( __( 'Deferred SEPA — why this checkout shows what it shows', 'ubac-sepa' ), $rows );
 }
 
 /**
@@ -252,7 +252,7 @@ function dahu_deferred_sepa_render_checkout_diagnostics() {
  * @param callable $callback Callback.
  * @return string
  */
-function dahu_deferred_sepa_describe_callback( $callback ) {
+function ubac_sepa_describe_callback( $callback ) {
 	try {
 		if ( is_string( $callback ) && function_exists( $callback ) ) {
 			$reflection = new ReflectionFunction( $callback );

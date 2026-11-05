@@ -18,7 +18,7 @@
  * different failures:
  *
  *  1. **It ran and was refused.** There is a reason, written on the order by
- *     `dahu_deferred_sepa_refuse()`: no approved mandate, the approval was
+ *     `ubac_sepa_refuse()`: no approved mandate, the approval was
  *     withdrawn, the IBAN changed, Stripe said no. The order carries a
  *     result and it is in the history.
  *  2. **It never ran at all.** The due date passed and nothing happened —
@@ -28,7 +28,7 @@
  *     is the one that shows a shop an order as "pending" with a settlement
  *     estimate that will never arrive.
  *
- * `dahu_deferred_sepa_is_overdue()` names the second; the email below names
+ * `ubac_sepa_is_overdue()` names the second; the email below names
  * both.
  *
  * ## One alert per failure, and not one per day
@@ -37,7 +37,7 @@
  * filtered alert is worse than none: it is silence a shop believes is
  * coverage. So every alert carries a fingerprint — what failed, the date it
  * was due, and the sentence a person reads — kept on the order in
- * `_dahu_deferred_sepa_alerted`. The same failure, re-detected tomorrow by
+ * `_ubac_sepa_alerted`. The same failure, re-detected tomorrow by
  * the same sweep, sends nothing. A rescheduling moves the due date, so the
  * fingerprint changes, so a charge that fails again after being retried is
  * said again. That is the behaviour wanted on both sides: no repetition of
@@ -68,7 +68,7 @@
  * when the charge is scheduled, so that the shop can fix it in the days it
  * has rather than find out on the day.
  *
- * @package DahuDeferredSepa
+ * @package UbacSepa
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -83,14 +83,14 @@ defined( 'ABSPATH' ) || exit;
  *
  * @return int Seconds.
  */
-function dahu_deferred_sepa_overdue_grace() {
+function ubac_sepa_overdue_grace() {
 
 	/**
 	 * Filters how late a scheduled charge may be before it is reported.
 	 *
 	 * @param int $seconds Grace period, in seconds.
 	 */
-	$grace = (int) apply_filters( 'dahu_deferred_sepa_overdue_grace', DAY_IN_SECONDS );
+	$grace = (int) apply_filters( 'ubac_sepa_overdue_grace', DAY_IN_SECONDS );
 
 	// Never negative, and never zero: zero would report every charge the
 	// moment its date passed, which is every charge, every time.
@@ -101,31 +101,31 @@ function dahu_deferred_sepa_overdue_grace() {
  * Was this charge due, and nothing happened?
  *
  * Deliberately NOT "did it fail": an order that ran and was refused carries
- * `_dahu_deferred_sepa_executed_ts` and a result, and it is in the history
+ * `_ubac_sepa_executed_ts` and a result, and it is in the history
  * with its reason. This answers the other question — the date passed, and
  * there is no trace of anything having been tried.
  *
  * @param WC_Order $order Order.
  * @return bool
  */
-function dahu_deferred_sepa_is_overdue( WC_Order $order ) {
+function ubac_sepa_is_overdue( WC_Order $order ) {
 
-	if ( ! dahu_deferred_sepa_order_is_sepa( $order ) ) {
+	if ( ! ubac_sepa_order_is_sepa( $order ) ) {
 		return false;
 	}
 
-	if ( 'yes' === $order->get_meta( '_dahu_deferred_sepa_done' ) ) {
+	if ( 'yes' === $order->get_meta( '_ubac_sepa_done' ) ) {
 		return false;
 	}
 
 	// Settled another way, on purpose, by somebody who said so. Not late:
 	// paid. Without this, the shop that marks a cheque would be told about
 	// that order every day, which is how an alert becomes noise.
-	if ( dahu_deferred_sepa_is_settled_offline( $order ) ) {
+	if ( ubac_sepa_is_settled_offline( $order ) ) {
 		return false;
 	}
 
-	$when = (int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' );
+	$when = (int) $order->get_meta( '_ubac_sepa_scheduled_ts' );
 
 	// An attempt was recorded **for this date**, whatever became of it: that
 	// belongs to the history and its result, not to this question.
@@ -142,7 +142,7 @@ function dahu_deferred_sepa_is_overdue( WC_Order $order ) {
 	// the refused charge out of the record. The two facts live side by side —
 	// an attempt was made on the 14th, another is due on the 21st — and the
 	// comparison is what reads them in the right order.
-	$attempt = (int) $order->get_meta( '_dahu_deferred_sepa_executed_ts' );
+	$attempt = (int) $order->get_meta( '_ubac_sepa_executed_ts' );
 
 	if ( $attempt > 0 && $attempt >= $when ) {
 		return false;
@@ -154,7 +154,7 @@ function dahu_deferred_sepa_is_overdue( WC_Order $order ) {
 		return false;
 	}
 
-	return ( $when + dahu_deferred_sepa_overdue_grace() ) < time();
+	return ( $when + ubac_sepa_overdue_grace() ) < time();
 }
 
 /**
@@ -172,9 +172,9 @@ function dahu_deferred_sepa_is_overdue( WC_Order $order ) {
  * @param WC_Order $order Order.
  * @return string Translated sentence, or ''.
  */
-function dahu_deferred_sepa_blocking_reason( WC_Order $order ) {
+function ubac_sepa_blocking_reason( WC_Order $order ) {
 
-	$mandate = dahu_deferred_sepa_mandate_for_order( $order );
+	$mandate = ubac_sepa_mandate_for_order( $order );
 
 	return is_wp_error( $mandate ) ? (string) $mandate->get_error_message() : '';
 }
@@ -186,9 +186,9 @@ function dahu_deferred_sepa_blocking_reason( WC_Order $order ) {
  * @param string   $fingerprint Fingerprint.
  * @return bool
  */
-function dahu_deferred_sepa_already_alerted( WC_Order $order, $fingerprint ) {
+function ubac_sepa_already_alerted( WC_Order $order, $fingerprint ) {
 
-	$seen = $order->get_meta( '_dahu_deferred_sepa_alerted' );
+	$seen = $order->get_meta( '_ubac_sepa_alerted' );
 
 	return is_array( $seen ) && in_array( (string) $fingerprint, $seen, true );
 }
@@ -200,9 +200,9 @@ function dahu_deferred_sepa_already_alerted( WC_Order $order, $fingerprint ) {
  * @param string   $fingerprint Fingerprint.
  * @return void
  */
-function dahu_deferred_sepa_remember_alert( WC_Order $order, $fingerprint ) {
+function ubac_sepa_remember_alert( WC_Order $order, $fingerprint ) {
 
-	$seen = $order->get_meta( '_dahu_deferred_sepa_alerted' );
+	$seen = $order->get_meta( '_ubac_sepa_alerted' );
 	$seen = is_array( $seen ) ? $seen : array();
 
 	$seen[] = (string) $fingerprint;
@@ -213,7 +213,7 @@ function dahu_deferred_sepa_remember_alert( WC_Order $order, $fingerprint ) {
 		$seen = array_slice( $seen, -20 );
 	}
 
-	$order->update_meta_data( '_dahu_deferred_sepa_alerted', $seen );
+	$order->update_meta_data( '_ubac_sepa_alerted', $seen );
 	$order->save();
 }
 
@@ -228,7 +228,7 @@ function dahu_deferred_sepa_remember_alert( WC_Order $order, $fingerprint ) {
  * @param string   $message The sentence a person reads.
  * @return string
  */
-function dahu_deferred_sepa_alert_fingerprint( WC_Order $order, $code, $message ) {
+function ubac_sepa_alert_fingerprint( WC_Order $order, $code, $message ) {
 
 	// Which cycle this alert belongs to.
 	//
@@ -239,14 +239,14 @@ function dahu_deferred_sepa_alert_fingerprint( WC_Order $order, $code, $message 
 	//   attempt to key on. The due date is what distinguishes "late on the
 	//   14th" from "late again on the 21st after a reschedule".
 	// - Every path that alerts about a charge that DID run has already deleted
-	//   the due date by the time it alerts — `dahu_deferred_sepa_refuse()`
-	//   deletes it before calling here, `dahu_deferred_sepa_mark_done()` deletes
+	//   the due date by the time it alerts — `ubac_sepa_refuse()`
+	//   deletes it before calling here, `ubac_sepa_mark_done()` deletes
 	//   it too. Keyed on the date alone those alerts all fingerprint as 0, and
 	//   the second refusal on the same order — after the shop put the cause
 	//   right and rescheduled — was swallowed as old news. A refused charge
 	//   going unreported is the exact thing this file exists to prevent, so
 	//   that was the worst kind of bug: a watchdog quietly covering a silence.
-	$cycle = (int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' );
+	$cycle = (int) $order->get_meta( '_ubac_sepa_scheduled_ts' );
 
 	if ( ! $cycle ) {
 		// Both paths that alert about a charge which RAN have already deleted
@@ -254,11 +254,11 @@ function dahu_deferred_sepa_alert_fingerprint( WC_Order $order, $code, $message 
 		// doing so. Preferred over the attempt timestamp because two refusals
 		// within the same second — which the bench can produce and a retry
 		// loop could too — would otherwise share a fingerprint.
-		$cycle = (int) $order->get_meta( '_dahu_deferred_sepa_final_scheduled_ts' );
+		$cycle = (int) $order->get_meta( '_ubac_sepa_final_scheduled_ts' );
 	}
 
 	if ( ! $cycle ) {
-		$cycle = (int) $order->get_meta( '_dahu_deferred_sepa_executed_ts' );
+		$cycle = (int) $order->get_meta( '_ubac_sepa_executed_ts' );
 	}
 
 	return md5(
@@ -284,11 +284,11 @@ function dahu_deferred_sepa_alert_fingerprint( WC_Order $order, $code, $message 
  * @param string   $message The sentence written on the order. No raw payload.
  * @return bool Whether an email was sent.
  */
-function dahu_deferred_sepa_alert_failure( WC_Order $order, $code, $message ) {
+function ubac_sepa_alert_failure( WC_Order $order, $code, $message ) {
 
-	$fingerprint = dahu_deferred_sepa_alert_fingerprint( $order, $code, $message );
+	$fingerprint = ubac_sepa_alert_fingerprint( $order, $code, $message );
 
-	if ( dahu_deferred_sepa_already_alerted( $order, $fingerprint ) ) {
+	if ( ubac_sepa_already_alerted( $order, $fingerprint ) ) {
 		return false;
 	}
 
@@ -296,9 +296,9 @@ function dahu_deferred_sepa_alert_failure( WC_Order $order, $code, $message ) {
 	// times out must not be the reason the same alert goes out again on the
 	// next run: one of those two mistakes sends an email twice, the other
 	// sends it in a loop.
-	dahu_deferred_sepa_remember_alert( $order, $fingerprint );
+	ubac_sepa_remember_alert( $order, $fingerprint );
 
-	$to = dahu_deferred_sepa_notify_email();
+	$to = ubac_sepa_notify_email();
 
 	if ( ! $to ) {
 		return false;
@@ -331,7 +331,7 @@ function dahu_deferred_sepa_alert_failure( WC_Order $order, $code, $message ) {
 	 */
 	$mail = wp_parse_args(
 		(array) apply_filters(
-			'dahu_deferred_sepa_charge_refused_email',
+			'ubac_sepa_charge_refused_email',
 			compact( 'to', 'subject', 'body' ),
 			$order,
 			$code
@@ -349,12 +349,12 @@ function dahu_deferred_sepa_alert_failure( WC_Order $order, $code, $message ) {
  *
  * @return WC_Order[]
  */
-function dahu_deferred_sepa_overdue_orders() {
+function ubac_sepa_overdue_orders() {
 
 	$orders = wc_get_orders(
 		array(
 			'limit'        => -1,
-			'meta_key'     => '_dahu_deferred_sepa_scheduled_ts', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- wc_get_orders' own argument.
+			'meta_key'     => '_ubac_sepa_scheduled_ts', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- wc_get_orders' own argument.
 			'meta_compare' => 'EXISTS',
 		)
 	);
@@ -363,7 +363,7 @@ function dahu_deferred_sepa_overdue_orders() {
 
 	foreach ( (array) $orders as $order ) {
 
-		if ( $order instanceof WC_Order && dahu_deferred_sepa_is_overdue( $order ) ) {
+		if ( $order instanceof WC_Order && ubac_sepa_is_overdue( $order ) ) {
 			$late[] = $order;
 		}
 	}
@@ -373,7 +373,7 @@ function dahu_deferred_sepa_overdue_orders() {
 	usort(
 		$late,
 		static function ( $a, $b ) {
-			return (int) $a->get_meta( '_dahu_deferred_sepa_scheduled_ts' ) <=> (int) $b->get_meta( '_dahu_deferred_sepa_scheduled_ts' );
+			return (int) $a->get_meta( '_ubac_sepa_scheduled_ts' ) <=> (int) $b->get_meta( '_ubac_sepa_scheduled_ts' );
 		}
 	);
 
@@ -394,9 +394,9 @@ function dahu_deferred_sepa_overdue_orders() {
  *
  * @return int How many orders the email named, 0 when nothing was sent.
  */
-function dahu_deferred_sepa_sweep() {
+function ubac_sepa_sweep() {
 
-	$late = dahu_deferred_sepa_overdue_orders();
+	$late = ubac_sepa_overdue_orders();
 
 	if ( ! $late ) {
 		return 0;
@@ -406,9 +406,9 @@ function dahu_deferred_sepa_sweep() {
 
 	foreach ( $late as $order ) {
 
-		$fingerprint = dahu_deferred_sepa_alert_fingerprint( $order, 'overdue', '' );
+		$fingerprint = ubac_sepa_alert_fingerprint( $order, 'overdue', '' );
 
-		if ( ! dahu_deferred_sepa_already_alerted( $order, $fingerprint ) ) {
+		if ( ! ubac_sepa_already_alerted( $order, $fingerprint ) ) {
 			$fresh[] = $order;
 		}
 	}
@@ -420,10 +420,10 @@ function dahu_deferred_sepa_sweep() {
 	}
 
 	foreach ( $fresh as $order ) {
-		dahu_deferred_sepa_remember_alert( $order, dahu_deferred_sepa_alert_fingerprint( $order, 'overdue', '' ) );
+		ubac_sepa_remember_alert( $order, ubac_sepa_alert_fingerprint( $order, 'overdue', '' ) );
 	}
 
-	$to = dahu_deferred_sepa_notify_email();
+	$to = ubac_sepa_notify_email();
 
 	if ( ! $to ) {
 		return count( $fresh );
@@ -433,14 +433,14 @@ function dahu_deferred_sepa_sweep() {
 
 	foreach ( $fresh as $order ) {
 
-		$reason = dahu_deferred_sepa_blocking_reason( $order );
+		$reason = ubac_sepa_blocking_reason( $order );
 
 		$lines[] = sprintf(
 			/* translators: 1: order number, 2: amount, 3: the date the charge was due, 4: what is in the way, already a sentence. */
 			__( "#%1\$s — %2\$s — was due %3\$s\n    %4\$s", 'ubac-sepa' ),
 			$order->get_order_number(),
 			html_entity_decode( wp_strip_all_tags( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ), ENT_QUOTES, 'UTF-8' ),
-			dahu_deferred_sepa_format_date( (int) $order->get_meta( '_dahu_deferred_sepa_scheduled_ts' ) ),
+			ubac_sepa_format_date( (int) $order->get_meta( '_ubac_sepa_scheduled_ts' ) ),
 			'' !== $reason
 				? $reason
 				: __( 'Nothing is visibly wrong with this order, so the charge was never run at all: the scheduled job was lost or the queue is not running.', 'ubac-sepa' )
@@ -465,7 +465,7 @@ function dahu_deferred_sepa_sweep() {
 			'ubac-sepa'
 		),
 		implode( "\n\n", $lines ),
-		admin_url( 'admin.php?page=' . DAHU_DEFERRED_SEPA_CHARGES_PAGE )
+		admin_url( 'admin.php?page=' . UBAC_SEPA_CHARGES_PAGE )
 	);
 
 	/**
@@ -476,7 +476,7 @@ function dahu_deferred_sepa_sweep() {
 	 */
 	$mail = wp_parse_args(
 		(array) apply_filters(
-			'dahu_deferred_sepa_overdue_email',
+			'ubac_sepa_overdue_email',
 			compact( 'to', 'subject', 'body' ),
 			$fresh
 		),
@@ -485,9 +485,9 @@ function dahu_deferred_sepa_sweep() {
 
 	wp_mail( $mail['to'], $mail['subject'], $mail['body'] );
 
-	dahu_deferred_sepa_log( sprintf( '%d overdue charge(s) reported', count( $fresh ) ), 'error' );
+	ubac_sepa_log( sprintf( '%d overdue charge(s) reported', count( $fresh ) ), 'error' );
 
-	update_option( 'dahu_deferred_sepa_last_sweep', time(), false );
+	update_option( 'ubac_sepa_last_sweep', time(), false );
 
 	return count( $fresh );
 }
@@ -501,9 +501,9 @@ function dahu_deferred_sepa_sweep() {
  *
  * @return int
  */
-function dahu_deferred_sepa_last_sweep() {
+function ubac_sepa_last_sweep() {
 
-	return (int) get_option( 'dahu_deferred_sepa_last_sweep', 0 );
+	return (int) get_option( 'ubac_sepa_last_sweep', 0 );
 }
 
 /**
@@ -516,15 +516,15 @@ function dahu_deferred_sepa_last_sweep() {
  *
  * @return void
  */
-function dahu_deferred_sepa_keep_sweep_scheduled() {
+function ubac_sepa_keep_sweep_scheduled() {
 
-	if ( ! wp_next_scheduled( 'dahu_deferred_sepa_sweep' ) ) {
-		wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dahu_deferred_sepa_sweep' );
+	if ( ! wp_next_scheduled( 'ubac_sepa_sweep' ) ) {
+		wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'ubac_sepa_sweep' );
 	}
 }
 
-add_action( 'dahu_deferred_sepa_sweep', 'dahu_deferred_sepa_sweep' );
-add_action( 'admin_init', 'dahu_deferred_sepa_keep_sweep_scheduled' );
+add_action( 'ubac_sepa_sweep', 'ubac_sepa_sweep' );
+add_action( 'admin_init', 'ubac_sepa_keep_sweep_scheduled' );
 
 /**
  * Tells the shop that money which HAD moved has moved back.
@@ -541,7 +541,7 @@ add_action( 'admin_init', 'dahu_deferred_sepa_keep_sweep_scheduled' );
  *
  * So an email telling the shop to reschedule would be an instruction the code
  * forbids. Nor does this one say "settle it another way and record that":
- * `dahu_deferred_sepa_mark_settled_offline()` REFUSES an order whose debit is
+ * `ubac_sepa_mark_settled_offline()` REFUSES an order whose debit is
  * confirmed, and the order screen does not even draw the form. Advice the code
  * turns down is worse than no advice — it sends somebody looking for a button
  * that is not there.
@@ -562,7 +562,7 @@ add_action( 'admin_init', 'dahu_deferred_sepa_keep_sweep_scheduled' );
  * @param string   $kind  'failed' (the bank took it back) or 'disputed'.
  * @return bool Whether an email was handed over.
  */
-function dahu_deferred_sepa_alert_reversal( WC_Order $order, $kind ) {
+function ubac_sepa_alert_reversal( WC_Order $order, $kind ) {
 
 	$kind = 'disputed' === $kind ? 'disputed' : 'failed';
 
@@ -570,9 +570,9 @@ function dahu_deferred_sepa_alert_reversal( WC_Order $order, $kind ) {
 	// against a refusal alert, and a dispute is never read as a repeat of a
 	// bank return. The cycle comes from the shared fingerprint, which keys on
 	// the attempt once there has been one.
-	$fingerprint = dahu_deferred_sepa_alert_fingerprint( $order, 'reversal-' . $kind, '' );
+	$fingerprint = ubac_sepa_alert_fingerprint( $order, 'reversal-' . $kind, '' );
 
-	if ( dahu_deferred_sepa_already_alerted( $order, $fingerprint ) ) {
+	if ( ubac_sepa_already_alerted( $order, $fingerprint ) ) {
 		return false;
 	}
 
@@ -580,9 +580,9 @@ function dahu_deferred_sepa_alert_reversal( WC_Order $order, $kind ) {
 	// that times out must not turn one reversal into a stream of emails.
 	// Stripe retries a webhook it believes failed, so this path is called
 	// again by design.
-	dahu_deferred_sepa_remember_alert( $order, $fingerprint );
+	ubac_sepa_remember_alert( $order, $fingerprint );
 
-	$to = dahu_deferred_sepa_notify_email();
+	$to = ubac_sepa_notify_email();
 
 	if ( ! $to ) {
 		return false;
@@ -639,7 +639,7 @@ function dahu_deferred_sepa_alert_reversal( WC_Order $order, $kind ) {
 	 */
 	$mail = wp_parse_args(
 		(array) apply_filters(
-			'dahu_deferred_sepa_charge_reversed_email',
+			'ubac_sepa_charge_reversed_email',
 			compact( 'to', 'subject', 'body' ),
 			$order,
 			$kind
