@@ -134,6 +134,7 @@ if ( ! class_exists( 'Ubac_Welcome' ) ) {
 			if ( ! self::$booted ) {
 				self::$booted = true;
 				add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+				add_filter( 'admin_title', array( __CLASS__, 'document_title' ) );
 				add_action( 'admin_init', array( __CLASS__, 'maybe_redirect' ) );
 				add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_tour' ) );
 			}
@@ -182,6 +183,38 @@ if ( ! class_exists( 'Ubac_Welcome' ) ) {
 					}
 				);
 			}
+		}
+
+		/**
+		 * Gives the welcome screen a browser title.
+		 *
+		 * WHY THIS FILTER EXISTS. The screen is registered with an empty parent
+		 * slug, which is how a page is kept out of the menus. WordPress builds
+		 * the document title from get_admin_page_title(), and that looks the
+		 * page up in $submenu under its parent: with no parent there is nothing
+		 * to find, so the browser tab read " &lsaquo; Site — WordPress", with a
+		 * blank where the page's name belongs. The title was passed to
+		 * add_submenu_page() all along; it simply never reached the <title>.
+		 *
+		 * @param string $admin_title The title WordPress built.
+		 * @return string
+		 */
+		public static function document_title( $admin_title ) {
+
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading which screen is being displayed.
+			$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+			if ( '' === $page ) {
+				return $admin_title;
+			}
+
+			foreach ( self::$plugins as $slug => $spec ) {
+				if ( $slug . '-welcome' === $page ) {
+					return sprintf( '%1$s &lsaquo; %2$s', $spec['name'], get_bloginfo( 'name' ) );
+				}
+			}
+
+			return $admin_title;
 		}
 
 		/**
