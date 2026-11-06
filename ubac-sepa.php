@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Ubac Deferred SEPA
  * Description: Charges a Stripe SEPA Direct Debit mandate a configurable number of days after an order is completed, instead of at checkout. The charge date can be viewed and moved from the order screen.
- * Version:     1.2.2
+ * Version:     1.2.3
  * Author:      Hugo Vial-Jaime
  * Author URI:  https://dahu-concept.fr
  * License:     MIT
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'UBAC_SEPA_VERSION', '1.2.2' );
+define( 'UBAC_SEPA_VERSION', '1.2.3' );
 define( 'UBAC_SEPA_FILE', __FILE__ );
 define( 'UBAC_SEPA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'UBAC_SEPA_URL', plugin_dir_url( __FILE__ ) );

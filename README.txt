@@ -4,7 +4,7 @@ Tags: payment terms, mandate, deferred payment, direct debit, sepa
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -188,6 +188,9 @@ your database, and not something this plugin does on the way out.
 
 == Changelog ==
 
+= 1.2.3 =
+* Changed: WordPress 6.2 is now the floor. Three extensions of the family need it for prepare()'s %i identifier placeholder, and the family states one floor rather than two because the welcome screen and the shared admin stylesheet are copied byte for byte across it.
+
 = 1.2.2 =
 * Fixed: a webhook event could confirm a charge on an order this plugin had never charged. The signature proves an event comes from Stripe, not that it concerns this order, and the metadata it carries is set by whoever created the payment. A confirmation now requires the payment intent this plugin recorded when it sent the charge, and the two must match.
 * An event that has nothing to confirm is refused, and the refusal is written on the order rather than dropped in silence, so a charge whose Stripe answer was lost in transit can still be picked up by hand.
@@ -224,6 +227,9 @@ your database, and not something this plugin does on the way out.
 * First release.
 
 == Upgrade Notice ==
+
+= 1.2.3 =
+WordPress 6.2 is now the floor, in step with the rest of the family. Nothing else changes.
 
 = 1.1.1 =
 Fixes a per-customer charge delay of zero days being discarded, and completes the uninstaller.
