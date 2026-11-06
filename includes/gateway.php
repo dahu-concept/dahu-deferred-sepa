@@ -158,6 +158,23 @@ function ubac_sepa_load_gateway_class() {
 					'description' => __( 'Adds a panel, visible only to administrators, at checkout and on the user profile, explaining each condition this gateway checks. Useful while setting the plugin up; turn it off afterwards.', 'ubac-sepa' ),
 					'default'     => 'no',
 				),
+				/*
+				 * The uninstall choice. Read by uninstall.php out of this very
+				 * settings array, which is why it lives here rather than in an
+				 * option of its own: one place to set it, one place to read it.
+				 *
+				 * It governs the mandate approvals this plugin put on customer
+				 * accounts. It does NOT govern the order meta -- that is a
+				 * payment record, and uninstall.php declines to touch it
+				 * whatever this box says, as its own header explains.
+				 */
+				'delete_data_on_uninstall' => array(
+					'title'       => __( 'Uninstalling', 'ubac-sepa' ),
+					'type'        => 'checkbox',
+					'label'       => __( "Delete this plugin's data when the plugin is deleted", 'ubac-sepa' ),
+					'description' => __( 'Off, and worth leaving off. What goes is the mandate approval held on each customer account, so every customer who had agreed to be debited has to agree again. The payment records on past orders are never deleted, whatever this box says. On a multisite network, accounts are shared between the sites: one shop ticking this box clears the approvals for the customers of every shop on the network.', 'ubac-sepa' ),
+					'default'     => 'no',
+				),
 			);
 		}
 

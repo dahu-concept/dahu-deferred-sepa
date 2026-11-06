@@ -14,7 +14,7 @@
  * The scheduled charges are cancelled, because leaving actions queued for a
  * plugin that is gone means a hook nothing answers.
  *
- * AND NO OPTION CHANGES THAT. This header used to say that a shop wanting the
+ * AND NO SETTING CHANGES THAT. This header used to say that a shop wanting the
  * order meta gone could set `ubac_sepa_remove_data_on_uninstall`
  * first, and that was false: the body of this file declines to touch order
  * meta *even when that option is set*, deliberately and for the reason above.
@@ -36,6 +36,31 @@
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 /**
+ * Whether this site asked for its data to go.
+ *
+ * Read from the gateway's own settings array, where the box that sets it
+ * lives, so there is one place to set it and one place to read it. Until
+ * 06/11/2026 it was a standalone option named
+ * `ubac_sepa_remove_data_on_uninstall` that NOTHING anywhere wrote: the branch
+ * it guards could never run, and the promise was unreachable.
+ *
+ * Compared against 'yes' and never read as a boolean: WooCommerce stores the
+ * STRING 'no' for an unticked checkbox, and 'no' is truthy in PHP, so casting
+ * it would wipe the data of every shop that left the box alone.
+ *
+ * @return bool
+ */
+function ubac_sepa_uninstall_wanted() {
+	$settings = get_option( 'woocommerce_ubac_sepa_settings', array() );
+
+	if ( ! is_array( $settings ) || ! isset( $settings['delete_data_on_uninstall'] ) ) {
+		return false;
+	}
+
+	return 'yes' === $settings['delete_data_on_uninstall'];
+}
+
+/**
  * Cleans one site.
  *
  * @return void
@@ -55,9 +80,14 @@ function ubac_sepa_uninstall_site() {
 	delete_option( 'ubac_welcome_tour_ubac-sepa' );
 	global $wpdb;
 
-	$wipe = (bool) get_option( 'ubac_sepa_remove_data_on_uninstall', false );
+	// Read BEFORE the settings array is deleted just below.
+	$wipe = ubac_sepa_uninstall_wanted();
 
 	delete_option( 'woocommerce_ubac_sepa_settings' );
+
+	// The old name goes too. Nothing in the code ever wrote it, but a shop that
+	// followed the previous header and set it by hand would otherwise keep an
+	// orphan row that no longer does anything.
 	delete_option( 'ubac_sepa_remove_data_on_uninstall' );
 
 	// When the overdue sweep last reported. Interface state of a watchdog that
@@ -141,7 +171,7 @@ function ubac_sepa_uninstall_users( $wipe ) {
 	}
 }
 
-$ubac_sepa_wipe_users = (bool) get_option( 'ubac_sepa_remove_data_on_uninstall', false );
+$ubac_sepa_wipe_users = ubac_sepa_uninstall_wanted();
 
 if ( is_multisite() ) {
 	$ubac_sepa_site_ids = get_sites(
@@ -157,7 +187,7 @@ if ( is_multisite() ) {
 
 		// Read per site: only a site that asked for it gets its own options
 		// removed, and any one site asking is enough for the shared user meta.
-		if ( get_option( 'ubac_sepa_remove_data_on_uninstall', false ) ) {
+		if ( ubac_sepa_uninstall_wanted() ) {
 			$ubac_sepa_wipe_users = true;
 		}
 
