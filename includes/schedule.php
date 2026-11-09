@@ -51,7 +51,7 @@ function ubac_sepa_schedule_on_completed( $order_id, $order = null ) {
 	// again — which happens, for a dozen ordinary reasons — must not put a
 	// charge back on an order the shop has already been paid for.
 	if ( ubac_sepa_is_settled_offline( $order ) ) {
-		$order->add_order_note( __( 'Deferred SEPA: nothing scheduled, because this order is recorded as settled another way.', 'ubac-sepa' ) );
+		$order->add_order_note( __( 'Deferred SEPA: nothing scheduled, because this order is recorded as settled another way.', 'dahuconcept-deferred-sepa' ) );
 
 		return;
 	}
@@ -64,7 +64,7 @@ function ubac_sepa_schedule_on_completed( $order_id, $order = null ) {
 	// plugin's own gateway: it leaves the order unpaid on purpose, so is_paid()
 	// would be misleading there.
 	if ( UBAC_SEPA_GATEWAY_ID !== $order->get_payment_method() && $order->is_paid() ) {
-		$order->add_order_note( __( 'Deferred SEPA: order is already paid, nothing scheduled.', 'ubac-sepa' ) );
+		$order->add_order_note( __( 'Deferred SEPA: order is already paid, nothing scheduled.', 'dahuconcept-deferred-sepa' ) );
 
 		return;
 	}
@@ -76,7 +76,7 @@ function ubac_sepa_schedule_on_completed( $order_id, $order = null ) {
 
 	$note = sprintf(
 		/* translators: 1: date and time of the charge, 2: delay in days. */
-		__( 'Deferred SEPA: charge scheduled for %1$s (%2$d days from now).', 'ubac-sepa' ),
+		__( 'Deferred SEPA: charge scheduled for %1$s (%2$d days from now).', 'dahuconcept-deferred-sepa' ),
 		ubac_sepa_format_date( $timestamp ),
 		$days
 	);
@@ -92,7 +92,7 @@ function ubac_sepa_schedule_on_completed( $order_id, $order = null ) {
 	if ( '' !== $blocking ) {
 		$note .= "\n\n" . sprintf(
 			/* translators: %s: the reason, already a sentence. */
-			__( 'As things stand, that charge would be refused: %s Put it right before the date above and nothing else needs doing.', 'ubac-sepa' ),
+			__( 'As things stand, that charge would be refused: %s Put it right before the date above and nothing else needs doing.', 'dahuconcept-deferred-sepa' ),
 			$blocking
 		);
 	}
@@ -352,7 +352,7 @@ function ubac_sepa_mandate_for_order( WC_Order $order ) {
 
 		return new WP_Error(
 			'ubac_sepa_guest_incomplete',
-			__( 'Deferred SEPA: this order has no customer account and does not carry both a Stripe customer and a mandate, so nothing was charged.', 'ubac-sepa' ),
+			__( 'Deferred SEPA: this order has no customer account and does not carry both a Stripe customer and a mandate, so nothing was charged.', 'dahuconcept-deferred-sepa' ),
 			array( 'log' => 'guest order missing customer or mandate' )
 		);
 	}
@@ -360,7 +360,7 @@ function ubac_sepa_mandate_for_order( WC_Order $order ) {
 	if ( ! ubac_sepa_is_authorized( $user_id ) ) {
 		return new WP_Error(
 			'ubac_sepa_not_authorized',
-			__( 'Deferred SEPA: this customer is no longer approved for deferred payment, so nothing was charged. Approve a mandate on their profile and mark the order Completed again, or take payment another way.', 'ubac-sepa' ),
+			__( 'Deferred SEPA: this customer is no longer approved for deferred payment, so nothing was charged. Approve a mandate on their profile and mark the order Completed again, or take payment another way.', 'dahuconcept-deferred-sepa' ),
 			array( 'log' => 'approval withdrawn before the charge came due' )
 		);
 	}
@@ -370,7 +370,7 @@ function ubac_sepa_mandate_for_order( WC_Order $order ) {
 	if ( ! $mandate ) {
 		return new WP_Error(
 			'ubac_sepa_no_mandate',
-			__( 'Deferred SEPA: no approved mandate could be found for this customer, so nothing was charged.', 'ubac-sepa' ),
+			__( 'Deferred SEPA: no approved mandate could be found for this customer, so nothing was charged.', 'dahuconcept-deferred-sepa' ),
 			array( 'log' => 'no approved mandate at charge time' )
 		);
 	}
@@ -381,7 +381,7 @@ function ubac_sepa_mandate_for_order( WC_Order $order ) {
 	if ( $on_order && $on_order !== $mandate['payment_method'] ) {
 		return new WP_Error(
 			'ubac_sepa_mandate_changed',
-			__( 'Deferred SEPA: the mandate approved for this customer is no longer the one this order was placed with, so nothing was charged. Check which IBAN should be used and charge it by hand.', 'ubac-sepa' ),
+			__( 'Deferred SEPA: the mandate approved for this customer is no longer the one this order was placed with, so nothing was charged. Check which IBAN should be used and charge it by hand.', 'dahuconcept-deferred-sepa' ),
 			array( 'log' => 'approved mandate differs from the one on the order' )
 		);
 	}
@@ -424,7 +424,7 @@ function ubac_sepa_charge( $order_id ) {
 	// order, because a charge that was due and did not happen must never be
 	// silent.
 	if ( ubac_sepa_is_settled_offline( $order ) ) {
-		$order->add_order_note( __( 'Deferred SEPA: the charge came due and was not sent, because this order is recorded as settled another way.', 'ubac-sepa' ) );
+		$order->add_order_note( __( 'Deferred SEPA: the charge came due and was not sent, because this order is recorded as settled another way.', 'dahuconcept-deferred-sepa' ) );
 		ubac_sepa_unschedule( $order->get_id() );
 
 		return;
@@ -435,7 +435,7 @@ function ubac_sepa_charge( $order_id ) {
 		// rather than returning in silence, and stop counting it as due.
 		ubac_sepa_refuse(
 			$order,
-			__( 'Deferred SEPA: the charge came due, but this order is no longer on a SEPA payment method, so nothing was charged.', 'ubac-sepa' ),
+			__( 'Deferred SEPA: the charge came due, but this order is no longer on a SEPA payment method, so nothing was charged.', 'dahuconcept-deferred-sepa' ),
 			'payment method changed after scheduling',
 			false
 		);
@@ -446,7 +446,7 @@ function ubac_sepa_charge( $order_id ) {
 	// Same reasoning as when scheduling: is_paid() is not the truth for this
 	// plugin's own gateway.
 	if ( UBAC_SEPA_GATEWAY_ID !== $order->get_payment_method() && $order->is_paid() ) {
-		$order->add_order_note( __( 'Deferred SEPA: order was already paid when the charge came due. Nothing done.', 'ubac-sepa' ) );
+		$order->add_order_note( __( 'Deferred SEPA: order was already paid when the charge came due. Nothing done.', 'dahuconcept-deferred-sepa' ) );
 		ubac_sepa_mark_done( $order );
 
 		// Recorded, not left blank: the charge ended in a known state, and a
@@ -469,7 +469,7 @@ function ubac_sepa_charge( $order_id ) {
 	if ( ! $secret_key ) {
 		ubac_sepa_refuse(
 			$order,
-			__( 'Deferred SEPA: no Stripe secret key is configured. No charge was attempted — this needs doing by hand.', 'ubac-sepa' ),
+			__( 'Deferred SEPA: no Stripe secret key is configured. No charge was attempted — this needs doing by hand.', 'dahuconcept-deferred-sepa' ),
 			'no secret key configured',
 			false
 		);
@@ -515,7 +515,7 @@ function ubac_sepa_charge( $order_id ) {
 					$order->add_order_note(
 						sprintf(
 							/* translators: %s: Stripe PaymentIntent status. */
-							__( 'Deferred SEPA: the existing payment is already under way at Stripe (%s). Nothing done.', 'ubac-sepa' ),
+							__( 'Deferred SEPA: the existing payment is already under way at Stripe (%s). Nothing done.', 'dahuconcept-deferred-sepa' ),
 							$intent['status']
 						)
 					);
@@ -553,7 +553,7 @@ function ubac_sepa_charge( $order_id ) {
 					}
 
 					$order->add_order_note(
-						__( 'Deferred SEPA: the payment already prepared at Stripe is for a different amount than this order, so a new one was created for the current total.', 'ubac-sepa' )
+						__( 'Deferred SEPA: the payment already prepared at Stripe is for a different amount than this order, so a new one was created for the current total.', 'dahuconcept-deferred-sepa' )
 					);
 					ubac_sepa_log(
 						sprintf(
@@ -591,7 +591,7 @@ function ubac_sepa_charge( $order_id ) {
 			'confirm'              => 'true',
 			'description'          => sprintf(
 				/* translators: 1: order number, 2: site name. */
-				__( 'Order #%1$s — %2$s', 'ubac-sepa' ),
+				__( 'Order #%1$s — %2$s', 'dahuconcept-deferred-sepa' ),
 				$order->get_order_number(),
 				get_bloginfo( 'name' )
 			),
@@ -671,8 +671,8 @@ function ubac_sepa_record_payment( WC_Order $order, $intent ) {
  */
 function ubac_sepa_handle_result( WC_Order $order, $result, $route ) {
 	$label = 'confirm' === $route
-		? __( 'confirming the existing payment', 'ubac-sepa' )
-		: __( 'creating the payment', 'ubac-sepa' );
+		? __( 'confirming the existing payment', 'dahuconcept-deferred-sepa' )
+		: __( 'creating the payment', 'dahuconcept-deferred-sepa' );
 
 	if ( is_wp_error( $result ) ) {
 		// Deliberately NOT recorded as a failed charge and NOT unscheduled: the
@@ -683,7 +683,7 @@ function ubac_sepa_handle_result( WC_Order $order, $result, $route ) {
 		$order->add_order_note(
 			sprintf(
 				/* translators: 1: what the plugin was doing, 2: error message. */
-				__( 'Deferred SEPA could not reach Stripe while %1$s — %2$s. The charge may or may not have been taken: check the Stripe dashboard for this order before charging it again.', 'ubac-sepa' ),
+				__( 'Deferred SEPA could not reach Stripe while %1$s — %2$s. The charge may or may not have been taken: check the Stripe dashboard for this order before charging it again.', 'dahuconcept-deferred-sepa' ),
 				$label,
 				$result->get_error_message()
 			)
@@ -707,13 +707,13 @@ function ubac_sepa_handle_result( WC_Order $order, $result, $route ) {
 		} else {
 			$message = isset( $result['error']['message'] )
 				? $result['error']['message']
-				: __( 'no reason given', 'ubac-sepa' );
+				: __( 'no reason given', 'dahuconcept-deferred-sepa' );
 
 			ubac_sepa_refuse(
 				$order,
 				sprintf(
 					/* translators: 1: what the plugin was doing, 2: the message Stripe returned. */
-					__( 'Deferred SEPA failed while %1$s: Stripe refused it — %2$s', 'ubac-sepa' ),
+					__( 'Deferred SEPA failed while %1$s: Stripe refused it — %2$s', 'dahuconcept-deferred-sepa' ),
 					$label,
 					$message
 				),
@@ -739,8 +739,8 @@ function ubac_sepa_handle_result( WC_Order $order, $result, $route ) {
 
 		$order->add_order_note(
 			'succeeded' === $status
-				? __( 'Deferred SEPA: charge collected.', 'ubac-sepa' )
-				: __( 'Deferred SEPA: charge sent to Stripe and under way. SEPA settles in a few working days.', 'ubac-sepa' )
+				? __( 'Deferred SEPA: charge collected.', 'dahuconcept-deferred-sepa' )
+				: __( 'Deferred SEPA: charge sent to Stripe and under way. SEPA settles in a few working days.', 'dahuconcept-deferred-sepa' )
 		);
 
 		if ( 'succeeded' === $status ) {
@@ -759,7 +759,7 @@ function ubac_sepa_handle_result( WC_Order $order, $result, $route ) {
 		$order,
 		sprintf(
 			/* translators: 1: what the plugin was doing, 2: the status Stripe returned. */
-			__( 'Deferred SEPA: unexpected status while %1$s — "%2$s". Check the Stripe dashboard for this order.', 'ubac-sepa' ),
+			__( 'Deferred SEPA: unexpected status while %1$s — "%2$s". Check the Stripe dashboard for this order.', 'dahuconcept-deferred-sepa' ),
 			$label,
 			$status
 		),
@@ -812,5 +812,5 @@ function ubac_sepa_cancel_schedule( $order_id ) {
 
 	$order->delete_meta_data( '_ubac_sepa_scheduled_ts' );
 	$order->save();
-	$order->add_order_note( __( 'Deferred SEPA: scheduled charge cancelled, because the order was cancelled or refunded.', 'ubac-sepa' ) );
+	$order->add_order_note( __( 'Deferred SEPA: scheduled charge cancelled, because the order was cancelled or refunded.', 'dahuconcept-deferred-sepa' ) );
 }

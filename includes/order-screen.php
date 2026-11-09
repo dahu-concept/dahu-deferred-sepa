@@ -43,7 +43,7 @@ function ubac_sepa_register_metabox() {
 	foreach ( array( 'woocommerce_page_wc-orders', 'shop_order' ) as $screen ) {
 		add_meta_box(
 			'ubac_sepa_metabox',
-			__( 'Deferred SEPA Direct Debit', 'ubac-sepa' ),
+			__( 'Deferred SEPA Direct Debit', 'dahuconcept-deferred-sepa' ),
 			'ubac_sepa_render_metabox',
 			$screen,
 			'side',
@@ -71,13 +71,13 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 	}
 
 	if ( ! $order ) {
-		echo '<p>' . esc_html__( 'Order not found.', 'ubac-sepa' ) . '</p>';
+		echo '<p>' . esc_html__( 'Order not found.', 'dahuconcept-deferred-sepa' ) . '</p>';
 
 		return;
 	}
 
 	if ( ! ubac_sepa_order_is_sepa( $order ) ) {
-		echo '<p>' . esc_html__( 'This order was not paid by SEPA Direct Debit, so there is nothing to manage here.', 'ubac-sepa' ) . '</p>';
+		echo '<p>' . esc_html__( 'This order was not paid by SEPA Direct Debit, so there is nothing to manage here.', 'dahuconcept-deferred-sepa' ) . '</p>';
 
 		return;
 	}
@@ -113,7 +113,7 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 		);
 
 		echo '<p class="description ubac-sepa-charge__hint">'
-			. esc_html__( 'No direct debit will be taken on this order: nothing is scheduled, the date cannot be changed, and a charge is refused even if an old scheduled action fires.', 'ubac-sepa' )
+			. esc_html__( 'No direct debit will be taken on this order: nothing is scheduled, the date cannot be changed, and a charge is refused even if an old scheduled action fires.', 'dahuconcept-deferred-sepa' )
 			. '</p>';
 
 		if ( current_user_can( 'edit_shop_orders' ) && ! ubac_sepa_stripe_confirmed( $order ) ) {
@@ -123,11 +123,11 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 			<p class="ubac-sepa-charge__row">
 				<label>
 					<input type="checkbox" name="ubac_sepa_offline_lift" value="1">
-					<?php esc_html_e( 'Lift this mark when the order is saved', 'ubac-sepa' ); ?>
+					<?php esc_html_e( 'Lift this mark when the order is saved', 'dahuconcept-deferred-sepa' ); ?>
 				</label>
 			</p>
 			<p class="description ubac-sepa-charge__hint">
-				<?php esc_html_e( 'Nothing is rescheduled when the mark is lifted: the order goes back to having no date, and you set one if a direct debit is still wanted.', 'ubac-sepa' ); ?>
+				<?php esc_html_e( 'Nothing is rescheduled when the mark is lifted: the order goes back to having no date, and you set one if a direct debit is still wanted.', 'dahuconcept-deferred-sepa' ); ?>
 			</p>
 			<?php
 		}
@@ -147,11 +147,11 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 		if ( $executed ) {
 			printf(
 				/* translators: %s: date and time the charge was sent. */
-				esc_html__( 'Charge sent on %s.', 'ubac-sepa' ),
+				esc_html__( 'Charge sent on %s.', 'dahuconcept-deferred-sepa' ),
 				'<span class="ubac-sepa-charge__date">' . esc_html( ubac_sepa_format_date( $executed ) ) . '</span>'
 			);
 		} else {
-			esc_html_e( 'Charge already sent.', 'ubac-sepa' );
+			esc_html_e( 'Charge already sent.', 'dahuconcept-deferred-sepa' );
 		}
 
 		echo '</p>';
@@ -178,14 +178,14 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 			echo '<p class="ubac-sepa-charge__row">';
 			printf(
 				/* translators: %s: date and time of the attempt. */
-				esc_html__( 'A charge was attempted on %s and did not go through.', 'ubac-sepa' ),
+				esc_html__( 'A charge was attempted on %s and did not go through.', 'dahuconcept-deferred-sepa' ),
 				'<span class="ubac-sepa-charge__date">' . esc_html( ubac_sepa_format_date( $attempted ) ) . '</span>'
 			);
 			echo ' ' . ubac_sepa_result_badge( $result ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside the helper.
 			echo '</p>';
 
 			echo '<p class="description ubac-sepa-charge__hint">'
-				. esc_html__( 'Put right whatever the order note says, then set a new date below. Nothing is retried on its own: a charge sent twice is taken twice.', 'ubac-sepa' )
+				. esc_html__( 'Put right whatever the order note says, then set a new date below. Nothing is retried on its own: a charge sent twice is taken twice.', 'dahuconcept-deferred-sepa' )
 				. '</p>';
 		}
 
@@ -203,7 +203,7 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 			);
 
 			echo '<p class="description ubac-sepa-charge__hint">'
-				. esc_html__( 'The mandate is read again when the charge comes due, so putting this right before the date is enough — nothing else needs doing here.', 'ubac-sepa' )
+				. esc_html__( 'The mandate is read again when the charge comes due, so putting this right before the date is enough — nothing else needs doing here.', 'dahuconcept-deferred-sepa' )
 				. '</p>';
 		}
 
@@ -212,11 +212,11 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 		if ( $scheduled ) {
 			printf(
 				/* translators: %s: date and time of the scheduled charge. */
-				esc_html__( 'Charge due on %s.', 'ubac-sepa' ),
+				esc_html__( 'Charge due on %s.', 'dahuconcept-deferred-sepa' ),
 				'<span class="ubac-sepa-charge__date">' . esc_html( ubac_sepa_format_date( $scheduled ) ) . '</span>'
 			);
 		} else {
-			esc_html_e( 'Nothing scheduled yet: the order has not been marked Completed.', 'ubac-sepa' );
+			esc_html_e( 'Nothing scheduled yet: the order has not been marked Completed.', 'dahuconcept-deferred-sepa' );
 		}
 
 		echo '</p>';
@@ -226,7 +226,7 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 		?>
 		<p class="ubac-sepa-charge__row">
 			<label for="ubac_sepa_new_date">
-				<strong><?php esc_html_e( 'Move the charge to', 'ubac-sepa' ); ?></strong>
+				<strong><?php esc_html_e( 'Move the charge to', 'dahuconcept-deferred-sepa' ); ?></strong>
 			</label><br>
 			<input type="date" id="ubac_sepa_new_date" name="ubac_sepa_new_date"
 				value="<?php echo esc_attr( $value ); ?>" min="<?php echo esc_attr( $min ); ?>">
@@ -235,7 +235,7 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 			<?php
 			printf(
 				/* translators: %s: time of day, already formatted. */
-				esc_html__( 'The charge is sent at %s on the chosen day. SEPA then settles in a few working days. Leave the field as it is to change nothing, and save the order to apply.', 'ubac-sepa' ),
+				esc_html__( 'The charge is sent at %s on the chosen day. SEPA then settles in a few working days. Leave the field as it is to change nothing, and save the order to apply.', 'dahuconcept-deferred-sepa' ),
 				esc_html(
 					wp_date(
 						get_option( 'time_format' ),
@@ -268,17 +268,17 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 			'ubac-sepa-admin-order',
 			'ubacDeferredSepaOrder',
 			array(
-				'confirm' => __( 'Charge this SEPA mandate now? This takes real money from the customer.', 'ubac-sepa' ),
+				'confirm' => __( 'Charge this SEPA mandate now? This takes real money from the customer.', 'dahuconcept-deferred-sepa' ),
 			)
 		);
 		?>
 		<div class="ubac-sepa-charge__actions">
 			<a href="<?php echo esc_url( $url ); ?>" class="button button-secondary js-ubac-sepa-charge-now">
-				<?php esc_html_e( 'Charge now', 'ubac-sepa' ); ?>
+				<?php esc_html_e( 'Charge now', 'dahuconcept-deferred-sepa' ); ?>
 			</a>
 		</div>
 		<p class="description ubac-sepa-charge__hint">
-			<?php esc_html_e( 'Sends the charge immediately instead of waiting for the due date. The scheduled action stays in place but will do nothing: the order is marked as charged, and the idempotency key rules out a second debit.', 'ubac-sepa' ); ?>
+			<?php esc_html_e( 'Sends the charge immediately instead of waiting for the due date. The scheduled action stays in place but will do nothing: the order is marked as charged, and the idempotency key rules out a second debit.', 'dahuconcept-deferred-sepa' ); ?>
 		</p>
 		<?php
 	}
@@ -290,22 +290,22 @@ function ubac_sepa_render_metabox( $post_or_order ) {
 		<hr>
 		<p class="ubac-sepa-charge__row">
 			<label for="ubac_sepa_offline_reason">
-				<strong><?php esc_html_e( 'Settled another way', 'ubac-sepa' ); ?></strong>
+				<strong><?php esc_html_e( 'Settled another way', 'dahuconcept-deferred-sepa' ); ?></strong>
 			</label><br>
 			<select id="ubac_sepa_offline_reason" name="ubac_sepa_offline_reason">
-				<option value=""><?php esc_html_e( '— no, a direct debit is still due —', 'ubac-sepa' ); ?></option>
+				<option value=""><?php esc_html_e( '— no, a direct debit is still due —', 'dahuconcept-deferred-sepa' ); ?></option>
 				<?php foreach ( ubac_sepa_offline_reasons() as $key => $label ) : ?>
 					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</p>
 		<p class="ubac-sepa-charge__row">
-			<label for="ubac_sepa_offline_comment"><?php esc_html_e( 'How, exactly', 'ubac-sepa' ); ?></label><br>
+			<label for="ubac_sepa_offline_comment"><?php esc_html_e( 'How, exactly', 'dahuconcept-deferred-sepa' ); ?></label><br>
 			<input type="text" class="widefat" id="ubac_sepa_offline_comment"
 				name="ubac_sepa_offline_comment" maxlength="200">
 		</p>
 		<p class="description ubac-sepa-charge__hint">
-			<?php esc_html_e( 'Use this when the order was paid by cheque, by transfer, by card over the telephone or in Stripe by hand. It cancels the scheduled charge and takes the order out of the pending list, with a note saying who recorded it and why — which is what somebody reconciling a bank statement in six months will read. Required for "another way".', 'ubac-sepa' ); ?>
+			<?php esc_html_e( 'Use this when the order was paid by cheque, by transfer, by card over the telephone or in Stripe by hand. It cancels the scheduled charge and takes the order out of the pending list, with a note saying who recorded it and why — which is what somebody reconciling a bank statement in six months will read. Required for "another way".', 'dahuconcept-deferred-sepa' ); ?>
 		</p>
 		<?php
 	}
@@ -408,7 +408,7 @@ function ubac_sepa_save_metabox( $order_id ) {
 	}
 
 	if ( ubac_sepa_is_settled_offline( $order ) ) {
-		$order->add_order_note( __( 'Deferred SEPA: the date was not changed, because this order is recorded as settled another way.', 'ubac-sepa' ) );
+		$order->add_order_note( __( 'Deferred SEPA: the date was not changed, because this order is recorded as settled another way.', 'dahuconcept-deferred-sepa' ) );
 
 		return;
 	}
@@ -420,7 +420,7 @@ function ubac_sepa_save_metabox( $order_id ) {
 	// it, so a forged or fat-fingered value would move the charge somewhere
 	// nobody asked for.
 	if ( ! ubac_sepa_is_ymd( $date ) ) {
-		$order->add_order_note( __( 'Deferred SEPA: that date could not be read, so the schedule is unchanged.', 'ubac-sepa' ) );
+		$order->add_order_note( __( 'Deferred SEPA: that date could not be read, so the schedule is unchanged.', 'dahuconcept-deferred-sepa' ) );
 
 		return;
 	}
@@ -434,7 +434,7 @@ function ubac_sepa_save_metabox( $order_id ) {
 	);
 
 	if ( ! $when ) {
-		$order->add_order_note( __( 'Deferred SEPA: that date could not be read, so the schedule is unchanged.', 'ubac-sepa' ) );
+		$order->add_order_note( __( 'Deferred SEPA: that date could not be read, so the schedule is unchanged.', 'dahuconcept-deferred-sepa' ) );
 
 		return;
 	}
@@ -442,7 +442,7 @@ function ubac_sepa_save_metabox( $order_id ) {
 	$timestamp = $when->getTimestamp();
 
 	if ( $timestamp <= time() ) {
-		$order->add_order_note( __( 'Deferred SEPA: that date is in the past, so the schedule is unchanged.', 'ubac-sepa' ) );
+		$order->add_order_note( __( 'Deferred SEPA: that date is in the past, so the schedule is unchanged.', 'dahuconcept-deferred-sepa' ) );
 
 		return;
 	}
@@ -459,13 +459,13 @@ function ubac_sepa_save_metabox( $order_id ) {
 		$previous
 			? sprintf(
 				/* translators: 1: previous date and time, 2: new date and time. */
-				__( 'Deferred SEPA: charge moved by hand from %1$s to %2$s.', 'ubac-sepa' ),
+				__( 'Deferred SEPA: charge moved by hand from %1$s to %2$s.', 'dahuconcept-deferred-sepa' ),
 				ubac_sepa_format_date( $previous ),
 				ubac_sepa_format_date( $timestamp )
 			)
 			: sprintf(
 				/* translators: %s: date and time of the charge. */
-				__( 'Deferred SEPA: charge set by hand for %s.', 'ubac-sepa' ),
+				__( 'Deferred SEPA: charge set by hand for %s.', 'dahuconcept-deferred-sepa' ),
 				ubac_sepa_format_date( $timestamp )
 			)
 	);
@@ -486,7 +486,7 @@ function ubac_sepa_handle_charge_now() {
 		|| ! isset( $_GET['_wpnonce'] )
 		|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'ubac_sepa_charge_now_' . $order_id )
 	) {
-		wp_die( esc_html__( 'You are not allowed to do that.', 'ubac-sepa' ), '', array( 'response' => 403 ) );
+		wp_die( esc_html__( 'You are not allowed to do that.', 'dahuconcept-deferred-sepa' ), '', array( 'response' => 403 ) );
 	}
 
 	// Refused here as well as by `ubac_sepa_charge()`, so that the
@@ -495,7 +495,7 @@ function ubac_sepa_handle_charge_now() {
 
 	if ( $order && ubac_sepa_is_settled_offline( $order ) ) {
 		wp_die(
-			esc_html__( 'This order is recorded as settled another way, so no direct debit can be taken on it. Lift that mark first if a charge really is wanted.', 'ubac-sepa' ),
+			esc_html__( 'This order is recorded as settled another way, so no direct debit can be taken on it. Lift that mark first if a charge really is wanted.', 'dahuconcept-deferred-sepa' ),
 			'',
 			array( 'response' => 409, 'back_link' => true )
 		);

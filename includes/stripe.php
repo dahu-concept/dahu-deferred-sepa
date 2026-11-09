@@ -158,7 +158,7 @@ function ubac_sepa_stripe_request( $method, $endpoint, $body, $secret_key, $idem
 
 		return new WP_Error(
 			'ubac_sepa_bad_json',
-			__( 'Stripe returned a response that could not be read.', 'ubac-sepa' )
+			__( 'Stripe returned a response that could not be read.', 'dahuconcept-deferred-sepa' )
 		);
 	}
 
@@ -232,7 +232,7 @@ function ubac_sepa_currency_error( WC_Order $order ) {
 
 	return sprintf(
 		/* translators: 1: the order's currency, 2: the only currency SEPA accepts. */
-		__( 'This order is in %1$s. Stripe only accepts SEPA Direct Debit in %2$s, so no charge was attempted.', 'ubac-sepa' ),
+		__( 'This order is in %1$s. Stripe only accepts SEPA Direct Debit in %2$s, so no charge was attempted.', 'dahuconcept-deferred-sepa' ),
 		$currency,
 		UBAC_SEPA_CURRENCY
 	);

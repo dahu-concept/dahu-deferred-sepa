@@ -306,7 +306,7 @@ function ubac_sepa_alert_failure( WC_Order $order, $code, $message ) {
 
 	$subject = sprintf(
 		/* translators: %s: order number. */
-		__( 'Deferred SEPA charge refused on order #%s', 'ubac-sepa' ),
+		__( 'Deferred SEPA charge refused on order #%s', 'dahuconcept-deferred-sepa' ),
 		$order->get_order_number()
 	);
 
@@ -314,7 +314,7 @@ function ubac_sepa_alert_failure( WC_Order $order, $code, $message ) {
 		/* translators: 1: order number, 2: amount, 3: the reason, 4: link to the order. */
 		__(
 			"A deferred SEPA charge was refused and no money moved.\n\nOrder: #%1\$s\nAmount: %2\$s\n\n%3\$s\n\nThe order:\n%4\$s\n\nNothing is retried automatically: a charge sent twice is taken twice. Put right whatever the sentence above names, then reschedule the charge from the order.",
-			'ubac-sepa'
+			'dahuconcept-deferred-sepa'
 		),
 		$order->get_order_number(),
 		html_entity_decode( wp_strip_all_tags( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ), ENT_QUOTES, 'UTF-8' ),
@@ -437,13 +437,13 @@ function ubac_sepa_sweep() {
 
 		$lines[] = sprintf(
 			/* translators: 1: order number, 2: amount, 3: the date the charge was due, 4: what is in the way, already a sentence. */
-			__( "#%1\$s — %2\$s — was due %3\$s\n    %4\$s", 'ubac-sepa' ),
+			__( "#%1\$s — %2\$s — was due %3\$s\n    %4\$s", 'dahuconcept-deferred-sepa' ),
 			$order->get_order_number(),
 			html_entity_decode( wp_strip_all_tags( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ), ENT_QUOTES, 'UTF-8' ),
 			ubac_sepa_format_date( (int) $order->get_meta( '_ubac_sepa_scheduled_ts' ) ),
 			'' !== $reason
 				? $reason
-				: __( 'Nothing is visibly wrong with this order, so the charge was never run at all: the scheduled job was lost or the queue is not running.', 'ubac-sepa' )
+				: __( 'Nothing is visibly wrong with this order, so the charge was never run at all: the scheduled job was lost or the queue is not running.', 'dahuconcept-deferred-sepa' )
 		);
 	}
 
@@ -453,7 +453,7 @@ function ubac_sepa_sweep() {
 			'%d deferred SEPA charge was due and never ran',
 			'%d deferred SEPA charges were due and never ran',
 			count( $fresh ),
-			'ubac-sepa'
+			'dahuconcept-deferred-sepa'
 		),
 		count( $fresh )
 	);
@@ -462,7 +462,7 @@ function ubac_sepa_sweep() {
 		/* translators: 1: the list of orders, one per line, 2: link to the charges screen. */
 		__(
 			"These orders have a deferred charge whose date has passed, and no charge was ever attempted on them. No money has moved and the customers have their goods.\n\n%1\$s\n\nThe full list, with the amounts:\n%2\$s\n\nNothing is retried automatically, because a charge that may already have been sent would be taken twice. Check each order, then reschedule it from the order itself.\n\nThis list is sent once per order. An order that stays overdue is not reported again, so it stays on the screen above until it is dealt with.",
-			'ubac-sepa'
+			'dahuconcept-deferred-sepa'
 		),
 		implode( "\n\n", $lines ),
 		admin_url( 'admin.php?page=' . UBAC_SEPA_CHARGES_PAGE )
@@ -597,7 +597,7 @@ function ubac_sepa_alert_reversal( WC_Order $order, $kind ) {
 	if ( 'disputed' === $kind ) {
 		$subject = sprintf(
 			/* translators: %s: order number. */
-			__( 'SEPA charge disputed by the customer on order #%s', 'ubac-sepa' ),
+			__( 'SEPA charge disputed by the customer on order #%s', 'dahuconcept-deferred-sepa' ),
 			$order->get_order_number()
 		);
 
@@ -605,7 +605,7 @@ function ubac_sepa_alert_reversal( WC_Order $order, $kind ) {
 			/* translators: 1: order number, 2: amount, 3: link to the order. */
 			__(
 				"The customer has disputed a SEPA charge that had already been collected. The money is being taken back.\n\nOrder: #%1\$s\nAmount: %2\$s\n\nThe order:\n%3\$s\n\nNothing has been retried and nothing has been changed on the order: this charge is recorded as collected, and sending it again would take the money twice. The reason is on the order and in the Stripe dashboard, which is where a dispute is answered or accepted.",
-				'ubac-sepa'
+				'dahuconcept-deferred-sepa'
 			),
 			$order->get_order_number(),
 			$amount,
@@ -614,7 +614,7 @@ function ubac_sepa_alert_reversal( WC_Order $order, $kind ) {
 	} else {
 		$subject = sprintf(
 			/* translators: %s: order number. */
-			__( 'Stripe reports a failed SEPA charge on collected order #%s', 'ubac-sepa' ),
+			__( 'Stripe reports a failed SEPA charge on collected order #%s', 'dahuconcept-deferred-sepa' ),
 			$order->get_order_number()
 		);
 
@@ -622,7 +622,7 @@ function ubac_sepa_alert_reversal( WC_Order $order, $kind ) {
 			/* translators: 1: order number, 2: amount, 3: link to the order. */
 			__(
 				"Stripe reports that a SEPA charge has failed on an order whose charge is recorded as collected. If the bank has taken the money back, the order is not paid and whatever was in it has already gone out.\n\nOrder: #%1\$s\nAmount: %2\$s\n\nThe order:\n%3\$s\n\nNothing has been retried and nothing has been changed on the order, because a charge recorded as collected must not be sent again. What the money actually did is in the Stripe dashboard, and the reason is on the order.",
-				'ubac-sepa'
+				'dahuconcept-deferred-sepa'
 			),
 			$order->get_order_number(),
 			$amount,

@@ -1,1001 +1,1016 @@
+# Copyright (C) 2026 Hugo Vial-Jaime
+# This file is distributed under the MIT licence.
 msgid ""
 msgstr ""
-"Project-Id-Version: ubac-sepa\n"
+"Project-Id-Version: DahuConcept Deferred SEPA\n"
+"Report-Msgid-Bugs-To: https://dahu-concept.fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr_FR\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"PO-Revision-Date: 2026-10-24 10:37+0000\n"
-"X-Generator: ubac i18n-build\n"
+"PO-Revision-Date: 2026-11-09 07:28+0000\n"
+"X-Domain: dahuconcept-deferred-sepa\n"
 
 #. translators: 1: order number, 2: amount, 3: the date the charge was due, 4: what is in the way, already a sentence. */
 #: includes/alerts.php:440
 msgid "#%1$s — %2$s — was due %3$s\n    %4$s"
-msgstr "n° %1$s — %2$s — échéance %3$s\n    %4$s"
+msgstr ""
 
+#. translators: %d: number of orders. */
 #: includes/admin-charges.php:226
 msgid "%d charge was due and never ran."
 msgid_plural "%d charges were due and never ran."
-msgstr[0] "%d prélèvement était dû et n’a jamais tourné."
-msgstr[1] "%d prélèvements étaient dus et n’ont jamais tourné."
+msgstr[0] ""
+msgstr[1] ""
 
 #. translators: %d: days. */
 #: includes/admin-charges.php:471
 msgid "%d day"
 msgid_plural "%d days"
-msgstr[0] "%d jour"
-msgstr[1] "%d jours"
+msgstr[0] ""
+msgstr[1] ""
 
 #. translators: %d: number of orders. */
 #: includes/alerts.php:452
 msgid "%d deferred SEPA charge was due and never ran"
 msgid_plural "%d deferred SEPA charges were due and never ran"
-msgstr[0] "%d prélèvement SEPA différé était dû et n’a jamais tourné"
-msgstr[1] "%d prélèvements SEPA différés étaient dus et n’ont jamais tourné"
+msgstr[0] ""
+msgstr[1] ""
 
 #: includes/diagnostics.php:262
 msgid "(anonymous function)"
-msgstr "(fonction anonyme)"
+msgstr ""
 
 #: includes/mandates.php:246
 msgid "(currently the customer's own default)"
-msgstr "(actuellement le choix par défaut du client)"
+msgstr ""
 
 #: includes/webhook.php:404
 msgid "A SEPA charge was submitted and Stripe refused it before settlement. No money left the customer's account, and this order has been reopened so the charge can be scheduled again."
-msgstr "Un prélèvement SEPA a été envoyé et Stripe l’a refusé avant encaissement. Aucun argent n’a quitté le compte du client, et cette commande a été réouverte pour que le prélèvement puisse être replanifié."
+msgstr ""
 
 #: includes/offline.php:224
 msgid "A Stripe debit has been confirmed on this order since it was marked, so the mark stays: the money moved, and that is the fact the record has to keep."
-msgstr "Un prélèvement Stripe a été confirmé sur cette commande depuis le marquage : la marque reste, parce que l’argent a bougé et que c’est ce fait-là que l’enregistrement doit garder."
+msgstr ""
 
 #: includes/diagnostics.php:118
 msgid "A Stripe secret key is configured"
-msgstr "Une clé secrète Stripe est configurée"
+msgstr ""
 
 #. translators: %s: date and time of the attempt. */
 #: includes/order-screen.php:181
 msgid "A charge was attempted on %s and did not go through."
-msgstr "Un prélèvement a été tenté le %s et n’est pas passé."
+msgstr ""
 
 #. translators: 1: customer name, 2: customer email, 3: last four digits of the IBAN, 4: date and time, 5: link to the customer's profile. */
 #: includes/mandates.php:466
 msgid "A customer has made a new IBAN their default payment method, which submits it for your approval.\n\nCustomer: %1$s (%2$s)\nIBAN ending: %3$s\nWhen: %4$s\n\nTo approve it, open their profile and name it as the active mandate:\n%5$s\n\nUntil it is approved, deferred payment is not offered to this customer."
-msgstr "Un client a fait d’un nouvel IBAN son moyen de paiement par défaut, ce qui le soumet à votre approbation.\n\nClient : %1$s (%2$s)\nIBAN finissant par : %3$s\nQuand : %4$s\n\nPour l’approuver, ouvrez son profil et désignez-le comme mandat actif :\n%5$s\n\nTant qu’il n’est pas approuvé, le paiement différé n’est pas proposé à ce client."
+msgstr ""
 
 #: includes/mandates.php:463
 msgid "A customer submitted a SEPA mandate for approval"
-msgstr "Un client a soumis un mandat SEPA pour approbation"
+msgstr ""
 
 #. translators: 1: order number, 2: amount, 3: the reason, 4: link to the order. */
 #: includes/alerts.php:315
 msgid "A deferred SEPA charge was refused and no money moved.\n\nOrder: #%1$s\nAmount: %2$s\n\n%3$s\n\nThe order:\n%4$s\n\nNothing is retried automatically: a charge sent twice is taken twice. Put right whatever the sentence above names, then reschedule the charge from the order."
-msgstr "Un prélèvement SEPA différé a été refusé et aucun argent n’a bougé.\n\nCommande : n° %1$s\nMontant : %2$s\n\n%3$s\n\nLa commande :\n%4$s\n\nRien n’est retenté automatiquement : un prélèvement envoyé deux fois est prélevé deux fois. Corrigez ce que la phrase ci-dessus nomme, puis replanifiez le prélèvement depuis la commande."
+msgstr ""
 
 #: includes/diagnostics.php:93
 msgid "A mandate is named active"
-msgstr "Un mandat est désigné comme actif"
+msgstr ""
 
-#: ubac-sepa.php:411
+#: dahuconcept-deferred-sepa.php:414
 msgid "A refused or returned charge is emailed to the shop."
-msgstr "Un prélèvement refusé ou revenu part en courriel à la boutique."
+msgstr ""
 
 #: includes/mandates.php:223
 msgid "Active mandate"
-msgstr "Mandat actif"
+msgstr ""
 
 #: includes/gateway.php:158
 msgid "Adds a panel, visible only to administrators, at checkout and on the user profile, explaining each condition this gateway checks. Useful while setting the plugin up; turn it off afterwards."
-msgstr "Ajoute un panneau, visible des seuls administrateurs, lors de la commande et sur le profil utilisateur, expliquant chaque condition que cette passerelle vérifie. Utile pendant la mise en place, à désactiver ensuite."
+msgstr ""
 
 #: includes/diagnostics.php:213
 msgid "Allowed to use deferred payment"
-msgstr "Autorisé à payer en différé"
+msgstr ""
 
 #: includes/admin-charges.php:416
 msgid "Also show orders taken on this gateway that have not shipped yet"
-msgstr "Afficher aussi les commandes prises sur cette passerelle qui n’ont pas encore été expédiées"
+msgstr ""
 
 #: includes/admin-charges.php:244 includes/admin-charges.php:454 includes/admin-charges.php:878 includes/admin-charges.php:1165
 msgid "Amount"
-msgstr "Montant"
+msgstr ""
 
 #: includes/offline.php:65
 msgid "Another way (say which)"
-msgstr "Autrement (précisez)"
+msgstr ""
 
 #: includes/admin-charges.php:1067
 msgid "Any"
-msgstr "Tous"
+msgstr ""
 
 #: includes/admin-charges.php:417
 msgid "Apply"
-msgstr "Appliquer"
+msgstr ""
 
 #. translators: %s: the reason, already a sentence. */
 #: includes/schedule.php:95
 msgid "As things stand, that charge would be refused: %s Put it right before the date above and nothing else needs doing."
-msgstr "En l’état, ce prélèvement serait refusé : %s Corrigez-le avant la date ci-dessus et il n’y aura rien d’autre à faire."
+msgstr ""
 
 #: includes/diagnostics.php:140
 msgid "Availability for this customer"
-msgstr "Disponibilité pour ce client"
+msgstr ""
 
 #: includes/offline.php:64
 msgid "Bank transfer"
-msgstr "Virement"
+msgstr ""
 
-#: ubac-sepa.php:329
+#: dahuconcept-deferred-sepa.php:332
 msgid "By Hugo Vial-Jaime — Dahu-Concept"
-msgstr "Par Hugo Vial-Jaime — Dahu-Concept"
+msgstr ""
 
 #: includes/order-screen.php:154
 msgid "Charge already sent."
-msgstr "Prélèvement déjà envoyé."
+msgstr ""
 
 #: includes/mandates.php:258
 msgid "Charge delay for this customer, in days"
-msgstr "Délai de prélèvement pour ce client, en jours"
+msgstr ""
 
 #. translators: %s: date and time of the scheduled charge. */
 #: includes/order-screen.php:215
 msgid "Charge due on %s."
-msgstr "Prélèvement dû le %s."
+msgstr ""
 
 #: includes/order-screen.php:277
 msgid "Charge now"
-msgstr "Prélever maintenant"
+msgstr ""
 
 #: includes/admin-charges.php:456
 msgid "Charge sent"
-msgstr "Prélèvement envoyé"
+msgstr ""
 
 #. translators: %s: date and time the charge was sent. */
 #: includes/order-screen.php:150
 msgid "Charge sent on %s."
-msgstr "Prélèvement envoyé le %s."
+msgstr ""
 
 #: includes/order-screen.php:271
 msgid "Charge this SEPA mandate now? This takes real money from the customer."
-msgstr "Prélever ce mandat SEPA maintenant ? Cela prend réellement de l’argent au client."
+msgstr ""
 
-#: ubac-sepa.php:431
+#: dahuconcept-deferred-sepa.php:434
 msgid "Charged after shipping"
-msgstr "Prélevé après expédition"
+msgstr ""
 
-#: ubac-sepa.php:406
+#: dahuconcept-deferred-sepa.php:409
 msgid "Charged once"
-msgstr "Prélevé une fois"
+msgstr ""
 
 #: includes/admin-charges.php:1054
 msgid "Charges sent by this gateway. Stripe's own immediate SEPA option is not listed here."
-msgstr "Prélèvements envoyés par cette passerelle. L’option SEPA immédiate de Stripe n’y figure pas."
+msgstr ""
 
-#: ubac-sepa.php:437
+#: dahuconcept-deferred-sepa.php:440
 msgid "Charges still to come, with the date each one is sent."
-msgstr "Les prélèvements restant à faire, avec la date d'envoi de chacun."
+msgstr ""
 
 #: includes/offline.php:63
 msgid "Cheque"
-msgstr "Chèque"
+msgstr ""
 
 #: includes/offline.php:141
 msgid "Choose how this order was settled."
-msgstr "Choisissez comment cette commande a été réglée."
+msgstr ""
 
 #: includes/admin-charges.php:57
 msgid "Collected"
-msgstr "Encaissé"
+msgstr ""
 
 #: includes/gateway.php:127
 msgid "Contact address for customers"
-msgstr "Adresse de contact pour les clients"
+msgstr ""
 
 #: includes/admin-charges.php:1166 includes/diagnostics.php:155
 msgid "Currency"
-msgstr "Devise"
+msgstr ""
 
 #: includes/admin-charges.php:877 includes/admin-charges.php:1163
 msgid "Customer"
-msgstr "Client"
+msgstr ""
 
 #: includes/gateway.php:105
 msgid "Days between the order being marked Completed and the charge being sent. Can be overridden per customer, under Users → the customer → Deferred SEPA Direct Debit."
-msgstr "Jours entre le passage de la commande en Terminée et l’envoi du prélèvement. Redéfinissable par client, sous Utilisateurs → le client → Prélèvement SEPA différé."
+msgstr ""
 
 #: includes/gateway.php:103
 msgid "Default charge delay (days)"
-msgstr "Délai de prélèvement par défaut (jours)"
+msgstr ""
 
-#: ubac-sepa.php:378
+#: dahuconcept-deferred-sepa.php:381
 msgid "Deferred SEPA"
-msgstr "SEPA différé"
+msgstr ""
 
 #: includes/gateway.php:55 includes/mandates.php:206 includes/order-screen.php:46
 msgid "Deferred SEPA Direct Debit"
-msgstr "Prélèvement SEPA différé"
+msgstr ""
 
 #. translators: %s: order number. */
 #: includes/alerts.php:309
 msgid "Deferred SEPA charge refused on order #%s"
-msgstr "Prélèvement SEPA différé refusé sur la commande n° %s"
+msgstr ""
 
 #. translators: 1: what the plugin was doing, 2: error message. */
 #: includes/schedule.php:686
 msgid "Deferred SEPA could not reach Stripe while %1$s — %2$s. The charge may or may not have been taken: check the Stripe dashboard for this order before charging it again."
-msgstr "SEPA différé n’a pas pu joindre Stripe pendant %1$s — %2$s. Le prélèvement a pu passer ou non : vérifiez le tableau de bord Stripe pour cette commande avant de prélever à nouveau."
+msgstr ""
 
 #. translators: 1: what the plugin was doing, 2: the message Stripe returned. */
 #: includes/schedule.php:716
 msgid "Deferred SEPA failed while %1$s: Stripe refused it — %2$s"
-msgstr "SEPA différé a échoué pendant %1$s : Stripe a refusé — %2$s"
+msgstr ""
 
 #: includes/diagnostics.php:245
 msgid "Deferred SEPA — why this checkout shows what it shows"
-msgstr "SEPA différé — pourquoi cette commande affiche ce qu’elle affiche"
+msgstr ""
 
 #. translators: %s: the reason Stripe gave. */
 #: includes/webhook.php:347
 msgid "Deferred SEPA: Stripe reports a failure on this charge, which is recorded as collected. Nothing has been changed here — check the Stripe dashboard. Reason given: %s"
-msgstr "SEPA différé : Stripe signale un échec sur ce prélèvement, qui est enregistré comme encaissé. Rien n’a été modifié ici — vérifiez le tableau de bord Stripe. Motif indiqué : %s"
+msgstr ""
 
 #. translators: %s: the event type Stripe sent. */
 #: includes/webhook.php:160
 msgid "Deferred SEPA: a Stripe event (%s) arrived for this order, but no charge of this plugin is recorded against it, so nothing was changed. Check the Stripe dashboard before treating this order as collected."
-msgstr "SEPA différé : un événement Stripe (%s) est arrivé pour cette commande, mais aucun prélèvement de cette extension n’y est enregistré, donc rien n’a été modifié. Vérifiez le tableau de bord Stripe avant de considérer cette commande comme encaissée."
+msgstr ""
 
 #: includes/webhook.php:322
 msgid "Deferred SEPA: charge collected (confirmed by Stripe)."
-msgstr "SEPA différé : prélèvement encaissé (confirmé par Stripe)."
+msgstr ""
 
 #: includes/schedule.php:742
 msgid "Deferred SEPA: charge collected."
-msgstr "SEPA différé : prélèvement encaissé."
+msgstr ""
 
 #. translators: %s: the reason Stripe gave. */
 #: includes/webhook.php:384
 msgid "Deferred SEPA: charge failed (reported by Stripe) — %s"
-msgstr "SEPA différé : prélèvement échoué (signalé par Stripe) — %s"
+msgstr ""
 
 #. translators: 1: previous date and time, 2: new date and time. */
 #: includes/order-screen.php:462
 msgid "Deferred SEPA: charge moved by hand from %1$s to %2$s."
-msgstr "SEPA différé : prélèvement déplacé à la main du %1$s au %2$s."
+msgstr ""
 
 #. translators: 1: date and time of the charge, 2: delay in days. */
 #: includes/schedule.php:79
 msgid "Deferred SEPA: charge scheduled for %1$s (%2$d days from now)."
-msgstr "SEPA différé : prélèvement planifié pour le %1$s (dans %2$d jours)."
+msgstr ""
 
 #: includes/schedule.php:743
 msgid "Deferred SEPA: charge sent to Stripe and under way. SEPA settles in a few working days."
-msgstr "SEPA différé : prélèvement envoyé à Stripe et en cours. L’encaissement SEPA suit en quelques jours ouvrés."
+msgstr ""
 
 #. translators: %s: date and time of the charge. */
 #: includes/order-screen.php:468
 msgid "Deferred SEPA: charge set by hand for %s."
-msgstr "SEPA différé : prélèvement fixé à la main au %s."
+msgstr ""
 
 #: includes/schedule.php:472
 msgid "Deferred SEPA: no Stripe secret key is configured. No charge was attempted — this needs doing by hand."
-msgstr "SEPA différé : aucune clé secrète Stripe n’est configurée. Aucun prélèvement n’a été tenté — à faire à la main."
+msgstr ""
 
 #: includes/schedule.php:373
 msgid "Deferred SEPA: no approved mandate could be found for this customer, so nothing was charged."
-msgstr "SEPA différé : aucun mandat approuvé n’a été trouvé pour ce client, rien n’a été prélevé."
+msgstr ""
 
 #: includes/webhook.php:395
 msgid "Deferred SEPA: no money left the customer's account, so this charge can be sent again. Set a new date on this order once the cause is put right."
-msgstr "SEPA différé : aucun argent n’a quitté le compte du client, ce prélèvement peut donc être renvoyé. Posez une nouvelle date sur cette commande une fois la cause corrigée."
+msgstr ""
 
 #: includes/schedule.php:54
 msgid "Deferred SEPA: nothing scheduled, because this order is recorded as settled another way."
-msgstr "SEPA différé : rien n’a été planifié, parce que cette commande est enregistrée comme réglée autrement."
+msgstr ""
 
 #: includes/schedule.php:67
 msgid "Deferred SEPA: order is already paid, nothing scheduled."
-msgstr "SEPA différé : la commande est déjà payée, rien n’a été planifié."
+msgstr ""
 
 #: includes/schedule.php:449
 msgid "Deferred SEPA: order was already paid when the charge came due. Nothing done."
-msgstr "SEPA différé : la commande était déjà payée à l’échéance. Rien n’a été fait."
+msgstr ""
 
 #. translators: 1: how it was settled, 2: the comment or a dash, 3: who recorded it. */
 #: includes/offline.php:191
 msgid "Deferred SEPA: recorded as settled another way — %1$s. %2$s Recorded by %3$s. No direct debit will be taken: the scheduled charge has been cancelled and a charge is refused even if an old scheduled action fires."
-msgstr "SEPA différé : enregistrée comme réglée autrement — %1$s. %2$s Enregistré par %3$s. Aucun prélèvement ne sera fait : le prélèvement planifié a été annulé, et un prélèvement est refusé même si une ancienne action planifiée se déclenche."
+msgstr ""
 
 #: includes/schedule.php:815
 msgid "Deferred SEPA: scheduled charge cancelled, because the order was cancelled or refunded."
-msgstr "SEPA différé : prélèvement planifié annulé, parce que la commande a été annulée ou remboursée."
+msgstr ""
 
 #: includes/order-screen.php:423 includes/order-screen.php:437
 msgid "Deferred SEPA: that date could not be read, so the schedule is unchanged."
-msgstr "SEPA différé : cette date n’a pas pu être lue, la planification est inchangée."
+msgstr ""
 
 #: includes/order-screen.php:445
 msgid "Deferred SEPA: that date is in the past, so the schedule is unchanged."
-msgstr "SEPA différé : cette date est passée, la planification est inchangée."
+msgstr ""
 
 #. translators: 1: who lifted it, 2: the date the charge had been due. */
 #: includes/offline.php:238
 msgid "Deferred SEPA: the \"settled another way\" mark was lifted by %1$s. Nothing has been rescheduled — it had been due on %2$s — so set a date on this order if a direct debit is still wanted."
-msgstr "SEPA différé : la marque « réglée autrement » a été retirée par %1$s. Rien n’a été replanifié — l’échéance était au %2$s — donc posez une date sur cette commande si un prélèvement est toujours voulu."
+msgstr ""
 
 #: includes/schedule.php:427
 msgid "Deferred SEPA: the charge came due and was not sent, because this order is recorded as settled another way."
-msgstr "SEPA différé : le prélèvement est arrivé à échéance et n’a pas été envoyé, parce que cette commande est enregistrée comme réglée autrement."
+msgstr ""
 
 #: includes/schedule.php:438
 msgid "Deferred SEPA: the charge came due, but this order is no longer on a SEPA payment method, so nothing was charged."
-msgstr "SEPA différé : l’échéance est arrivée, mais cette commande n’est plus sur un moyen de paiement SEPA : rien n’a été prélevé."
+msgstr ""
 
 #: includes/webhook.php:419
 msgid "Deferred SEPA: the customer has disputed this charge (reported by Stripe). Check the Stripe dashboard."
-msgstr "SEPA différé : le client a contesté ce prélèvement (signalé par Stripe). Vérifiez le tableau de bord Stripe."
+msgstr ""
 
 #. translators: %d: delay in days. */
-#: includes/gateway.php:246
+#: includes/gateway.php:263
 msgid "Deferred SEPA: the customer's saved mandate will be used. Nothing charged at checkout — the charge is scheduled when the order is marked Completed, %d days out."
-msgstr "SEPA différé : le mandat enregistré du client sera employé. Rien n’est prélevé à la commande — le prélèvement est planifié au passage en Terminée, à %d jours."
+msgstr ""
 
 #: includes/order-screen.php:411
 msgid "Deferred SEPA: the date was not changed, because this order is recorded as settled another way."
-msgstr "SEPA différé : la date n’a pas été modifiée, parce que cette commande est enregistrée comme réglée autrement."
+msgstr ""
 
 #. translators: %s: Stripe PaymentIntent status. */
 #: includes/schedule.php:518
 msgid "Deferred SEPA: the existing payment is already under way at Stripe (%s). Nothing done."
-msgstr "SEPA différé : le paiement existant est déjà en cours chez Stripe (%s). Rien n’a été fait."
+msgstr ""
 
 #: includes/schedule.php:384
 msgid "Deferred SEPA: the mandate approved for this customer is no longer the one this order was placed with, so nothing was charged. Check which IBAN should be used and charge it by hand."
-msgstr "SEPA différé : le mandat approuvé pour ce client n’est plus celui avec lequel cette commande a été passée, rien n’a été prélevé. Vérifiez quel IBAN employer et prélevez à la main."
+msgstr ""
 
 #: includes/schedule.php:556
 msgid "Deferred SEPA: the payment already prepared at Stripe is for a different amount than this order, so a new one was created for the current total."
-msgstr "SEPA différé : le paiement déjà préparé chez Stripe porte sur un montant différent de celui de cette commande ; un nouveau a donc été créé pour le total actuel."
+msgstr ""
 
 #: includes/schedule.php:363
 msgid "Deferred SEPA: this customer is no longer approved for deferred payment, so nothing was charged. Approve a mandate on their profile and mark the order Completed again, or take payment another way."
-msgstr "SEPA différé : ce client n’est plus approuvé pour le paiement différé, rien n’a été prélevé. Approuvez un mandat sur son profil et repassez la commande en Terminée, ou encaissez autrement."
+msgstr ""
 
 #: includes/schedule.php:355
 msgid "Deferred SEPA: this order has no customer account and does not carry both a Stripe customer and a mandate, so nothing was charged."
-msgstr "SEPA différé : cette commande n’a pas de compte client et ne porte pas à la fois un client Stripe et un mandat, rien n’a été prélevé."
+msgstr ""
 
 #. translators: 1: what the plugin was doing, 2: the status Stripe returned. */
 #: includes/schedule.php:762
 msgid "Deferred SEPA: unexpected status while %1$s — \"%2$s\". Check the Stripe dashboard for this order."
-msgstr "SEPA différé : statut inattendu pendant %1$s — « %2$s ». Vérifiez le tableau de bord Stripe pour cette commande."
+msgstr ""
 
 #: includes/admin-charges.php:455
 msgid "Delay"
-msgstr "Délai"
+msgstr ""
+
+#: includes/gateway.php:174
+msgid "Delete this plugin's data when the plugin is deleted"
+msgstr ""
 
 #: includes/gateway.php:93
 msgid "Description"
-msgstr "Description"
+msgstr ""
 
 #: includes/gateway.php:155
 msgid "Diagnostics"
-msgstr "Diagnostics"
+msgstr ""
 
 #: includes/admin-charges.php:59
 msgid "Disputed"
-msgstr "Contesté"
+msgstr ""
 
-#: ubac-sepa.php:399
+#: dahuconcept-deferred-sepa.php:402
 msgid "Done"
-msgstr "Terminé"
+msgstr ""
 
-#: ubac-sepa.php:432
+#: dahuconcept-deferred-sepa.php:435
 msgid "Each SEPA payment is taken a set number of days after the order ships."
-msgstr "Chaque paiement SEPA est prélevé un nombre de jours fixé après l'expédition de la commande."
+msgstr ""
 
 #: includes/admin-charges.php:1164
 msgid "Email"
-msgstr "E-mail"
+msgstr ""
 
 #: includes/gateway.php:80
 msgid "Enable"
-msgstr "Activer"
+msgstr ""
 
 #: includes/gateway.php:82
 msgid "Enable deferred SEPA Direct Debit"
-msgstr "Activer le prélèvement SEPA différé"
+msgstr ""
 
-#: ubac-sepa.php:442
+#: dahuconcept-deferred-sepa.php:445
 msgid "Every charge already sent, with its outcome. Export it as CSV."
-msgstr "Tous les prélèvements déjà envoyés, avec leur résultat. Export CSV possible."
+msgstr ""
 
 #. translators: 1: one or more total amounts, already formatted; 2: number of orders. */
 #: includes/admin-charges.php:406
 msgid "Expected: %1$s across %2$d orders."
-msgstr "Attendu : %1$s sur %2$d commandes."
+msgstr ""
 
 #: includes/admin-charges.php:1084
 msgid "Export CSV"
-msgstr "Exporter en CSV"
+msgstr ""
 
 #: includes/admin-charges.php:58
 msgid "Failed"
-msgstr "Échoué"
+msgstr ""
 
 #: includes/admin-charges.php:1079
 msgid "Filter"
-msgstr "Filtrer"
+msgstr ""
 
 #: includes/diagnostics.php:236 includes/diagnostics.php:242
 msgid "Filtering the gateway list"
-msgstr "Filtrage de la liste des passerelles"
+msgstr ""
 
 #: includes/admin-charges.php:880 includes/admin-charges.php:1168
 msgid "Finally due"
-msgstr "Échéance finale"
+msgstr ""
 
 #: includes/admin-charges.php:879 includes/admin-charges.php:1167
 msgid "First due"
-msgstr "Première échéance"
+msgstr ""
 
 #: includes/admin-charges.php:1061
 msgid "From"
-msgstr "Du"
+msgstr ""
 
 #: includes/diagnostics.php:81 includes/diagnostics.php:214
 msgid "Gateway enabled"
-msgstr "Passerelle activée"
+msgstr ""
 
 #. translators: 1: customer name, 2: last four digits of the IBAN, 3: shop name. */
 #: includes/mandates.php:503
 msgid "Hello %1$s,\n\nWe have received your IBAN ending %2$s.\n\nWe will email you once it has been approved. From then on you will be able to pay for your orders by deferred SEPA Direct Debit.\n\n%3$s"
-msgstr "Bonjour %1$s,\n\nNous avons bien reçu votre IBAN finissant par %2$s.\n\nNous vous écrirons dès qu’il sera approuvé. Vous pourrez alors régler vos commandes par prélèvement SEPA différé.\n\n%3$s"
+msgstr ""
 
 #. translators: 1: customer name, 2: last four digits of the IBAN, 3: delay in days, 4: shop name. */
 #: includes/mandates.php:555
 msgid "Hello %1$s,\n\nYour IBAN ending %2$s has been approved for deferred SEPA Direct Debit.\n\nYou can now choose it when you order. Nothing is charged when you place the order: your mandate is charged %3$d days after it ships, and SEPA then settles in a few working days.\n\n%4$s"
-msgstr "Bonjour %1$s,\n\nVotre IBAN finissant par %2$s a été approuvé pour le prélèvement SEPA différé.\n\nVous pouvez désormais le choisir au moment de commander. Rien n’est prélevé à la commande : votre mandat est prélevé %3$d jours après l’expédition, et l’encaissement SEPA suit en quelques jours ouvrés.\n\n%4$s"
+msgstr ""
 
 #: includes/gateway.php:115
 msgid "Hide it at checkout"
-msgstr "La masquer lors de la commande"
+msgstr ""
 
 #: includes/admin-charges.php:152
 msgid "History"
-msgstr "Historique"
+msgstr ""
 
 #: includes/order-screen.php:303
 msgid "How, exactly"
-msgstr "Comment, précisément"
+msgstr ""
 
 #. translators: %s: last four digits of an IBAN. */
 #: includes/mandates.php:241
 msgid "IBAN ending %s"
-msgstr "IBAN finissant par %s"
+msgstr ""
 
 #: includes/diagnostics.php:102
 msgid "It belongs to this customer"
-msgstr "Il appartient bien à ce client"
+msgstr ""
 
 #: includes/diagnostics.php:110
 msgid "It is a Stripe payment method"
-msgstr "C’est bien un moyen de paiement Stripe"
+msgstr ""
 
 #. translators: %d: the global delay in days. */
 #: includes/mandates.php:270
 msgid "Leave empty to use the global delay, currently %d days. A value here applies to this customer only, and only to their future orders — charges already scheduled are not moved."
-msgstr "Laissez vide pour employer le délai global, actuellement %d jours. Une valeur ici ne vaut que pour ce client, et seulement pour ses commandes à venir : les prélèvements déjà planifiés ne sont pas déplacés."
+msgstr ""
 
 #: includes/gateway.php:136
 msgid "Leave these empty to use the keys already configured in the official WooCommerce Stripe Gateway. Fill them in to charge with a key of your own — a restricted key that may only write PaymentIntents is enough, and means this plugin does not depend on another plugin's stored settings."
-msgstr "Laissez-les vides pour employer les clés déjà configurées dans la passerelle Stripe officielle de WooCommerce. Renseignez-les pour prélever avec une clé à vous — une clé restreinte n’autorisant que l’écriture de PaymentIntents suffit, et évite que cette extension dépende des réglages enregistrés par une autre."
+msgstr ""
 
 #: includes/order-screen.php:126
 msgid "Lift this mark when the order is saved"
-msgstr "Retirer cette marque à l’enregistrement de la commande"
+msgstr ""
 
 #: includes/gateway.php:145
 msgid "Live secret key"
-msgstr "Clé secrète de production"
+msgstr ""
 
 #: includes/diagnostics.php:216
 msgid "Mandate found"
-msgstr "Mandat trouvé"
+msgstr ""
 
-#: ubac-sepa.php:415
+#: dahuconcept-deferred-sepa.php:418
 msgid "Movable until it fires, and every move is recorded."
-msgstr "Déplaçable jusqu’au déclenchement, et chaque déplacement est enregistré."
+msgstr ""
 
 #: includes/order-screen.php:229
 msgid "Move the charge to"
-msgstr "Reporter le prélèvement au"
+msgstr ""
 
 #: includes/mandates.php:253
 msgid "Naming an IBAN here approves it for deferred payment. The customer must also have that same IBAN set as their default under My account → Payment methods before the gateway is offered to them — that is what stops them moving to an IBAN you have not approved."
-msgstr "Désigner un IBAN ici l’approuve pour le paiement différé. Le client doit en outre avoir ce même IBAN en moyen de paiement par défaut sous Mon compte → Moyens de paiement avant que la passerelle lui soit proposée — c’est ce qui l’empêche de basculer vers un IBAN que vous n’avez pas approuvé."
+msgstr ""
 
-#: ubac-sepa.php:398
+#: dahuconcept-deferred-sepa.php:401
 msgid "Next"
-msgstr "Suivant"
+msgstr ""
 
-#: includes/gateway.php:218
+#: includes/gateway.php:235
 msgid "No approved SEPA mandate was found for your account. Please choose another payment method."
-msgstr "Aucun mandat SEPA approuvé n’a été trouvé pour votre compte. Merci de choisir un autre moyen de paiement."
+msgstr ""
 
 #: includes/admin-charges.php:947
 msgid "No charge has been sent yet: every charge this gateway takes is listed here."
-msgstr "Aucun prélèvement n’a encore été envoyé : tous ceux que ce moyen de paiement effectue sont listés ici."
+msgstr ""
 
 #: includes/admin-charges.php:942
 msgid "No charges match these filters."
-msgstr "Aucun prélèvement ne correspond à ces filtres."
+msgstr ""
 
 #: includes/order-screen.php:116
 msgid "No direct debit will be taken on this order: nothing is scheduled, the date cannot be changed, and a charge is refused even if an old scheduled action fires."
-msgstr "Aucun prélèvement ne sera fait sur cette commande : rien n’est planifié, la date n’est pas modifiable, et un prélèvement est refusé même si une ancienne action planifiée se déclenche."
+msgstr ""
 
 #: includes/admin-charges.php:238
 msgid "No money moved on these orders and nothing is retried automatically, because a charge that may already have been sent would be taken twice. Check each one, then reschedule it from the order."
-msgstr "Aucun argent n’a bougé sur ces commandes et rien n’est retenté automatiquement : un prélèvement peut-être déjà envoyé serait prélevé deux fois. Vérifiez chacune, puis replanifiez depuis la commande."
+msgstr ""
 
 #: includes/mandates.php:227
 msgid "None — this customer will not be offered deferred payment"
-msgstr "Aucun — le paiement différé ne sera pas proposé à ce client"
+msgstr ""
 
-#: ubac-sepa.php:410
+#: dahuconcept-deferred-sepa.php:413
 msgid "Nothing fails quietly"
-msgstr "Rien n’échoue en silence"
+msgstr ""
 
 #: includes/admin-charges.php:443
 msgid "Nothing is due: an order paid with this gateway appears here as soon as it is marked Completed."
-msgstr "Rien n’est dû : une commande payée par ce moyen s’affiche ici dès qu’elle passe en Terminée."
+msgstr ""
 
 #: includes/order-screen.php:130
 msgid "Nothing is rescheduled when the mark is lifted: the order goes back to having no date, and you set one if a direct debit is still wanted."
-msgstr "Retirer la marque ne replanifie rien : la commande se retrouve sans date, et c’est vous qui en posez une si un prélèvement est toujours voulu."
+msgstr ""
 
 #: includes/alerts.php:446
 msgid "Nothing is visibly wrong with this order, so the charge was never run at all: the scheduled job was lost or the queue is not running."
-msgstr "Rien ne va visiblement mal sur cette commande : le prélèvement n’a donc jamais tourné du tout — tâche planifiée perdue, ou file à l’arrêt."
+msgstr ""
 
 #: includes/admin-charges.php:265
 msgid "Nothing is wrong with this order: the scheduled job was lost, or the queue is not running."
-msgstr "Rien ne va mal sur cette commande : la tâche planifiée a été perdue, ou la file ne tourne pas."
+msgstr ""
 
 #: includes/order-screen.php:219
 msgid "Nothing scheduled yet: the order has not been marked Completed."
-msgstr "Rien de planifié pour l’instant : la commande n’est pas passée en Terminée."
+msgstr ""
 
 #: includes/gateway.php:122
 msgid "Notified when a customer submits or changes a SEPA mandate. Empty falls back to the site admin address."
-msgstr "Notifiée quand un client soumet ou change un mandat SEPA. Vide, l’adresse d’administration du site est employée."
+msgstr ""
 
 #: includes/gateway.php:120
 msgid "Notify this address"
-msgstr "Notifier cette adresse"
+msgstr ""
 
-#: ubac-sepa.php:407
+#: includes/gateway.php:175
+msgid "Off, and worth leaving off. What goes is the mandate approval held on each customer account, so every customer who had agreed to be debited has to agree again. The payment records on past orders are never deleted, whatever this box says. On a multisite network, accounts are shared between the sites: one shop ticking this box clears the approvals for the customers of every shop on the network."
+msgstr ""
+
+#: dahuconcept-deferred-sepa.php:410
 msgid "One key per order, so a retry or a timeout cannot debit twice."
-msgstr "Une clé par commande : ni une reprise ni un délai dépassé ne prélèvent deux fois."
+msgstr ""
 
 #: includes/admin-charges.php:243 includes/admin-charges.php:452 includes/admin-charges.php:876 includes/admin-charges.php:1162
 msgid "Order"
-msgstr "Commande"
+msgstr ""
 
 #. translators: 1: order number, 2: site name. */
 #: includes/schedule.php:594
 msgid "Order #%1$s — %2$s"
-msgstr "Commande n° %1$s — %2$s"
+msgstr ""
 
 #: includes/order-screen.php:74
 msgid "Order not found."
-msgstr "Commande introuvable."
+msgstr ""
 
 #: includes/admin-charges.php:453
 msgid "Ordered"
-msgstr "Commandé"
+msgstr ""
 
 #: includes/admin-charges.php:428
 msgid "Orders that have not shipped have no date yet — their delay starts when the order is marked Completed."
-msgstr "Les commandes non expédiées n’ont pas encore de date : leur délai démarre au passage en Terminée."
+msgstr ""
 
 #: includes/admin-charges.php:882 includes/admin-charges.php:1066 includes/admin-charges.php:1171
 msgid "Outcome"
-msgstr "Résultat"
+msgstr ""
 
 #: includes/diagnostics.php:154
 msgid "Payment method"
-msgstr "Moyen de paiement"
+msgstr ""
 
 #: includes/admin-charges.php:883 includes/admin-charges.php:1172
 msgid "PaymentIntent"
-msgstr "PaymentIntent"
+msgstr ""
 
 #: includes/order-screen.php:188
 msgid "Put right whatever the order note says, then set a new date below. Nothing is retried on its own: a charge sent twice is taken twice."
-msgstr "Corrigez ce que dit la note de commande, puis posez une nouvelle date ci-dessous. Rien n’est réessayé tout seul : un prélèvement envoyé deux fois est prélevé deux fois."
+msgstr ""
 
 #: includes/admin-charges.php:1082
 msgid "Reset"
-msgstr "Réinitialiser"
+msgstr ""
 
 #: includes/diagnostics.php:136
 msgid "Result: the gateway is offered to this customer"
-msgstr "Résultat : la passerelle est proposée à ce client"
+msgstr ""
 
 #: includes/gateway.php:56
 msgid "Reuses the SEPA mandate the customer already has saved at Stripe. Nothing is charged at checkout: the charge is sent automatically a configurable number of days after the order is marked Completed. The delay is set below and can be overridden per customer on their user profile."
-msgstr "Réutilise le mandat SEPA que le client a déjà enregistré chez Stripe. Rien n’est prélevé lors de la commande : le prélèvement part automatiquement un nombre de jours configurable après le passage de la commande en Terminée. Le délai se règle ci-dessous et peut être redéfini pour chaque client sur son profil."
+msgstr ""
 
 #: includes/diagnostics.php:86
 msgid "Role allowed"
-msgstr "Rôle autorisé"
+msgstr ""
 
 #: includes/gateway.php:65 includes/gateway.php:89
 msgid "SEPA Direct Debit (deferred)"
-msgstr "Prélèvement SEPA (différé)"
+msgstr ""
 
 #. translators: %s: order number. */
 #: includes/alerts.php:600
 msgid "SEPA charge disputed by the customer on order #%s"
-msgstr "Prélèvement SEPA contesté par le client sur la commande n°%s"
+msgstr ""
 
 #: includes/admin-charges.php:40 includes/admin-charges.php:41 includes/admin-charges.php:157
 msgid "SEPA charges"
-msgstr "Prélèvements SEPA"
+msgstr ""
 
 #: includes/offline.php:150
 msgid "Say how it was settled: \"another way\" with nothing written is not an answer anybody can read in six months."
-msgstr "Dites comment elle a été réglée : « autrement » sans rien d’écrit n’est pas une réponse lisible dans six mois."
+msgstr ""
 
 #: includes/order-screen.php:281
 msgid "Sends the charge immediately instead of waiting for the due date. The scheduled action stays in place but will do nothing: the order is marked as charged, and the idempotency key rules out a second debit."
-msgstr "Envoie le prélèvement immédiatement au lieu d’attendre l’échéance. L’action planifiée reste en place mais ne fera rien : la commande est marquée comme prélevée, et la clé d’idempotence exclut un second débit."
+msgstr ""
 
 #: includes/admin-charges.php:881 includes/admin-charges.php:1170
 msgid "Sent"
-msgstr "Envoyé"
+msgstr ""
 
-#: ubac-sepa.php:302
+#: dahuconcept-deferred-sepa.php:304
 msgid "Settings"
-msgstr "Réglages"
+msgstr ""
 
 #: includes/admin-charges.php:457
 msgid "Settled (estimate)"
-msgstr "Encaissé (estimation)"
+msgstr ""
 
 #: includes/order-screen.php:293
 msgid "Settled another way"
-msgstr "Réglée autrement"
+msgstr ""
 
 #. translators: 1: how it was settled, 2: date, 3: who recorded it, 4: the comment or a dash. */
 #: includes/offline.php:266
 msgid "Settled another way — %1$s, recorded on %2$s by %3$s. %4$s"
-msgstr "Réglée autrement — %1$s, enregistré le %2$s par %3$s. %4$s"
+msgstr ""
 
 #: includes/gateway.php:157
 msgid "Show administrators why the gateway is or is not available"
-msgstr "Montrer aux administrateurs pourquoi la passerelle est disponible ou non"
+msgstr ""
 
 #: includes/gateway.php:129
 msgid "Shown to customers as the address to write to about a mandate change. Empty falls back to the site admin address."
-msgstr "Affichée aux clients comme l’adresse à qui écrire pour changer de mandat. Vide, l’adresse d’administration du site est employée."
+msgstr ""
 
 #: includes/diagnostics.php:212
 msgid "Signed in as"
-msgstr "Connecté en tant que"
+msgstr ""
 
-#: ubac-sepa.php:400
+#: dahuconcept-deferred-sepa.php:403
 msgid "Skip"
-msgstr "Passer"
+msgstr ""
 
 #: includes/diagnostics.php:130
 msgid "Stripe customer resolved"
-msgstr "Client Stripe identifié"
+msgstr ""
 
 #: includes/diagnostics.php:169
 msgid "Stripe identifiers on this order"
-msgstr "Identifiants Stripe de cette commande"
+msgstr ""
 
 #: includes/gateway.php:134
 msgid "Stripe keys"
-msgstr "Clés Stripe"
+msgstr ""
 
 #. translators: %s: order number. */
 #: includes/alerts.php:617
 msgid "Stripe reports a failed SEPA charge on collected order #%s"
-msgstr "Stripe signale un prélèvement SEPA en échec sur la commande encaissée n°%s"
+msgstr ""
 
 #. translators: 1: order number, 2: amount, 3: link to the order. */
 #: includes/alerts.php:623
 msgid "Stripe reports that a SEPA charge has failed on an order whose charge is recorded as collected. If the bank has taken the money back, the order is not paid and whatever was in it has already gone out.\n\nOrder: #%1$s\nAmount: %2$s\n\nThe order:\n%3$s\n\nNothing has been retried and nothing has been changed on the order, because a charge recorded as collected must not be sent again. What the money actually did is in the Stripe dashboard, and the reason is on the order."
-msgstr "Stripe signale l’échec d’un prélèvement SEPA sur une commande dont le prélèvement est enregistré comme encaissé. Si la banque a repris l’argent, la commande n’est pas payée et ce qu’elle contenait est déjà parti.\n\nCommande : n°%1$s\nMontant : %2$s\n\nLa commande :\n%3$s\n\nRien n’a été réessayé et rien n’a été modifié sur la commande, parce qu’un prélèvement enregistré comme encaissé ne doit pas être renvoyé. Ce que l’argent a réellement fait est dans le tableau de bord Stripe, et le motif est sur la commande."
+msgstr ""
 
 #: includes/stripe.php:161
 msgid "Stripe returned a response that could not be read."
-msgstr "Stripe a renvoyé une réponse illisible."
+msgstr ""
 
 #: includes/checkout.php:201
 msgid "Stripe's own SEPA Direct Debit charges immediately and cannot be set on an order here. Use Deferred SEPA Direct Debit instead. The payment method was left as it was."
-msgstr "Le prélèvement SEPA natif de Stripe prélève immédiatement et ne peut pas être posé sur une commande ici. Employez le prélèvement SEPA différé. Le moyen de paiement a été laissé tel quel."
+msgstr ""
 
 #: includes/gateway.php:113
 msgid "Stripe's own SEPA option"
-msgstr "L’option SEPA native de Stripe"
+msgstr ""
 
 #: includes/mandates.php:633
 msgid "Submit for approval"
-msgstr "Soumettre pour approbation"
+msgstr ""
 
 #: includes/offline.php:62
 msgid "Taken by card or in Stripe by hand"
-msgstr "Encaissée par carte ou à la main dans Stripe"
+msgstr ""
 
-#: ubac-sepa.php:379
+#: dahuconcept-deferred-sepa.php:382
 msgid "Takes a SEPA payment a set number of days after the order ships."
-msgstr "Prélève en SEPA un nombre de jours fixé après l’expédition."
+msgstr ""
 
 #: includes/gateway.php:139
 msgid "Test mode"
-msgstr "Mode test"
+msgstr ""
 
 #: includes/gateway.php:150
 msgid "Test secret key"
-msgstr "Clé secrète de test"
+msgstr ""
 
 #: includes/diagnostics.php:98
 msgid "That mandate still exists"
-msgstr "Ce mandat existe toujours"
+msgstr ""
 
 #. translators: %s: time of day, already formatted. */
 #: includes/order-screen.php:238
 msgid "The charge is sent at %s on the chosen day. SEPA then settles in a few working days. Leave the field as it is to change nothing, and save the order to apply."
-msgstr "Le prélèvement part à %s le jour choisi. L’encaissement SEPA suit en quelques jours ouvrés. Laissez le champ tel quel pour ne rien changer, et enregistrez la commande pour appliquer."
+msgstr ""
 
 #. translators: 1: order number, 2: amount, 3: link to the order. */
 #: includes/alerts.php:606
 msgid "The customer has disputed a SEPA charge that had already been collected. The money is being taken back.\n\nOrder: #%1$s\nAmount: %2$s\n\nThe order:\n%3$s\n\nNothing has been retried and nothing has been changed on the order: this charge is recorded as collected, and sending it again would take the money twice. The reason is on the order and in the Stripe dashboard, which is where a dispute is answered or accepted."
-msgstr "Le client a contesté un prélèvement SEPA déjà encaissé. L’argent est en train d’être repris.\n\nCommande : n°%1$s\nMontant : %2$s\n\nLa commande :\n%3$s\n\nRien n’a été réessayé et rien n’a été modifié sur la commande : ce prélèvement est enregistré comme encaissé, et le renvoyer prendrait l’argent deux fois. Le motif est sur la commande et dans le tableau de bord Stripe, qui est l’endroit où une contestation se répond ou s’accepte."
+msgstr ""
 
 #: includes/diagnostics.php:106
 msgid "The customer has it as their own default"
-msgstr "Le client l’a bien en moyen de paiement par défaut"
+msgstr ""
 
 #: includes/admin-charges.php:286
 msgid "The daily check has not reported anything yet. If these orders have been here since before today, the check may not be running: look at WooCommerce, Status, Scheduled Actions."
-msgstr "La vérification quotidienne n’a encore rien signalé. Si ces commandes sont là depuis avant aujourd’hui, c’est peut-être qu’elle ne tourne pas : regardez WooCommerce, État, Actions planifiées."
+msgstr ""
 
 #. translators: %s: date and time. */
 #: includes/admin-charges.php:279
 msgid "The daily check last reported overdue charges on %s. Each order is reported once, by email, and then stays on this list until it is dealt with."
-msgstr "La vérification quotidienne a signalé des prélèvements en retard pour la dernière fois le %s. Chaque commande est signalée une fois, par courriel, puis reste dans cette liste jusqu’à ce qu’elle soit traitée."
+msgstr ""
 
 #: includes/order-screen.php:206
 msgid "The mandate is read again when the charge comes due, so putting this right before the date is enough — nothing else needs doing here."
-msgstr "Le mandat est relu au moment de l’échéance : corriger cela avant la date suffit, il n’y a rien d’autre à faire ici."
+msgstr ""
 
 #: includes/gateway.php:116
 msgid "The official Stripe plugin's SEPA Direct Debit charges immediately. Hiding it at checkout stops it being picked as a competing option, while leaving it available under My account → Payment methods, which is where the customer signs the mandate in the first place."
-msgstr "Le prélèvement SEPA de l’extension Stripe officielle prélève immédiatement. Le masquer lors de la commande l’empêche d’être choisi comme option concurrente, tout en le laissant disponible sous Mon compte → Moyens de paiement, où le client signe le mandat au départ."
+msgstr ""
 
 #. translators: %d: assumed settlement time in working days. */
 #: includes/admin-charges.php:423
 msgid "The settlement date is an estimate: it assumes %d working days after the charge is sent, which WooCommerce cannot verify."
-msgstr "La date d’encaissement est une estimation : elle suppose %d jours ouvrés après l’envoi du prélèvement, ce que WooCommerce ne peut pas vérifier."
+msgstr ""
 
 #. translators: 1: the list of orders, one per line, 2: link to the charges screen. */
 #: includes/alerts.php:463
 msgid "These orders have a deferred charge whose date has passed, and no charge was ever attempted on them. No money has moved and the customers have their goods.\n\n%1$s\n\nThe full list, with the amounts:\n%2$s\n\nNothing is retried automatically, because a charge that may already have been sent would be taken twice. Check each order, then reschedule it from the order itself.\n\nThis list is sent once per order. An order that stays overdue is not reported again, so it stays on the screen above until it is dealt with."
-msgstr "Ces commandes portent un prélèvement dont la date est passée, et aucun prélèvement n’a jamais été tenté dessus. Aucun argent n’a bougé et les clients ont leur marchandise.\n\n%1$s\n\nLa liste complète, avec les montants :\n%2$s\n\nRien n’est retenté automatiquement : un prélèvement peut-être déjà envoyé serait prélevé deux fois. Vérifiez chaque commande, puis replanifiez depuis la commande elle-même.\n\nCette liste est envoyée une fois par commande. Une commande qui reste en retard n’est pas signalée de nouveau : elle reste sur l’écran ci-dessus jusqu’à ce qu’elle soit traitée."
+msgstr ""
 
 #: includes/mandates.php:210
 msgid "This account has a role that is barred from deferred payment, so the gateway is never offered to it."
-msgstr "Ce compte porte un rôle exclu du paiement différé : la passerelle ne lui est jamais proposée."
+msgstr ""
 
 #: includes/mandates.php:231
 msgid "This customer has no IBAN saved at Stripe yet."
-msgstr "Ce client n’a pas encore d’IBAN enregistré chez Stripe."
+msgstr ""
 
 #: includes/offline.php:157
 msgid "This order has a confirmed Stripe debit, so it cannot be marked as settled another way. If it was paid twice, refund one of the two — recording it here would hide the debit instead."
-msgstr "Cette commande porte un prélèvement Stripe confirmé : elle ne peut pas être marquée comme réglée autrement. Si elle a été payée deux fois, remboursez l’un des deux — l’enregistrer ici masquerait le prélèvement au lieu de le corriger."
+msgstr ""
 
 #. translators: 1: the order's currency, 2: the only currency SEPA accepts. */
 #: includes/stripe.php:235
 msgid "This order is in %1$s. Stripe only accepts SEPA Direct Debit in %2$s, so no charge was attempted."
-msgstr "Cette commande est en %1$s. Stripe n’accepte le prélèvement SEPA qu’en %2$s : aucun prélèvement n’a été tenté."
+msgstr ""
 
 #: includes/offline.php:217
 msgid "This order is not marked as settled another way."
-msgstr "Cette commande n’est pas marquée comme réglée autrement."
+msgstr ""
 
 #: includes/order-screen.php:498
 msgid "This order is recorded as settled another way, so no direct debit can be taken on it. Lift that mark first if a charge really is wanted."
-msgstr "Cette commande est enregistrée comme réglée autrement : aucun prélèvement ne peut être fait dessus. Retirez d’abord cette marque si un prélèvement est réellement voulu."
+msgstr ""
 
 #: includes/order-screen.php:80
 msgid "This order was not paid by SEPA Direct Debit, so there is nothing to manage here."
-msgstr "Cette commande n’a pas été payée par prélèvement SEPA : il n’y a rien à gérer ici."
+msgstr ""
 
-#: includes/gateway.php:209
+#: includes/gateway.php:226
 msgid "This payment method is not available for this currency."
-msgstr "Ce moyen de paiement n’est pas disponible pour cette devise."
+msgstr ""
 
-#: includes/gateway.php:201
+#: includes/gateway.php:218
 msgid "This payment method is not available for your account."
-msgstr "Ce moyen de paiement n’est pas disponible pour votre compte."
+msgstr ""
 
 #: includes/admin-charges.php:1169
 msgid "Times moved"
-msgstr "Reports"
+msgstr ""
 
 #: includes/diagnostics.php:166
 msgid "Times the charge was moved"
-msgstr "Nombre de reports du prélèvement"
+msgstr ""
 
 #: includes/gateway.php:86
 msgid "Title"
-msgstr "Titre"
+msgstr ""
 
 #: includes/admin-charges.php:1063
 msgid "To"
-msgstr "Au"
+msgstr ""
 
 #. translators: %s: contact email address. */
 #: includes/mandates.php:654
 msgid "To change the approved mandate, write to %s."
-msgstr "Pour changer de mandat approuvé, écrivez à %s."
+msgstr ""
 
 #: includes/mandates.php:646
 msgid "To pay by SEPA Direct Debit, use \"Add payment method\" above to save your IBAN. We will email you once it has been approved."
-msgstr "Pour payer par prélèvement SEPA, utilisez « Ajouter un moyen de paiement » ci-dessus pour enregistrer votre IBAN. Nous vous écrirons dès qu’il sera approuvé."
+msgstr ""
 
 #: includes/admin-charges.php:56
 msgid "Under way"
-msgstr "En cours"
+msgstr ""
+
+#: includes/gateway.php:172
+msgid "Uninstalling"
+msgstr ""
 
 #: includes/admin-charges.php:151
 msgid "Upcoming"
-msgstr "À venir"
+msgstr ""
 
 #: includes/gateway.php:141
 msgid "Use the test key below"
-msgstr "Utiliser la clé de test ci-dessous"
+msgstr ""
 
 #: includes/order-screen.php:308
 msgid "Use this when the order was paid by cheque, by transfer, by card over the telephone or in Stripe by hand. It cancels the scheduled charge and takes the order out of the pending list, with a note saying who recorded it and why — which is what somebody reconciling a bank statement in six months will read. Required for \"another way\"."
-msgstr "À utiliser quand la commande a été payée par chèque, par virement, par carte au téléphone ou à la main dans Stripe. Cela annule le prélèvement planifié et sort la commande de la liste des échéances, avec une note disant qui l’a enregistré et pourquoi — c’est ce que lira la personne qui rapprochera un relevé bancaire dans six mois. Obligatoire pour « autrement »."
+msgstr ""
 
-#: ubac-sepa.php:328
+#: dahuconcept-deferred-sepa.php:331
 msgid "Version %s"
-msgstr "Version %s"
+msgstr ""
 
 #: includes/admin-charges.php:245
 msgid "Was due"
-msgstr "Échéance"
+msgstr ""
 
 #: includes/mandates.php:500
 msgid "We have received your IBAN"
-msgstr "Nous avons bien reçu votre IBAN"
+msgstr ""
 
-#: ubac-sepa.php:436
+#: dahuconcept-deferred-sepa.php:439
 msgid "What is due"
-msgstr "Ce qui est à venir"
+msgstr ""
 
 #: includes/admin-charges.php:158
 msgid "What is due, and what has been taken."
-msgstr "Ce qui est dû, et ce qui a été prélevé."
+msgstr ""
 
 #: includes/admin-charges.php:246
 msgid "What is in the way"
-msgstr "Ce qui bloque"
+msgstr ""
 
 #: includes/gateway.php:88
 msgid "What the customer sees at checkout."
-msgstr "Ce que le client voit lors de la commande."
+msgstr ""
 
+#. translators: %s: the {days} placeholder, shown literally. */
 #: includes/gateway.php:97
 msgid "What the customer sees under the title at checkout. %s is replaced by the delay that applies to this customer, plus two working days for the bank."
-msgstr "Ce que le client voit sous le titre lors de la commande. %s est remplacé par le délai qui s’applique à ce client, plus deux jours ouvrés pour la banque."
+msgstr ""
 
-#: ubac-sepa.php:441
+#: dahuconcept-deferred-sepa.php:444
 msgid "What was taken"
-msgstr "Ce qui a été prélevé"
+msgstr ""
 
 #: includes/admin-charges.php:1135 includes/order-screen.php:489
 msgid "You are not allowed to do that."
-msgstr "Vous n’avez pas l’autorisation de faire cela."
+msgstr ""
 
-#: ubac-sepa.php:402 includes/admin-charges.php:124
+#: dahuconcept-deferred-sepa.php:405 includes/admin-charges.php:124
 msgid "You are not allowed to view this page."
-msgstr "Vous n’avez pas l’autorisation de voir cette page."
+msgstr ""
 
-#: ubac-sepa.php:414
+#: dahuconcept-deferred-sepa.php:417
 msgid "You keep the date"
-msgstr "La date reste la vôtre"
+msgstr ""
 
 #: includes/mandates.php:552
 msgid "Your IBAN has been approved for deferred payment"
-msgstr "Votre IBAN a été approuvé pour le paiement différé"
+msgstr ""
 
 #: includes/mandates.php:644
 msgid "Your IBAN has been submitted. We will email you once it has been approved."
-msgstr "Votre IBAN a été soumis. Nous vous écrirons dès qu’il sera approuvé."
+msgstr ""
 
 #. translators: %d: delay in days. */
 #: includes/mandates.php:640
 msgid "Your approved mandate is charged %d days after your order ships. SEPA then settles in a few working days."
-msgstr "Votre mandat approuvé est prélevé %d jours après l’expédition de votre commande. L’encaissement SEPA suit en quelques jours ouvrés."
+msgstr ""
 
 #: includes/gateway.php:100
 msgid "Your saved SEPA mandate will be charged {days} days after your order ships."
-msgstr "Votre mandat SEPA enregistré sera prélevé {days} jours après l’expédition de votre commande."
+msgstr ""
 
 #: includes/offline.php:194 includes/offline.php:239 includes/offline.php:269
 msgid "a shop user"
-msgstr "un utilisateur de la boutique"
+msgstr ""
 
 #: includes/mandates.php:632
 msgid "approved"
-msgstr "approuvé"
+msgstr ""
 
 #: includes/diagnostics.php:268
 msgid "callback could not be identified"
-msgstr "rappel non identifiable"
+msgstr ""
 
 #: includes/diagnostics.php:283
 msgid "callback could not be inspected"
-msgstr "rappel non inspectable"
+msgstr ""
 
 #: includes/schedule.php:674
 msgid "confirming the existing payment"
-msgstr "la confirmation du paiement existant"
+msgstr ""
 
 #: includes/schedule.php:675
 msgid "creating the payment"
-msgstr "la création du paiement"
+msgstr ""
 
 #: includes/diagnostics.php:123
 msgid "live mode"
-msgstr "mode production"
+msgstr ""
 
 #. translators: %d: how many times the charge was moved. */
 #: includes/admin-charges.php:1000
-msgid "moved once"
+msgid "moved %d time"
 msgid_plural "moved %d times"
-msgstr[0] "reporté une fois"
-msgstr[1] "reporté %d fois"
+msgstr[0] ""
+msgstr[1] ""
 
 #: includes/diagnostics.php:45
 msgid "no"
-msgstr "non"
+msgstr ""
 
 #: includes/schedule.php:710 includes/webhook.php:331
 msgid "no reason given"
-msgstr "aucun motif donné"
+msgstr ""
 
 #: includes/diagnostics.php:242
 msgid "nothing"
-msgstr "rien"
+msgstr ""
 
-#: ubac-sepa.php:401
+#: dahuconcept-deferred-sepa.php:404
 msgid "of"
-msgstr "sur"
+msgstr ""
 
 #: includes/diagnostics.php:122
 msgid "test mode"
-msgstr "mode test"
+msgstr ""
 
 #: includes/admin-charges.php:479
 msgid "when the order is completed"
-msgstr "au passage en Terminée"
+msgstr ""
 
 #: includes/diagnostics.php:44
 msgid "yes"
-msgstr "oui"
+msgstr ""
 
 #: includes/order-screen.php:296
 msgid "— no, a direct debit is still due —"
-msgstr "— non, un prélèvement est toujours dû —"
+msgstr ""
 

@@ -52,17 +52,17 @@ function ubac_sepa_load_gateway_class() {
 		 */
 		public function __construct() {
 			$this->id                 = UBAC_SEPA_GATEWAY_ID;
-			$this->method_title       = __( 'Deferred SEPA Direct Debit', 'ubac-sepa' );
+			$this->method_title       = __( 'Deferred SEPA Direct Debit', 'dahuconcept-deferred-sepa' );
 			$this->method_description = __(
 				'Reuses the SEPA mandate the customer already has saved at Stripe. Nothing is charged at checkout: the charge is sent automatically a configurable number of days after the order is marked Completed. The delay is set below and can be overridden per customer on their user profile.',
-				'ubac-sepa'
+				'dahuconcept-deferred-sepa'
 			);
 			$this->has_fields         = false;
 
 			$this->init_form_fields();
 			$this->init_settings();
 
-			$this->title       = $this->get_option( 'title', __( 'SEPA Direct Debit (deferred)', 'ubac-sepa' ) );
+			$this->title       = $this->get_option( 'title', __( 'SEPA Direct Debit (deferred)', 'dahuconcept-deferred-sepa' ) );
 			$this->description = $this->get_option( 'description' );
 			$this->enabled     = $this->get_option( 'enabled', 'no' );
 
@@ -77,32 +77,32 @@ function ubac_sepa_load_gateway_class() {
 		public function init_form_fields() {
 			$this->form_fields = array(
 				'enabled'         => array(
-					'title'   => __( 'Enable', 'ubac-sepa' ),
+					'title'   => __( 'Enable', 'dahuconcept-deferred-sepa' ),
 					'type'    => 'checkbox',
-					'label'   => __( 'Enable deferred SEPA Direct Debit', 'ubac-sepa' ),
+					'label'   => __( 'Enable deferred SEPA Direct Debit', 'dahuconcept-deferred-sepa' ),
 					'default' => 'no',
 				),
 				'title'           => array(
-					'title'       => __( 'Title', 'ubac-sepa' ),
+					'title'       => __( 'Title', 'dahuconcept-deferred-sepa' ),
 					'type'        => 'text',
-					'description' => __( 'What the customer sees at checkout.', 'ubac-sepa' ),
-					'default'     => __( 'SEPA Direct Debit (deferred)', 'ubac-sepa' ),
+					'description' => __( 'What the customer sees at checkout.', 'dahuconcept-deferred-sepa' ),
+					'default'     => __( 'SEPA Direct Debit (deferred)', 'dahuconcept-deferred-sepa' ),
 					'desc_tip'    => true,
 				),
 				'description'     => array(
-					'title'       => __( 'Description', 'ubac-sepa' ),
+					'title'       => __( 'Description', 'dahuconcept-deferred-sepa' ),
 					'type'        => 'textarea',
 					'description' => sprintf(
 						/* translators: %s: the {days} placeholder, shown literally. */
-						__( 'What the customer sees under the title at checkout. %s is replaced by the delay that applies to this customer, plus two working days for the bank.', 'ubac-sepa' ),
+						__( 'What the customer sees under the title at checkout. %s is replaced by the delay that applies to this customer, plus two working days for the bank.', 'dahuconcept-deferred-sepa' ),
 						'<code>{days}</code>'
 					),
-					'default'     => __( 'Your saved SEPA mandate will be charged {days} days after your order ships.', 'ubac-sepa' ),
+					'default'     => __( 'Your saved SEPA mandate will be charged {days} days after your order ships.', 'dahuconcept-deferred-sepa' ),
 				),
 				'delay_days'      => array(
-					'title'             => __( 'Default charge delay (days)', 'ubac-sepa' ),
+					'title'             => __( 'Default charge delay (days)', 'dahuconcept-deferred-sepa' ),
 					'type'              => 'number',
-					'description'       => __( 'Days between the order being marked Completed and the charge being sent. Can be overridden per customer, under Users → the customer → Deferred SEPA Direct Debit.', 'ubac-sepa' ),
+					'description'       => __( 'Days between the order being marked Completed and the charge being sent. Can be overridden per customer, under Users → the customer → Deferred SEPA Direct Debit.', 'dahuconcept-deferred-sepa' ),
 					'default'           => UBAC_SEPA_DELAY_DAYS,
 					'custom_attributes' => array(
 						'min'  => 0,
@@ -110,52 +110,52 @@ function ubac_sepa_load_gateway_class() {
 					),
 				),
 				'hide_native'     => array(
-					'title'       => __( 'Stripe\'s own SEPA option', 'ubac-sepa' ),
+					'title'       => __( 'Stripe\'s own SEPA option', 'dahuconcept-deferred-sepa' ),
 					'type'        => 'checkbox',
-					'label'       => __( 'Hide it at checkout', 'ubac-sepa' ),
-					'description' => __( 'The official Stripe plugin\'s SEPA Direct Debit charges immediately. Hiding it at checkout stops it being picked as a competing option, while leaving it available under My account → Payment methods, which is where the customer signs the mandate in the first place.', 'ubac-sepa' ),
+					'label'       => __( 'Hide it at checkout', 'dahuconcept-deferred-sepa' ),
+					'description' => __( 'The official Stripe plugin\'s SEPA Direct Debit charges immediately. Hiding it at checkout stops it being picked as a competing option, while leaving it available under My account → Payment methods, which is where the customer signs the mandate in the first place.', 'dahuconcept-deferred-sepa' ),
 					'default'     => 'no',
 				),
 				'notify_email'    => array(
-					'title'       => __( 'Notify this address', 'ubac-sepa' ),
+					'title'       => __( 'Notify this address', 'dahuconcept-deferred-sepa' ),
 					'type'        => 'email',
-					'description' => __( 'Notified when a customer submits or changes a SEPA mandate. Empty falls back to the site admin address.', 'ubac-sepa' ),
+					'description' => __( 'Notified when a customer submits or changes a SEPA mandate. Empty falls back to the site admin address.', 'dahuconcept-deferred-sepa' ),
 					'default'     => '',
 					'desc_tip'    => true,
 				),
 				'contact_email'   => array(
-					'title'       => __( 'Contact address for customers', 'ubac-sepa' ),
+					'title'       => __( 'Contact address for customers', 'dahuconcept-deferred-sepa' ),
 					'type'        => 'email',
-					'description' => __( 'Shown to customers as the address to write to about a mandate change. Empty falls back to the site admin address.', 'ubac-sepa' ),
+					'description' => __( 'Shown to customers as the address to write to about a mandate change. Empty falls back to the site admin address.', 'dahuconcept-deferred-sepa' ),
 					'default'     => '',
 					'desc_tip'    => true,
 				),
 				'keys_title'      => array(
-					'title'       => __( 'Stripe keys', 'ubac-sepa' ),
+					'title'       => __( 'Stripe keys', 'dahuconcept-deferred-sepa' ),
 					'type'        => 'title',
-					'description' => __( 'Leave these empty to use the keys already configured in the official WooCommerce Stripe Gateway. Fill them in to charge with a key of your own — a restricted key that may only write PaymentIntents is enough, and means this plugin does not depend on another plugin\'s stored settings.', 'ubac-sepa' ),
+					'description' => __( 'Leave these empty to use the keys already configured in the official WooCommerce Stripe Gateway. Fill them in to charge with a key of your own — a restricted key that may only write PaymentIntents is enough, and means this plugin does not depend on another plugin\'s stored settings.', 'dahuconcept-deferred-sepa' ),
 				),
 				'testmode'        => array(
-					'title'   => __( 'Test mode', 'ubac-sepa' ),
+					'title'   => __( 'Test mode', 'dahuconcept-deferred-sepa' ),
 					'type'    => 'checkbox',
-					'label'   => __( 'Use the test key below', 'ubac-sepa' ),
+					'label'   => __( 'Use the test key below', 'dahuconcept-deferred-sepa' ),
 					'default' => 'no',
 				),
 				'secret_key'      => array(
-					'title'   => __( 'Live secret key', 'ubac-sepa' ),
+					'title'   => __( 'Live secret key', 'dahuconcept-deferred-sepa' ),
 					'type'    => 'password',
 					'default' => '',
 				),
 				'test_secret_key' => array(
-					'title'   => __( 'Test secret key', 'ubac-sepa' ),
+					'title'   => __( 'Test secret key', 'dahuconcept-deferred-sepa' ),
 					'type'    => 'password',
 					'default' => '',
 				),
 				'diagnostics'     => array(
-					'title'       => __( 'Diagnostics', 'ubac-sepa' ),
+					'title'       => __( 'Diagnostics', 'dahuconcept-deferred-sepa' ),
 					'type'        => 'checkbox',
-					'label'       => __( 'Show administrators why the gateway is or is not available', 'ubac-sepa' ),
-					'description' => __( 'Adds a panel, visible only to administrators, at checkout and on the user profile, explaining each condition this gateway checks. Useful while setting the plugin up; turn it off afterwards.', 'ubac-sepa' ),
+					'label'       => __( 'Show administrators why the gateway is or is not available', 'dahuconcept-deferred-sepa' ),
+					'description' => __( 'Adds a panel, visible only to administrators, at checkout and on the user profile, explaining each condition this gateway checks. Useful while setting the plugin up; turn it off afterwards.', 'dahuconcept-deferred-sepa' ),
 					'default'     => 'no',
 				),
 				/*
@@ -169,10 +169,10 @@ function ubac_sepa_load_gateway_class() {
 				 * whatever this box says, as its own header explains.
 				 */
 				'delete_data_on_uninstall' => array(
-					'title'       => __( 'Uninstalling', 'ubac-sepa' ),
+					'title'       => __( 'Uninstalling', 'dahuconcept-deferred-sepa' ),
 					'type'        => 'checkbox',
-					'label'       => __( "Delete this plugin's data when the plugin is deleted", 'ubac-sepa' ),
-					'description' => __( 'Off, and worth leaving off. What goes is the mandate approval held on each customer account, so every customer who had agreed to be debited has to agree again. The payment records on past orders are never deleted, whatever this box says. On a multisite network, accounts are shared between the sites: one shop ticking this box clears the approvals for the customers of every shop on the network.', 'ubac-sepa' ),
+					'label'       => __( "Delete this plugin's data when the plugin is deleted", 'dahuconcept-deferred-sepa' ),
+					'description' => __( 'Off, and worth leaving off. What goes is the mandate approval held on each customer account, so every customer who had agreed to be debited has to agree again. The payment records on past orders are never deleted, whatever this box says. On a multisite network, accounts are shared between the sites: one shop ticking this box clears the approvals for the customers of every shop on the network.', 'dahuconcept-deferred-sepa' ),
 					'default'     => 'no',
 				),
 			);
@@ -215,7 +215,7 @@ function ubac_sepa_load_gateway_class() {
 			// Checked again here, server-side: the gateway being offered is a
 			// display decision, and this is the one that matters.
 			if ( ! $order || ! ubac_sepa_is_authorized( $order->get_user_id() ) ) {
-				wc_add_notice( __( 'This payment method is not available for your account.', 'ubac-sepa' ), 'error' );
+				wc_add_notice( __( 'This payment method is not available for your account.', 'dahuconcept-deferred-sepa' ), 'error' );
 
 				return array( 'result' => 'failure' );
 			}
@@ -223,7 +223,7 @@ function ubac_sepa_load_gateway_class() {
 			$currency_error = ubac_sepa_currency_error( $order );
 
 			if ( $currency_error ) {
-				wc_add_notice( __( 'This payment method is not available for this currency.', 'ubac-sepa' ), 'error' );
+				wc_add_notice( __( 'This payment method is not available for this currency.', 'dahuconcept-deferred-sepa' ), 'error' );
 
 				return array( 'result' => 'failure' );
 			}
@@ -232,7 +232,7 @@ function ubac_sepa_load_gateway_class() {
 
 			if ( ! $mandate ) {
 				wc_add_notice(
-					__( 'No approved SEPA mandate was found for your account. Please choose another payment method.', 'ubac-sepa' ),
+					__( 'No approved SEPA mandate was found for your account. Please choose another payment method.', 'dahuconcept-deferred-sepa' ),
 					'error'
 				);
 
@@ -260,7 +260,7 @@ function ubac_sepa_load_gateway_class() {
 				'on-hold',
 				sprintf(
 					/* translators: %d: delay in days. */
-					__( 'Deferred SEPA: the customer\'s saved mandate will be used. Nothing charged at checkout — the charge is scheduled when the order is marked Completed, %d days out.', 'ubac-sepa' ),
+					__( 'Deferred SEPA: the customer\'s saved mandate will be used. Nothing charged at checkout — the charge is scheduled when the order is marked Completed, %d days out.', 'dahuconcept-deferred-sepa' ),
 					ubac_sepa_get_delay_days( $order->get_user_id() )
 				)
 			);

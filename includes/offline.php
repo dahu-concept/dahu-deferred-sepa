@@ -59,10 +59,10 @@ defined( 'ABSPATH' ) || exit;
 function ubac_sepa_offline_reasons() {
 
 	return array(
-		'manual_card' => __( 'Taken by card or in Stripe by hand', 'ubac-sepa' ),
-		'cheque'      => __( 'Cheque', 'ubac-sepa' ),
-		'transfer'    => __( 'Bank transfer', 'ubac-sepa' ),
-		'other'       => __( 'Another way (say which)', 'ubac-sepa' ),
+		'manual_card' => __( 'Taken by card or in Stripe by hand', 'dahuconcept-deferred-sepa' ),
+		'cheque'      => __( 'Cheque', 'dahuconcept-deferred-sepa' ),
+		'transfer'    => __( 'Bank transfer', 'dahuconcept-deferred-sepa' ),
+		'other'       => __( 'Another way (say which)', 'dahuconcept-deferred-sepa' ),
 	);
 }
 
@@ -138,7 +138,7 @@ function ubac_sepa_mark_settled_offline( WC_Order $order, $reason, $comment, $us
 	if ( ! isset( $reasons[ $reason ] ) ) {
 		return new WP_Error(
 			'ubac_sepa_offline_reason',
-			__( 'Choose how this order was settled.', 'ubac-sepa' )
+			__( 'Choose how this order was settled.', 'dahuconcept-deferred-sepa' )
 		);
 	}
 
@@ -147,14 +147,14 @@ function ubac_sepa_mark_settled_offline( WC_Order $order, $reason, $comment, $us
 	if ( 'other' === $reason && '' === $comment ) {
 		return new WP_Error(
 			'ubac_sepa_offline_comment',
-			__( 'Say how it was settled: "another way" with nothing written is not an answer anybody can read in six months.', 'ubac-sepa' )
+			__( 'Say how it was settled: "another way" with nothing written is not an answer anybody can read in six months.', 'dahuconcept-deferred-sepa' )
 		);
 	}
 
 	if ( ubac_sepa_stripe_confirmed( $order ) ) {
 		return new WP_Error(
 			'ubac_sepa_offline_charged',
-			__( 'This order has a confirmed Stripe debit, so it cannot be marked as settled another way. If it was paid twice, refund one of the two — recording it here would hide the debit instead.', 'ubac-sepa' )
+			__( 'This order has a confirmed Stripe debit, so it cannot be marked as settled another way. If it was paid twice, refund one of the two — recording it here would hide the debit instead.', 'dahuconcept-deferred-sepa' )
 		);
 	}
 
@@ -188,10 +188,10 @@ function ubac_sepa_mark_settled_offline( WC_Order $order, $reason, $comment, $us
 	$order->add_order_note(
 		sprintf(
 			/* translators: 1: how it was settled, 2: the comment or a dash, 3: who recorded it. */
-			__( 'Deferred SEPA: recorded as settled another way — %1$s. %2$s Recorded by %3$s. No direct debit will be taken: the scheduled charge has been cancelled and a charge is refused even if an old scheduled action fires.', 'ubac-sepa' ),
+			__( 'Deferred SEPA: recorded as settled another way — %1$s. %2$s Recorded by %3$s. No direct debit will be taken: the scheduled charge has been cancelled and a charge is refused even if an old scheduled action fires.', 'dahuconcept-deferred-sepa' ),
 			$reasons[ $reason ],
 			'' !== $comment ? $comment : '—',
-			$user instanceof WP_User ? $user->display_name : __( 'a shop user', 'ubac-sepa' )
+			$user instanceof WP_User ? $user->display_name : __( 'a shop user', 'dahuconcept-deferred-sepa' )
 		)
 	);
 
@@ -214,14 +214,14 @@ function ubac_sepa_unmark_settled_offline( WC_Order $order, $user_id = 0 ) {
 	if ( ! ubac_sepa_is_settled_offline( $order ) ) {
 		return new WP_Error(
 			'ubac_sepa_offline_absent',
-			__( 'This order is not marked as settled another way.', 'ubac-sepa' )
+			__( 'This order is not marked as settled another way.', 'dahuconcept-deferred-sepa' )
 		);
 	}
 
 	if ( ubac_sepa_stripe_confirmed( $order ) ) {
 		return new WP_Error(
 			'ubac_sepa_offline_charged_since',
-			__( 'A Stripe debit has been confirmed on this order since it was marked, so the mark stays: the money moved, and that is the fact the record has to keep.', 'ubac-sepa' )
+			__( 'A Stripe debit has been confirmed on this order since it was marked, so the mark stays: the money moved, and that is the fact the record has to keep.', 'dahuconcept-deferred-sepa' )
 		);
 	}
 
@@ -235,8 +235,8 @@ function ubac_sepa_unmark_settled_offline( WC_Order $order, $user_id = 0 ) {
 	$order->add_order_note(
 		sprintf(
 			/* translators: 1: who lifted it, 2: the date the charge had been due. */
-			__( 'Deferred SEPA: the "settled another way" mark was lifted by %1$s. Nothing has been rescheduled — it had been due on %2$s — so set a date on this order if a direct debit is still wanted.', 'ubac-sepa' ),
-			$user instanceof WP_User ? $user->display_name : __( 'a shop user', 'ubac-sepa' ),
+			__( 'Deferred SEPA: the "settled another way" mark was lifted by %1$s. Nothing has been rescheduled — it had been due on %2$s — so set a date on this order if a direct debit is still wanted.', 'dahuconcept-deferred-sepa' ),
+			$user instanceof WP_User ? $user->display_name : __( 'a shop user', 'dahuconcept-deferred-sepa' ),
 			! empty( $record['was_due'] ) ? ubac_sepa_format_date( (int) $record['was_due'] ) : '—'
 		)
 	);
@@ -263,10 +263,10 @@ function ubac_sepa_offline_summary( WC_Order $order ) {
 
 	return sprintf(
 		/* translators: 1: how it was settled, 2: date, 3: who recorded it, 4: the comment or a dash. */
-		__( 'Settled another way — %1$s, recorded on %2$s by %3$s. %4$s', 'ubac-sepa' ),
+		__( 'Settled another way — %1$s, recorded on %2$s by %3$s. %4$s', 'dahuconcept-deferred-sepa' ),
 		isset( $reasons[ $record['reason'] ] ) ? $reasons[ $record['reason'] ] : (string) $record['reason'],
 		! empty( $record['at'] ) ? ubac_sepa_format_date( (int) $record['at'] ) : '—',
-		$user instanceof WP_User ? $user->display_name : __( 'a shop user', 'ubac-sepa' ),
+		$user instanceof WP_User ? $user->display_name : __( 'a shop user', 'dahuconcept-deferred-sepa' ),
 		! empty( $record['comment'] ) ? (string) $record['comment'] : '—'
 	);
 }

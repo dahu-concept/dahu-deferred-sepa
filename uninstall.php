@@ -76,8 +76,15 @@ function ubac_sepa_uninstall_site() {
 	// they are deleted here — and the welcome screen and the guided tour
 	// would then stay silent for good, with nothing on screen to explain why.
 	delete_option( 'ubac_welcome_seen_ubac-sepa' );
+	// Les memes clefs sous le nouveau slug : elle est construite au runtime
+	// a partir du slug, donc elle a change avec lui. Sans ces trois lignes,
+	// une mise a jour depuis la version Ubac laisse des orphelines que plus
+	// rien ne nomme.
+	delete_option( 'ubac_welcome_seen_dahuconcept-deferred-sepa' );
 	delete_option( 'ubac_welcome_pending_ubac-sepa' );
+	delete_option( 'ubac_welcome_pending_dahuconcept-deferred-sepa' );
 	delete_option( 'ubac_welcome_tour_ubac-sepa' );
+	delete_option( 'ubac_welcome_tour_dahuconcept-deferred-sepa' );
 	global $wpdb;
 
 	// Read BEFORE the settings array is deleted just below.

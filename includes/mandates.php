@@ -203,11 +203,11 @@ function ubac_sepa_render_profile_section( $user ) {
 	$excluded = (bool) array_intersect( ubac_sepa_excluded_roles(), (array) $user->roles );
 
 	// The notification email links straight to this anchor.
-	echo '<h2 id="ubac-sepa">' . esc_html__( 'Deferred SEPA Direct Debit', 'ubac-sepa' ) . '</h2>';
+	echo '<h2 id="ubac-sepa">' . esc_html__( 'Deferred SEPA Direct Debit', 'dahuconcept-deferred-sepa' ) . '</h2>';
 
 	if ( $excluded ) {
 		echo '<p class="description">'
-			. esc_html__( 'This account has a role that is barred from deferred payment, so the gateway is never offered to it.', 'ubac-sepa' )
+			. esc_html__( 'This account has a role that is barred from deferred payment, so the gateway is never offered to it.', 'dahuconcept-deferred-sepa' )
 			. '</p>';
 
 		return;
@@ -220,15 +220,15 @@ function ubac_sepa_render_profile_section( $user ) {
 	?>
 	<table class="form-table" role="presentation">
 		<tr>
-			<th scope="row"><?php esc_html_e( 'Active mandate', 'ubac-sepa' ); ?></th>
+			<th scope="row"><?php esc_html_e( 'Active mandate', 'dahuconcept-deferred-sepa' ); ?></th>
 			<td>
 				<label class="ubac-sepa-mandates__option">
 					<input type="radio" name="ubac_sepa_active_token" value="" <?php checked( '' === $active_id || '0' === $active_id ); ?>>
-					<?php esc_html_e( 'None — this customer will not be offered deferred payment', 'ubac-sepa' ); ?>
+					<?php esc_html_e( 'None — this customer will not be offered deferred payment', 'dahuconcept-deferred-sepa' ); ?>
 				</label>
 
 				<?php if ( empty( $tokens ) ) : ?>
-					<p class="description"><?php esc_html_e( 'This customer has no IBAN saved at Stripe yet.', 'ubac-sepa' ); ?></p>
+					<p class="description"><?php esc_html_e( 'This customer has no IBAN saved at Stripe yet.', 'dahuconcept-deferred-sepa' ); ?></p>
 				<?php else : ?>
 					<?php foreach ( $tokens as $token ) : ?>
 						<label class="ubac-sepa-mandates__option">
@@ -238,24 +238,24 @@ function ubac_sepa_render_profile_section( $user ) {
 							<?php
 							printf(
 								/* translators: %s: last four digits of an IBAN. */
-								esc_html__( 'IBAN ending %s', 'ubac-sepa' ),
+								esc_html__( 'IBAN ending %s', 'dahuconcept-deferred-sepa' ),
 								esc_html( ubac_sepa_token_last4( $token ) )
 							);
 							?>
 							<?php if ( $token->is_default() ) : ?>
-								<span class="description"><?php esc_html_e( '(currently the customer\'s own default)', 'ubac-sepa' ); ?></span>
+								<span class="description"><?php esc_html_e( '(currently the customer\'s own default)', 'dahuconcept-deferred-sepa' ); ?></span>
 							<?php endif; ?>
 						</label>
 					<?php endforeach; ?>
 				<?php endif; ?>
 
 				<p class="description ubac-sepa-mandates__hint">
-					<?php esc_html_e( 'Naming an IBAN here approves it for deferred payment. The customer must also have that same IBAN set as their default under My account → Payment methods before the gateway is offered to them — that is what stops them moving to an IBAN you have not approved.', 'ubac-sepa' ); ?>
+					<?php esc_html_e( 'Naming an IBAN here approves it for deferred payment. The customer must also have that same IBAN set as their default under My account → Payment methods before the gateway is offered to them — that is what stops them moving to an IBAN you have not approved.', 'dahuconcept-deferred-sepa' ); ?>
 				</p>
 
 				<p class="ubac-sepa-mandates__delay">
 					<label for="ubac_sepa_delay_days">
-						<strong><?php esc_html_e( 'Charge delay for this customer, in days', 'ubac-sepa' ); ?></strong>
+						<strong><?php esc_html_e( 'Charge delay for this customer, in days', 'dahuconcept-deferred-sepa' ); ?></strong>
 					</label>
 					<input type="number" id="ubac_sepa_delay_days" name="ubac_sepa_delay_days"
 						class="ubac-sepa-mandates__delay-input" min="0" step="1"
@@ -267,7 +267,7 @@ function ubac_sepa_render_profile_section( $user ) {
 					<?php
 					printf(
 						/* translators: %d: the global delay in days. */
-						esc_html__( 'Leave empty to use the global delay, currently %d days. A value here applies to this customer only, and only to their future orders — charges already scheduled are not moved.', 'ubac-sepa' ),
+						esc_html__( 'Leave empty to use the global delay, currently %d days. A value here applies to this customer only, and only to their future orders — charges already scheduled are not moved.', 'dahuconcept-deferred-sepa' ),
 						(int) $global
 					);
 					?>
@@ -460,12 +460,12 @@ function ubac_sepa_notify_iban_submitted( $user_id, $last4 ) {
 	$to = ubac_sepa_notify_email();
 
 	if ( $to ) {
-		$subject = __( 'A customer submitted a SEPA mandate for approval', 'ubac-sepa' );
+		$subject = __( 'A customer submitted a SEPA mandate for approval', 'dahuconcept-deferred-sepa' );
 		$body    = sprintf(
 			/* translators: 1: customer name, 2: customer email, 3: last four digits of the IBAN, 4: date and time, 5: link to the customer's profile. */
 			__(
 				"A customer has made a new IBAN their default payment method, which submits it for your approval.\n\nCustomer: %1\$s (%2\$s)\nIBAN ending: %3\$s\nWhen: %4\$s\n\nTo approve it, open their profile and name it as the active mandate:\n%5\$s\n\nUntil it is approved, deferred payment is not offered to this customer.",
-				'ubac-sepa'
+				'dahuconcept-deferred-sepa'
 			),
 			$user->display_name,
 			$user->user_email,
@@ -497,12 +497,12 @@ function ubac_sepa_notify_iban_submitted( $user_id, $last4 ) {
 		wp_mail( $mail['to'], $mail['subject'], $mail['body'] );
 	}
 
-	$subject = __( 'We have received your IBAN', 'ubac-sepa' );
+	$subject = __( 'We have received your IBAN', 'dahuconcept-deferred-sepa' );
 	$body    = sprintf(
 		/* translators: 1: customer name, 2: last four digits of the IBAN, 3: shop name. */
 		__(
 			"Hello %1\$s,\n\nWe have received your IBAN ending %2\$s.\n\nWe will email you once it has been approved. From then on you will be able to pay for your orders by deferred SEPA Direct Debit.\n\n%3\$s",
-			'ubac-sepa'
+			'dahuconcept-deferred-sepa'
 		),
 		$user->display_name,
 		$last4,
@@ -549,12 +549,12 @@ function ubac_sepa_notify_iban_approved( $user_id, $token_id ) {
 		return;
 	}
 
-	$subject = __( 'Your IBAN has been approved for deferred payment', 'ubac-sepa' );
+	$subject = __( 'Your IBAN has been approved for deferred payment', 'dahuconcept-deferred-sepa' );
 	$body    = sprintf(
 		/* translators: 1: customer name, 2: last four digits of the IBAN, 3: delay in days, 4: shop name. */
 		__(
 			"Hello %1\$s,\n\nYour IBAN ending %2\$s has been approved for deferred SEPA Direct Debit.\n\nYou can now choose it when you order. Nothing is charged when you place the order: your mandate is charged %3\$d days after it ships, and SEPA then settles in a few working days.\n\n%4\$s",
-			'ubac-sepa'
+			'dahuconcept-deferred-sepa'
 		),
 		$user->display_name,
 		ubac_sepa_token_last4( $token ),
@@ -629,21 +629,21 @@ function ubac_sepa_account_payment_methods() {
 		'ubacDeferredSepaAccount',
 		array(
 			'last4'         => $last4,
-			'approvedLabel' => __( 'approved', 'ubac-sepa' ),
-			'submitLabel'   => __( 'Submit for approval', 'ubac-sepa' ),
+			'approvedLabel' => __( 'approved', 'dahuconcept-deferred-sepa' ),
+			'submitLabel'   => __( 'Submit for approval', 'dahuconcept-deferred-sepa' ),
 		)
 	);
 
 	if ( ubac_sepa_is_authorized( $user_id ) ) {
 		$message = sprintf(
 			/* translators: %d: delay in days. */
-			__( 'Your approved mandate is charged %d days after your order ships. SEPA then settles in a few working days.', 'ubac-sepa' ),
+			__( 'Your approved mandate is charged %d days after your order ships. SEPA then settles in a few working days.', 'dahuconcept-deferred-sepa' ),
 			ubac_sepa_get_delay_days( $user_id )
 		);
 	} elseif ( $default && (int) $default->get_id() !== $active ) {
-		$message = __( 'Your IBAN has been submitted. We will email you once it has been approved.', 'ubac-sepa' );
+		$message = __( 'Your IBAN has been submitted. We will email you once it has been approved.', 'dahuconcept-deferred-sepa' );
 	} else {
-		$message = __( 'To pay by SEPA Direct Debit, use "Add payment method" above to save your IBAN. We will email you once it has been approved.', 'ubac-sepa' );
+		$message = __( 'To pay by SEPA Direct Debit, use "Add payment method" above to save your IBAN. We will email you once it has been approved.', 'dahuconcept-deferred-sepa' );
 	}
 
 	$contact = ubac_sepa_contact_email();
@@ -651,7 +651,7 @@ function ubac_sepa_account_payment_methods() {
 	if ( $contact ) {
 		$message .= ' ' . sprintf(
 			/* translators: %s: contact email address. */
-			__( 'To change the approved mandate, write to %s.', 'ubac-sepa' ),
+			__( 'To change the approved mandate, write to %s.', 'dahuconcept-deferred-sepa' ),
 			$contact
 		);
 	}

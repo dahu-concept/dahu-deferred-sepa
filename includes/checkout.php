@@ -198,7 +198,7 @@ function ubac_sepa_block_native_sepa_selection( $order_id, $order = null ) {
 
 	if ( class_exists( 'WC_Admin_Meta_Boxes' ) ) {
 		WC_Admin_Meta_Boxes::add_error(
-			__( 'Stripe\'s own SEPA Direct Debit charges immediately and cannot be set on an order here. Use Deferred SEPA Direct Debit instead. The payment method was left as it was.', 'ubac-sepa' )
+			__( 'Stripe\'s own SEPA Direct Debit charges immediately and cannot be set on an order here. Use Deferred SEPA Direct Debit instead. The payment method was left as it was.', 'dahuconcept-deferred-sepa' )
 		);
 	}
 }

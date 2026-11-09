@@ -37,8 +37,8 @@ add_action( 'admin_menu', 'ubac_sepa_register_admin_page', 20 );
 function ubac_sepa_register_admin_page() {
 	add_submenu_page(
 		'woocommerce',
-		__( 'SEPA charges', 'ubac-sepa' ),
-		__( 'SEPA charges', 'ubac-sepa' ),
+		__( 'SEPA charges', 'dahuconcept-deferred-sepa' ),
+		__( 'SEPA charges', 'dahuconcept-deferred-sepa' ),
 		'edit_shop_orders',
 		UBAC_SEPA_CHARGES_PAGE,
 		'ubac_sepa_render_admin_page'
@@ -53,10 +53,10 @@ function ubac_sepa_register_admin_page() {
  */
 function ubac_sepa_result_label( $result ) {
 	$labels = array(
-		'processing' => __( 'Under way', 'ubac-sepa' ),
-		'succeeded'  => __( 'Collected', 'ubac-sepa' ),
-		'failed'     => __( 'Failed', 'ubac-sepa' ),
-		'disputed'   => __( 'Disputed', 'ubac-sepa' ),
+		'processing' => __( 'Under way', 'dahuconcept-deferred-sepa' ),
+		'succeeded'  => __( 'Collected', 'dahuconcept-deferred-sepa' ),
+		'failed'     => __( 'Failed', 'dahuconcept-deferred-sepa' ),
+		'disputed'   => __( 'Disputed', 'dahuconcept-deferred-sepa' ),
 	);
 
 	return isset( $labels[ $result ] ) ? $labels[ $result ] : $result;
@@ -121,7 +121,7 @@ function ubac_sepa_settlement_days() {
  */
 function ubac_sepa_render_admin_page() {
 	if ( ! current_user_can( 'edit_shop_orders' ) ) {
-		wp_die( esc_html__( 'You are not allowed to view this page.', 'ubac-sepa' ), '', array( 'response' => 403 ) );
+		wp_die( esc_html__( 'You are not allowed to view this page.', 'dahuconcept-deferred-sepa' ), '', array( 'response' => 403 ) );
 	}
 
 	// The family sheet first, and its own second: the plugin's own rules
@@ -148,14 +148,14 @@ function ubac_sepa_render_admin_page() {
 	$current = isset( $_GET['tab'] ) && 'history' === $_GET['tab'] ? 'history' : 'upcoming';
 
 	$tabs = array(
-		'upcoming' => __( 'Upcoming', 'ubac-sepa' ),
-		'history'  => __( 'History', 'ubac-sepa' ),
+		'upcoming' => __( 'Upcoming', 'dahuconcept-deferred-sepa' ),
+		'history'  => __( 'History', 'dahuconcept-deferred-sepa' ),
 	);
 
 	echo '<div class="wrap ubac-ui">';
 	echo '<div class="ubac-ui-head">';
-	echo '<h1 class="ubac-ui-head__title">' . esc_html__( 'SEPA charges', 'ubac-sepa' ) . '</h1>';
-	echo '<p class="ubac-ui-head__sub">' . esc_html__( 'What is due, and what has been taken.', 'ubac-sepa' ) . '</p>';
+	echo '<h1 class="ubac-ui-head__title">' . esc_html__( 'SEPA charges', 'dahuconcept-deferred-sepa' ) . '</h1>';
+	echo '<p class="ubac-ui-head__sub">' . esc_html__( 'What is due, and what has been taken.', 'dahuconcept-deferred-sepa' ) . '</p>';
 	echo '</div>';
 
 	echo '<hr class="wp-header-end">';
@@ -227,7 +227,7 @@ function ubac_sepa_render_overdue_block( array $late ) {
 				'%d charge was due and never ran.',
 				'%d charges were due and never ran.',
 				count( $late ),
-				'ubac-sepa'
+				'dahuconcept-deferred-sepa'
 			)
 		),
 		count( $late )
@@ -235,15 +235,15 @@ function ubac_sepa_render_overdue_block( array $late ) {
 
 	echo '</p><p class="ubac-ui-band__text">';
 
-	esc_html_e( 'No money moved on these orders and nothing is retried automatically, because a charge that may already have been sent would be taken twice. Check each one, then reschedule it from the order.', 'ubac-sepa' );
+	esc_html_e( 'No money moved on these orders and nothing is retried automatically, because a charge that may already have been sent would be taken twice. Check each one, then reschedule it from the order.', 'dahuconcept-deferred-sepa' );
 
 	echo '</p></div></div>';
 
 	echo '<table class="ubac-ui-table"><thead><tr>';
-	echo '<th>' . esc_html__( 'Order', 'ubac-sepa' ) . '</th>';
-	echo '<th>' . esc_html__( 'Amount', 'ubac-sepa' ) . '</th>';
-	echo '<th>' . esc_html__( 'Was due', 'ubac-sepa' ) . '</th>';
-	echo '<th>' . esc_html__( 'What is in the way', 'ubac-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Order', 'dahuconcept-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Amount', 'dahuconcept-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Was due', 'dahuconcept-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'What is in the way', 'dahuconcept-deferred-sepa' ) . '</th>';
 	echo '</tr></thead><tbody>';
 
 	foreach ( $late as $order ) {
@@ -262,7 +262,7 @@ function ubac_sepa_render_overdue_block( array $late ) {
 				// never run at all. Said plainly, because it points
 				// somewhere completely different: at the queue, not at the
 				// customer's mandate.
-				: __( 'Nothing is wrong with this order: the scheduled job was lost, or the queue is not running.', 'ubac-sepa' )
+				: __( 'Nothing is wrong with this order: the scheduled job was lost, or the queue is not running.', 'dahuconcept-deferred-sepa' )
 		) . '</td>';
 		echo '</tr>';
 	}
@@ -276,14 +276,14 @@ function ubac_sepa_render_overdue_block( array $late ) {
 	if ( $swept ) {
 		printf(
 			/* translators: %s: date and time. */
-			esc_html__( 'The daily check last reported overdue charges on %s. Each order is reported once, by email, and then stays on this list until it is dealt with.', 'ubac-sepa' ),
+			esc_html__( 'The daily check last reported overdue charges on %s. Each order is reported once, by email, and then stays on this list until it is dealt with.', 'dahuconcept-deferred-sepa' ),
 			esc_html( ubac_sepa_format_date( $swept ) )
 		);
 	} else {
 		// Said, and not left blank. A watchdog nobody has ever heard from is
 		// either a shop that has never been late or a watchdog that is not
 		// running, and those two want different actions.
-		esc_html_e( 'The daily check has not reported anything yet. If these orders have been here since before today, the check may not be running: look at WooCommerce, Status, Scheduled Actions.', 'ubac-sepa' );
+		esc_html_e( 'The daily check has not reported anything yet. If these orders have been here since before today, the check may not be running: look at WooCommerce, Status, Scheduled Actions.', 'dahuconcept-deferred-sepa' );
 	}
 
 	echo '</p>';
@@ -403,7 +403,7 @@ function ubac_sepa_render_upcoming_tab() {
 	echo '<div class="ubac-sepa-note">';
 	printf(
 		/* translators: 1: one or more total amounts, already formatted; 2: number of orders. */
-		esc_html__( 'Expected: %1$s across %2$d orders.', 'ubac-sepa' ),
+		esc_html__( 'Expected: %1$s across %2$d orders.', 'dahuconcept-deferred-sepa' ),
 		wp_kses_post( $amounts ? implode( ' + ', $amounts ) : wc_price( 0 ) ),
 		count( $rows )
 	);
@@ -413,19 +413,19 @@ function ubac_sepa_render_upcoming_tab() {
 	echo '<input type="hidden" name="page" value="' . esc_attr( UBAC_SEPA_CHARGES_PAGE ) . '">';
 	echo '<input type="hidden" name="tab" value="upcoming">';
 	echo '<p><label><input type="checkbox" name="show_pending" value="1" ' . checked( $show_pending, true, false ) . '> '
-		. esc_html__( 'Also show orders taken on this gateway that have not shipped yet', 'ubac-sepa' )
-		. '</label> <button class="ubac-ui-btn">' . esc_html__( 'Apply', 'ubac-sepa' ) . '</button></p>';
+		. esc_html__( 'Also show orders taken on this gateway that have not shipped yet', 'dahuconcept-deferred-sepa' )
+		. '</label> <button class="ubac-ui-btn">' . esc_html__( 'Apply', 'dahuconcept-deferred-sepa' ) . '</button></p>';
 	echo '</form>';
 
 	echo '<p class="description">';
 	printf(
 		/* translators: %d: assumed settlement time in working days. */
-		esc_html__( 'The settlement date is an estimate: it assumes %d working days after the charge is sent, which WooCommerce cannot verify.', 'ubac-sepa' ),
+		esc_html__( 'The settlement date is an estimate: it assumes %d working days after the charge is sent, which WooCommerce cannot verify.', 'dahuconcept-deferred-sepa' ),
 		(int) ubac_sepa_settlement_days()
 	);
 
 	if ( $show_pending ) {
-		echo ' ' . esc_html__( 'Orders that have not shipped have no date yet — their delay starts when the order is marked Completed.', 'ubac-sepa' );
+		echo ' ' . esc_html__( 'Orders that have not shipped have no date yet — their delay starts when the order is marked Completed.', 'dahuconcept-deferred-sepa' );
 	}
 
 	echo '</p>';
@@ -440,7 +440,7 @@ function ubac_sepa_render_upcoming_tab() {
 		// like a screen that failed to load.
 		echo '<div class="ubac-ui-card">';
 		echo '<p class="ubac-ui-hint">'
-			. esc_html__( 'Nothing is due: an order paid with this gateway appears here as soon as it is marked Completed.', 'ubac-sepa' )
+			. esc_html__( 'Nothing is due: an order paid with this gateway appears here as soon as it is marked Completed.', 'dahuconcept-deferred-sepa' )
 			. '</p>';
 		echo '</div>';
 
@@ -449,12 +449,12 @@ function ubac_sepa_render_upcoming_tab() {
 
 	echo '<div class="ubac-ui-card">';
 	echo '<table class="widefat striped ubac-sepa-charges__table"><thead><tr>';
-	echo '<th>' . esc_html__( 'Order', 'ubac-sepa' ) . '</th>';
-	echo '<th>' . esc_html__( 'Ordered', 'ubac-sepa' ) . '</th>';
-	echo '<th>' . esc_html__( 'Amount', 'ubac-sepa' ) . '</th>';
-	echo '<th>' . esc_html__( 'Delay', 'ubac-sepa' ) . '</th>';
-	echo '<th>' . esc_html__( 'Charge sent', 'ubac-sepa' ) . '</th>';
-	echo '<th>' . esc_html__( 'Settled (estimate)', 'ubac-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Order', 'dahuconcept-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Ordered', 'dahuconcept-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Amount', 'dahuconcept-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Delay', 'dahuconcept-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Charge sent', 'dahuconcept-deferred-sepa' ) . '</th>';
+	echo '<th>' . esc_html__( 'Settled (estimate)', 'dahuconcept-deferred-sepa' ) . '</th>';
 	echo '</tr></thead><tbody>';
 
 	foreach ( $rows as $row ) {
@@ -468,7 +468,7 @@ function ubac_sepa_render_upcoming_tab() {
 			. esc_html( wc_get_order_status_name( $order->get_status() ) ) . '</span></td>';
 		echo '<td>' . esc_html( $created ? $created->date_i18n( get_option( 'date_format' ) ) : '—' ) . '</td>';
 		echo '<td>' . wp_kses_post( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ) . '</td>';
-		echo '<td>' . esc_html( sprintf( /* translators: %d: days. */ _n( '%d day', '%d days', $delay, 'ubac-sepa' ), $delay ) ) . '</td>';
+		echo '<td>' . esc_html( sprintf( /* translators: %d: days. */ _n( '%d day', '%d days', $delay, 'dahuconcept-deferred-sepa' ), $delay ) ) . '</td>';
 
 		if ( $row['when'] ) {
 			$settled = ubac_sepa_add_business_days( $row['when'], ubac_sepa_settlement_days() );
@@ -476,7 +476,7 @@ function ubac_sepa_render_upcoming_tab() {
 			echo '<td>' . esc_html( ubac_sepa_format_date( $row['when'] ) ) . '</td>';
 			echo '<td><strong>' . esc_html( ubac_sepa_format_day( $settled ) ) . '</strong></td>';
 		} else {
-			echo '<td><em>' . esc_html__( 'when the order is completed', 'ubac-sepa' ) . '</em></td>';
+			echo '<td><em>' . esc_html__( 'when the order is completed', 'dahuconcept-deferred-sepa' ) . '</em></td>';
 			echo '<td><em>—</em></td>';
 		}
 
@@ -873,14 +873,14 @@ function ubac_sepa_history_table() {
 			 */
 			public function get_columns() {
 				return array(
-					'number'   => __( 'Order', 'ubac-sepa' ),
-					'customer' => __( 'Customer', 'ubac-sepa' ),
-					'total'    => __( 'Amount', 'ubac-sepa' ),
-					'first'    => __( 'First due', 'ubac-sepa' ),
-					'final'    => __( 'Finally due', 'ubac-sepa' ),
-					'executed' => __( 'Sent', 'ubac-sepa' ),
-					'result'   => __( 'Outcome', 'ubac-sepa' ),
-					'intent'   => __( 'PaymentIntent', 'ubac-sepa' ),
+					'number'   => __( 'Order', 'dahuconcept-deferred-sepa' ),
+					'customer' => __( 'Customer', 'dahuconcept-deferred-sepa' ),
+					'total'    => __( 'Amount', 'dahuconcept-deferred-sepa' ),
+					'first'    => __( 'First due', 'dahuconcept-deferred-sepa' ),
+					'final'    => __( 'Finally due', 'dahuconcept-deferred-sepa' ),
+					'executed' => __( 'Sent', 'dahuconcept-deferred-sepa' ),
+					'result'   => __( 'Outcome', 'dahuconcept-deferred-sepa' ),
+					'intent'   => __( 'PaymentIntent', 'dahuconcept-deferred-sepa' ),
 				);
 			}
 
@@ -939,12 +939,12 @@ function ubac_sepa_history_table() {
 				// intersect id sets, so the message and the query can never
 				// disagree about what counts as a filter.
 				if ( ubac_sepa_history_is_filtered( ubac_sepa_history_request_args() ) ) {
-					esc_html_e( 'No charges match these filters.', 'ubac-sepa' );
+					esc_html_e( 'No charges match these filters.', 'dahuconcept-deferred-sepa' );
 
 					return;
 				}
 
-				esc_html_e( 'No charge has been sent yet: every charge this gateway takes is listed here.', 'ubac-sepa' );
+				esc_html_e( 'No charge has been sent yet: every charge this gateway takes is listed here.', 'dahuconcept-deferred-sepa' );
 			}
 
 			/**
@@ -997,7 +997,7 @@ function ubac_sepa_history_table() {
 							$out .= '<br><span class="description">' . esc_html(
 								sprintf(
 									/* translators: %d: how many times the charge was moved. */
-									_n( 'moved %d time', 'moved %d times', $item['reschedule'], 'ubac-sepa' ),
+									_n( 'moved %d time', 'moved %d times', $item['reschedule'], 'dahuconcept-deferred-sepa' ),
 									$item['reschedule']
 								)
 							) . '</span>';
@@ -1051,20 +1051,20 @@ function ubac_sepa_render_history_tab() {
 
 	echo '<div class="ubac-ui-card">';
 	echo '<p class="description">'
-		. esc_html__( 'Charges sent by this gateway. Stripe\'s own immediate SEPA option is not listed here.', 'ubac-sepa' )
+		. esc_html__( 'Charges sent by this gateway. Stripe\'s own immediate SEPA option is not listed here.', 'dahuconcept-deferred-sepa' )
 		. '</p>';
 
 	echo '<form method="get" class="ubac-sepa-charges__filters">';
 	echo '<input type="hidden" name="page" value="' . esc_attr( UBAC_SEPA_CHARGES_PAGE ) . '">';
 	echo '<input type="hidden" name="tab" value="history">';
 
-	echo '<label>' . esc_html__( 'From', 'ubac-sepa' )
+	echo '<label>' . esc_html__( 'From', 'dahuconcept-deferred-sepa' )
 		. '<br><input type="date" name="ubac_from" value="' . esc_attr( $args['from'] ) . '"></label>';
-	echo '<label>' . esc_html__( 'To', 'ubac-sepa' )
+	echo '<label>' . esc_html__( 'To', 'dahuconcept-deferred-sepa' )
 		. '<br><input type="date" name="ubac_to" value="' . esc_attr( $args['to'] ) . '"></label>';
 
-	echo '<label>' . esc_html__( 'Outcome', 'ubac-sepa' ) . '<br><select name="ubac_result">';
-	echo '<option value="">' . esc_html__( 'Any', 'ubac-sepa' ) . '</option>';
+	echo '<label>' . esc_html__( 'Outcome', 'dahuconcept-deferred-sepa' ) . '<br><select name="ubac_result">';
+	echo '<option value="">' . esc_html__( 'Any', 'dahuconcept-deferred-sepa' ) . '</option>';
 
 	foreach ( UBAC_SEPA_RESULTS as $value ) {
 		printf(
@@ -1076,12 +1076,12 @@ function ubac_sepa_render_history_tab() {
 	}
 
 	echo '</select></label>';
-	echo '<button class="ubac-ui-btn">' . esc_html__( 'Filter', 'ubac-sepa' ) . '</button>';
+	echo '<button class="ubac-ui-btn">' . esc_html__( 'Filter', 'dahuconcept-deferred-sepa' ) . '</button>';
 	echo '<a class="ubac-ui-btn" href="'
 		. esc_url( admin_url( 'admin.php?page=' . UBAC_SEPA_CHARGES_PAGE . '&tab=history' ) ) . '">'
-		. esc_html__( 'Reset', 'ubac-sepa' ) . '</a>';
+		. esc_html__( 'Reset', 'dahuconcept-deferred-sepa' ) . '</a>';
 	echo '<a class="ubac-ui-btn ubac-ui-btn--go" href="' . esc_url( $export_url ) . '">'
-		. esc_html__( 'Export CSV', 'ubac-sepa' ) . '</a>';
+		. esc_html__( 'Export CSV', 'dahuconcept-deferred-sepa' ) . '</a>';
 	echo '</form>';
 	echo '</div>';
 
@@ -1132,7 +1132,7 @@ function ubac_sepa_export_history_csv() {
 		|| ! isset( $_GET['_wpnonce'] )
 		|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'ubac_sepa_export_history' )
 	) {
-		wp_die( esc_html__( 'You are not allowed to do that.', 'ubac-sepa' ), '', array( 'response' => 403 ) );
+		wp_die( esc_html__( 'You are not allowed to do that.', 'dahuconcept-deferred-sepa' ), '', array( 'response' => 403 ) );
 	}
 
 	$args = ubac_sepa_history_request_args();
@@ -1159,17 +1159,17 @@ function ubac_sepa_export_history_csv() {
 	echo "\xEF\xBB\xBF";
 
 	$columns = array(
-		__( 'Order', 'ubac-sepa' ),
-		__( 'Customer', 'ubac-sepa' ),
-		__( 'Email', 'ubac-sepa' ),
-		__( 'Amount', 'ubac-sepa' ),
-		__( 'Currency', 'ubac-sepa' ),
-		__( 'First due', 'ubac-sepa' ),
-		__( 'Finally due', 'ubac-sepa' ),
-		__( 'Times moved', 'ubac-sepa' ),
-		__( 'Sent', 'ubac-sepa' ),
-		__( 'Outcome', 'ubac-sepa' ),
-		__( 'PaymentIntent', 'ubac-sepa' ),
+		__( 'Order', 'dahuconcept-deferred-sepa' ),
+		__( 'Customer', 'dahuconcept-deferred-sepa' ),
+		__( 'Email', 'dahuconcept-deferred-sepa' ),
+		__( 'Amount', 'dahuconcept-deferred-sepa' ),
+		__( 'Currency', 'dahuconcept-deferred-sepa' ),
+		__( 'First due', 'dahuconcept-deferred-sepa' ),
+		__( 'Finally due', 'dahuconcept-deferred-sepa' ),
+		__( 'Times moved', 'dahuconcept-deferred-sepa' ),
+		__( 'Sent', 'dahuconcept-deferred-sepa' ),
+		__( 'Outcome', 'dahuconcept-deferred-sepa' ),
+		__( 'PaymentIntent', 'dahuconcept-deferred-sepa' ),
 	);
 
 	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fputcsv -- as above.
