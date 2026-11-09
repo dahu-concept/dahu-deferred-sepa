@@ -368,7 +368,7 @@ require_once UBAC_SEPA_PATH . 'includes/ubac-welcome.php';
 register_activation_hook(
 	__FILE__,
 	static function () {
-		Ubac_Welcome::mark_activated( 'ubac-sepa' );
+		Ubac_Welcome::mark_activated( 'dahuconcept-deferred-sepa' );
 	}
 );
 
@@ -377,12 +377,12 @@ add_action(
 	static function () {
 		Ubac_Welcome::register(
 			array(
-				'slug'       => 'ubac-sepa',
+				'slug'       => 'dahuconcept-deferred-sepa',
 				'name'       => __( 'Deferred SEPA', 'dahuconcept-deferred-sepa' ),
 				'tagline'    => __( 'Takes a SEPA payment a set number of days after the order ships.', 'dahuconcept-deferred-sepa' ),
 				'file'       => UBAC_SEPA_FILE,
 				'version'    => UBAC_SEPA_VERSION,
-				'textdomain' => 'ubac-sepa',
+				'textdomain' => 'dahuconcept-deferred-sepa',
 				'mark'       => array(
 					'view'  => '0 0 112 112',
 					'paths' => array(
