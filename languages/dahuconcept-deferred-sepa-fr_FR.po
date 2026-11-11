@@ -6,8 +6,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fr_FR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"PO-Revision-Date: 2026-11-09 07:30+0000\n"
-"X-Generator: ubac i18n-build\n"
+"PO-Revision-Date: 2026-11-11 09:28+0000\n"
+"X-Generator: dahuconcept i18n-build\n"
 
 #. translators: 1: order number, 2: amount, 3: the date the charge was due, 4: what is in the way, already a sentence. */
 #: includes/alerts.php:440
