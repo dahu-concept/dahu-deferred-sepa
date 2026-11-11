@@ -161,7 +161,7 @@ function ubac_sepa_uninstall_users( $wipe ) {
 	global $wpdb;
 
 	// The cached Stripe customer lookup is derived data: always safe to drop.
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- uninstall routine; no caching layer is available here.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- uninstall routine; no caching layer is available here, and a query on meta_key alone is the point: it removes every user's copy in one pass, once, at uninstall. Indexing for it would cost on every request for the life of the shop.
 	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => '_ubac_sepa_customer_for_pm' ) );
 
 	if ( ! $wipe ) {
@@ -173,7 +173,7 @@ function ubac_sepa_uninstall_users( $wipe ) {
 		'_ubac_sepa_active_token_id',
 		'_ubac_sepa_known_default_token',
 	) as $meta_key ) {
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- as above.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- as above.
 		$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => $meta_key ) );
 	}
 }

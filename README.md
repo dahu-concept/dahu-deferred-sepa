@@ -1,4 +1,4 @@
-# DahuConcept Deferred SEPA
+# DahuConcept Deferred SEPA for WooCommerce
 
 Charge a WooCommerce customer's saved Stripe SEPA mandate a set number of days
 after their order ships, instead of at checkout.

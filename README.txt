@@ -1,10 +1,10 @@
-=== DahuConcept Deferred SEPA ===
+=== DahuConcept Deferred SEPA for WooCommerce ===
 Contributors: dahuconcept
 Tags: payment terms, mandate, deferred payment, direct debit, sepa
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -187,6 +187,10 @@ your database, and not something this plugin does on the way out.
 4. WooCommerce → SEPA charges: expected cash, and the history.
 
 == Changelog ==
+
+= 1.2.5 =
+* Changed: the requested payment method read on the order screen is now sanitised with `sanitize_text_field()` rather than `wc_clean()`. The line was already sanitising, but WPCS does not recognise WooCommerce's helper and reported it as unsanitised input — on a payment path, using the tool the tooling recognises is better than annotating the warning away. It also fails more safely: a forged array now yields an empty string, which matches no known gateway, where the previous helper returned the array.
+* Changed: the two user-meta deletions at uninstall now carry the `SlowDBQuery` sniff in their annotation, with the reason. Deleting by meta key alone is the point there — it removes every user's copy in one pass, once — and indexing for it would cost on every request for the life of the shop.
 
 = 1.2.4 =
 * Changed: the compiled French catalogue now travels in the package. It was left out on the grounds that the directory serves language packs, which is true only for a copy installed from the directory and only once translations have been imported: a copy installed by hand showed English with a catalogue that was fully translated.

@@ -1,4 +1,4 @@
-# DahuConcept Deferred SEPA
+# DahuConcept Deferred SEPA for WooCommerce
 
 Prélève le mandat SEPA Stripe enregistré d'un client WooCommerce un nombre de
 jours défini après l'expédition de sa commande, au lieu de le prélever à la
