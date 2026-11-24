@@ -181,17 +181,15 @@ function ubac_sepa_block_native_sepa_selection( $order_id, $order = null ) {
 	}
 
 	/*
-	 * `sanitize_text_field()` plutôt que `wc_clean()`, qui faisait la même
-	 * chose ici : WPCS ne connaît pas `wc_clean()` comme fonction
-	 * d'assainissement, et sortait un avertissement
-	 * `ValidatedSanitizedInput.InputNotSanitized` sur une ligne qui
-	 * assainissait pourtant. Mieux vaut l'outil que l'outillage reconnaît
-	 * qu'une annotation qui fait taire un contrôle de sécurité sur un chemin
-	 * de paiement.
+	 * `sanitize_text_field()` rather than `wc_clean()`, which did the same
+	 * thing here: WPCS does not know `wc_clean()` as a sanitising function,
+	 * and raised a `ValidatedSanitizedInput.InputNotSanitized` warning on a
+	 * line that did sanitise. The tool the tooling recognises is worth more
+	 * than an annotation silencing a security check on a payment path.
 	 *
-	 * Effet de bord utile : sur un tableau forgé, `sanitize_text_field()`
-	 * rend une chaîne vide, qui ne figure dans aucune passerelle connue et
-	 * sort donc par le test suivant. `wc_clean()`, lui, rendait le tableau.
+	 * A useful side effect: given a forged array, `sanitize_text_field()`
+	 * returns an empty string, which matches no known gateway and therefore
+	 * leaves by the test below. `wc_clean()` returned the array.
 	 */
 	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- as above.
 	$requested = sanitize_text_field( wp_unslash( $_POST['_payment_method'] ) );
